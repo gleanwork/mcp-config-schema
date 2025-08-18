@@ -1,37 +1,6 @@
 # @gleanwork/mcp-config-schema
 
-Single Source of Truth (SSOT) for MCP client configurations. This package provides a comprehensive registry of MCP client configurations, including which clients support native HTTP connections and which require `mcp-remote` as a bridge.
-
-## Overview
-
-This package is a **library** that provides:
-
-- **Type-safe configuration schemas** for all supported MCP clients
-- **Automatic detection** of client capabilities (HTTP vs stdio)
-- **Configuration builders** that generate correct config files for each client
-- **Registry** for querying client capabilities and requirements
-
-This package is designed to be used by `@gleanwork/configure-mcp-server` and other tools that need to understand MCP client configurations.
-
-## Key Concepts
-
-### Client Connection Types
-
-1. **Native HTTP Clients**: Can connect directly to HTTP MCP servers
-   - Claude Code
-   - Visual Studio Code
-
-2. **stdio-only Clients**: Require `mcp-remote` bridge for HTTP servers
-   - Claude for Desktop
-   - Cursor
-   - Goose
-   - Windsurf
-
-### Compatibility Levels
-
-- **Full**: Fully supported and tested
-- **Investigating**: Under investigation, may have missing features
-- **None**: Not yet supported
+Type-safe configuration schemas and builders for MCP (Model Context Protocol) clients.
 
 ## Installation
 
@@ -39,220 +8,261 @@ This package is designed to be used by `@gleanwork/configure-mcp-server` and oth
 npm install @gleanwork/mcp-config-schema
 ```
 
-## Usage
-
-### Basic Usage
+## Quick Start
 
 ```typescript
-import { createMCPToolkit } from '@gleanwork/mcp-config-schema';
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema';
 
-const toolkit = createMCPToolkit();
+const registry = new MCPConfigRegistry();
 
-// Get configuration for a specific client
-const cursorConfig = toolkit.registry.getConfig('cursor');
-console.log(cursorConfig.displayName); // "Cursor"
-console.log(cursorConfig.requiresMcpRemoteForHttp); // true
-
-// Create a configuration builder
-const builder = toolkit.createBuilder('cursor');
+// Create a configuration builder for a specific client
+const builder = registry.createBuilder('cursor');
 
 // Generate configuration
 const config = builder.buildConfiguration({
-  serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
-  serverName: 'glean'
+  mode: 'remote',
+  serverUrl: 'https://your-server.com/mcp/default',
+  serverName: 'my-server'
 });
 
-// Write configuration to the appropriate location
+// Write configuration to the client's config file (Node.js only)
 await builder.writeConfiguration({
-  serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
-  serverName: 'glean'
+  mode: 'remote',
+  serverUrl: 'https://your-server.com/mcp/default',
+  serverName: 'my-server'
 });
 ```
 
-### Query Registry
+## What This Package Does
+
+This package serves as the **Single Source of Truth** for MCP client configurations. It provides:
+
+- **Registry** of all MCP clients and their capabilities
+- **Configuration builders** that generate correct configs for each client
+- **Type-safe schemas** with TypeScript types and Zod validation
+- **Browser support** for web-based configuration tools
+- **Client detection** to identify which clients need special handling
+
+## Supported Clients
+
+For detailed configuration examples and requirements for each client, see **[CLIENTS.md](CLIENTS.md)**.
+
+### Fully Supported (can generate local configs)
+
+| Client | Connection Type | Requires mcp-remote? | Platform |
+|--------|----------------|---------------------|----------|
+| **Claude Code** | HTTP native | No | macOS |
+| **Visual Studio Code** | HTTP native | No | All |
+| **Claude Desktop** | stdio only | Yes (for HTTP) | macOS |
+| **Cursor** | stdio only | Yes (for HTTP) | All |
+| **Goose** | stdio only | Yes (for HTTP) | macOS, Linux |
+| **Windsurf** | stdio only | Yes (for HTTP) | All |
+
+### Not Configurable via Local Files
+
+- **ChatGPT** - Requires web UI configuration
+- **Claude Desktop (Organization)** - Managed by organization admins
+
+## Core Usage
+
+### Query Client Capabilities
 
 ```typescript
-import { createMCPToolkit } from '@gleanwork/mcp-config-schema';
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema';
 
-const toolkit = createMCPToolkit();
+const registry = new MCPConfigRegistry();
 
-// Get all supported clients
-const supportedClients = toolkit.registry.getSupportedClients();
+// Get client configuration
+const cursorConfig = registry.getConfig('cursor');
+console.log(cursorConfig.displayName);              // "Cursor"
+console.log(cursorConfig.requiresMcpRemoteForHttp); // true
 
-// Get clients that support native HTTP
-const httpClients = toolkit.registry.getNativeHttpClients();
-console.log('Native HTTP support:', httpClients.map(c => c.displayName));
-// Output: ['Visual Studio Code', 'Claude Code']
-
-// Get clients that need mcp-remote bridge
-const bridgeClients = toolkit.registry.getBridgeRequiredClients();
-console.log('Need mcp-remote:', bridgeClients.map(c => c.displayName));
-// Output: ['Claude for Desktop', 'Cursor', 'Goose', 'Windsurf']
-
-// Get clients by platform
-const macClients = toolkit.registry.getClientsByPlatform('darwin');
-const linuxClients = toolkit.registry.getClientsByPlatform('linux');
-const windowsClients = toolkit.registry.getClientsByPlatform('win32');
-
-// Get clients with one-click installation support
-const oneClickClients = toolkit.registry.getClientsWithOneClick();
+// Query different client groups
+const httpClients = registry.getNativeHttpClients();
+const bridgeClients = registry.getBridgeRequiredClients();
+const macClients = registry.getClientsByPlatform('darwin');
 ```
 
 ### Generate Configurations
 
 ```typescript
-import { createMCPToolkit, ClientId } from '@gleanwork/mcp-config-schema';
+const builder = registry.createBuilder('claude-code');
 
-const toolkit = createMCPToolkit();
+// Remote server configuration
+const remoteConfig = builder.buildConfiguration({
+  mode: 'remote',
+  serverUrl: 'https://api.example.com/mcp/default',
+  serverName: 'my-server'
+});
 
-async function configureClient(clientId: ClientId) {
-  const config = toolkit.registry.getConfig(clientId);
-  if (!config) {
-    throw new Error(`Unknown client: ${clientId}`);
-  }
-
-  const builder = toolkit.createBuilder(clientId);
-  
-  // Check if client needs mcp-remote
-  if (config.requiresMcpRemoteForHttp) {
-    console.log(`${config.displayName} requires mcp-remote bridge`);
-  }
-
-  // Generate configuration
-  const configContent = builder.buildConfiguration({
-    serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
-    serverName: 'glean'
-  });
-
-  // Get the config file path
-  const configPath = builder.getConfigPath();
-  console.log(`Config will be written to: ${configPath}`);
-
-  // Write configuration (backs up existing config)
-  await builder.writeConfiguration({
-    serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
-    serverName: 'glean'
-  });
-}
+// Local server configuration
+const localConfig = builder.buildConfiguration({
+  mode: 'local',
+  instance: 'your-instance',
+  apiToken: 'your-api-token'
+});
 ```
 
-### Integration with @gleanwork/configure-mcp-server
-
-This package is designed to work seamlessly with `@gleanwork/configure-mcp-server`:
+### Validate Configurations
 
 ```typescript
-import { createMCPToolkit } from '@gleanwork/mcp-config-schema';
+import { validateServerConfig, safeValidateServerConfig } from '@gleanwork/mcp-config-schema';
 
-// The configure-mcp-server CLI can use this package to:
-// 1. Determine which clients are supported
-// 2. Generate correct configurations for each client
-// 3. Know which clients need mcp-remote bridge
-// 4. Get platform-specific configuration paths
+// Validate input configuration
+const result = safeValidateServerConfig({
+  mode: 'remote',
+  serverUrl: 'https://your-server.com/mcp/default'
+});
 
-const toolkit = createMCPToolkit();
-
-// Example: Check if a client needs special handling
-function shouldUseMcpRemote(clientId: string) {
-  const config = toolkit.registry.getConfig(clientId);
-  return config?.requiresMcpRemoteForHttp ?? false;
-}
-
-// Example: Get all clients that can be configured on current platform
-function getAvailableClients() {
-  const platform = process.platform;
-  return toolkit.registry.getClientsByPlatform(platform);
+if (!result.success) {
+  console.error('Validation errors:', result.error.issues);
 }
 ```
 
-## API Reference
+## Browser Support
 
-### Types
+This package works in browsers! Use the `/browser` import path:
 
-- `ClientId`: Union type of all supported client identifiers
-- `MCPClientConfig`: Full configuration schema for a client
-- `GleanServerConfig`: Configuration for connecting to a Glean server
-- `Platform`: 'darwin' | 'linux' | 'win32'
-- `CompatibilityLevel`: 'full' | 'investigating' | 'none'
+```javascript
+// Browser-safe import
+import { MCPConfigRegistry, ConfigBuilder } from '@gleanwork/mcp-config-schema/browser';
 
-### Registry Methods
+const registry = new MCPConfigRegistry();
+const builder = registry.createBuilder('cursor');
 
-- `getConfig(clientId)`: Get configuration for a specific client
-- `getAllConfigs()`: Get all client configurations
-- `getSupportedClients()`: Get clients with full compatibility
-- `getNativeHttpClients()`: Get clients that support HTTP natively
-- `getBridgeRequiredClients()`: Get clients that need mcp-remote
-- `getStdioOnlyClients()`: Get clients that only support stdio
-- `getClientsByPlatform(platform)`: Get clients for a specific OS
-- `getClientsWithOneClick()`: Get clients with one-click protocol support
+// Generate configuration (works in browser)
+const config = builder.buildConfiguration({
+  mode: 'remote',
+  serverUrl: 'https://your-server.com/mcp/default'
+});
 
-### Builder Methods
+// Copy to clipboard
+navigator.clipboard.writeText(config);
+```
 
-- `buildConfiguration(gleanConfig)`: Generate configuration content
-- `writeConfiguration(gleanConfig)`: Write configuration to file
-- `getConfigPath()`: Get the configuration file path
-- `generateExample()`: Generate example configuration
-- `needsMcpRemote()`: Check if client needs mcp-remote bridge
+**Note:** File operations (`writeConfiguration`, `getConfigPath`) are not available in browsers and will throw clear error messages.
 
-## Client Configuration Examples
+### React Example
 
-### Native HTTP Client (Claude Code)
+```tsx
+import React from 'react';
+import { MCPConfigRegistry, ClientId } from '@gleanwork/mcp-config-schema/browser';
+
+function MCPConfigGenerator() {
+  const registry = new MCPConfigRegistry();
+  
+  const handleGenerateConfig = (clientId: ClientId, serverUrl: string) => {
+    const builder = registry.createBuilder(clientId);
+    const config = builder.buildConfiguration({
+      mode: 'remote',
+      serverUrl,
+      serverName: 'glean'
+    });
+    
+    navigator.clipboard.writeText(config);
+  };
+
+  const clients = registry.getSupportedClients();
+  
+  return (
+    <div>
+      {clients.map(client => (
+        <button 
+          key={client.id}
+          onClick={() => handleGenerateConfig(client.id, 'https://api.example.com/mcp')}
+        >
+          Configure {client.displayName}
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+## Configuration Examples
+
+> **📖 For complete configuration examples for all clients, see [CLIENTS.md](CLIENTS.md)**
+
+### Native HTTP Client (Claude Code, VS Code)
 ```json
 {
   "mcpServers": {
-    "glean": {
+    "my-server": {
       "type": "http",
-      "url": "https://glean-dev-be.glean.com/mcp/default"
+      "url": "https://your-server.com/mcp/default"
     }
   }
 }
 ```
 
-### stdio-only Client with mcp-remote (Cursor)
+### Bridge Client (Cursor, Claude Desktop, Windsurf)
 ```json
 {
   "mcpServers": {
-    "glean": {
+    "my-server": {
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://glean-dev-be.glean.com/mcp/default"
-      ]
+      "args": ["-y", "mcp-remote", "https://your-server.com/mcp/default"]
     }
   }
 }
 ```
 
-### YAML Configuration (Goose)
+### Goose (YAML format)
 ```yaml
 extensions:
-  glean:
-    name: glean
+  my-server:
+    name: my-server
     cmd: npx
-    args:
-      - '-y'
-      - mcp-remote
-      - https://glean-dev-be.glean.com/mcp/default
+    args: ['-y', 'mcp-remote', 'https://your-server.com/mcp/default']
     type: stdio
     timeout: 300
     enabled: true
 ```
 
-## Configuration Paths
+## Configuration File Locations
 
-| Client | Platform | Config Path |
-|--------|----------|-------------|
-| Claude Code | macOS | `~/.claude.json` |
-| VS Code | macOS | `~/Library/Application Support/Code/User/mcp.json` |
-| Claude Desktop | macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
-| Cursor | All | `~/.cursor/mcp.json` |
-| Goose | All | `~/.config/goose/config.yaml` |
-| Windsurf | All | `~/.codeium/windsurf/mcp_config.json` |
+| Client | macOS | Linux | Windows |
+|--------|-------|-------|---------|
+| Claude Code | `~/.claude.json` | - | - |
+| VS Code | `~/Library/Application Support/Code/User/mcp.json` | `~/.config/Code/User/mcp.json` | `%APPDATA%\Code\User\mcp.json` |
+| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` | - | - |
+| Cursor | `~/.cursor/mcp.json` | `~/.cursor/mcp.json` | `%USERPROFILE%\.cursor\mcp.json` |
+| Goose | `~/.config/goose/config.yaml` | `~/.config/goose/config.yaml` | - |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` | `~/.codeium/windsurf/mcp_config.json` | `%USERPROFILE%\.codeium\windsurf\mcp_config.json` |
 
-## Security Notes
+## API Reference
 
-- **Cursor**: As of Jan 8, 2025, Cursor's native OAuth implementation does not use a state parameter and may be vulnerable to CSRF attacks.
+### Types
+
+- `ClientId` - Union of all supported client identifiers
+- `MCPClientConfig` - Full client configuration schema
+- `GleanServerConfig` - Server connection configuration
+- `Platform` - 'darwin' | 'linux' | 'win32'
+- `LocalConfigSupport` - 'full' | 'none'
+- `ClientConnectionSupport` - 'http' | 'stdio-only' | 'both'
+
+### Registry Methods
+
+- `getConfig(clientId)` - Get configuration for a specific client
+- `getAllConfigs()` - Get all client configurations
+- `getSupportedClients()` - Get clients with local config support
+- `getNativeHttpClients()` - Get HTTP-native clients
+- `getBridgeRequiredClients()` - Get clients needing mcp-remote
+- `getClientsByPlatform(platform)` - Get platform-specific clients
+- `createBuilder(clientId)` - Create a configuration builder
+
+### Builder Methods
+
+- `buildConfiguration(serverConfig)` - Generate configuration content
+- `writeConfiguration(serverConfig)` - Write config to file (Node.js only)
+- `getConfigPath()` - Get the config file path (Node.js only)
+
+### Validation Functions
+
+- `validateServerConfig(config)` - Validate server configuration (throws)
+- `safeValidateServerConfig(config)` - Safe validation (returns result)
+- `validateGeneratedConfig(config, clientId)` - Validate generated output
 
 ## Development
 
@@ -266,22 +276,22 @@ npm run build
 # Run tests
 npm run test
 
-# Run tests with coverage
-npm run test:coverage
-
 # Run all checks (lint, typecheck, test)
 npm run test:all
 
-# Lint code
-npm run lint
-
-# Format code
-npm run format
-
-# Type check
-npm run typecheck
+# Generate documentation
+npm run generate:docs
 ```
+
+## Documentation
+
+- **[CLIENTS.md](CLIENTS.md)** - Comprehensive client compatibility matrix with detailed configuration examples
+- **[API Reference](#api-reference)** - Complete API documentation
 
 ## License
 
-MIT
+MIT - See [LICENSE](LICENSE) file for details
+
+## Contributing
+
+This package is part of the Glean MCP ecosystem. For issues and contributions, please visit the repository.

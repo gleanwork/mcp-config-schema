@@ -1,64 +1,86 @@
-export type ClientId =
-  | 'claude-code'
-  | 'vscode'
-  | 'claude-desktop'
-  | 'claude-desktop-org'
-  | 'cursor'
-  | 'goose'
-  | 'windsurf'
-  | 'chatgpt';
+import { z } from 'zod';
+import {
+  PlatformSchema,
+  ClientIdSchema,
+  ClientConnectionSupportSchema,
+  ServerTypeSchema,
+  LocalConfigSupportSchema,
+  ServerModeSchema,
+  HttpConfigStructureSchema,
+  StdioConfigStructureSchema,
+  ConfigStructureSchema,
+  PlatformPathsSchema,
+  MCPClientConfigSchema,
+  GleanServerConfigSchema,
+  HttpServerConfigSchema,
+  StdioServerConfigSchema,
+  StdioServerConfigAltSchema,
+  ServerConfigSchema,
+  McpServersConfigSchema,
+  VsCodeConfigSchema,
+  GooseServerConfigSchema,
+  GooseConfigSchema,
+} from './schemas.js';
 
-export type ClientConnectionSupport = 'http' | 'stdio-only' | 'both';
-export type ServerType = 'http' | 'stdio';
-export type CompatibilityLevel = 'full' | 'none' | 'investigating';
-export type Platform = 'darwin' | 'linux' | 'win32';
-
-export interface MCPClientConfig {
-  id: ClientId;
-  name: string;
-  displayName: string;
-  description: string;
-  compatibility: CompatibilityLevel;
-  compatibilityNotes?: string;
-
-  clientSupports: ClientConnectionSupport;
-
-  requiresMcpRemoteForHttp: boolean;
-
-  supportedPlatforms: Platform[];
-  configFormat: 'json' | 'yaml';
-  configPath: PlatformPaths;
-  oneClickProtocol?: string;
-  configStructure: ConfigStructure;
-  securityNotes?: string;
+export type Platform = z.infer<typeof PlatformSchema>;
+export type ClientId = z.infer<typeof ClientIdSchema>;
+export type ClientConnectionSupport = z.infer<typeof ClientConnectionSupportSchema>;
+export type ServerType = z.infer<typeof ServerTypeSchema>;
+export type LocalConfigSupport = z.infer<typeof LocalConfigSupportSchema>;
+export type ServerMode = z.infer<typeof ServerModeSchema>;
+export type HttpConfigStructure = z.infer<typeof HttpConfigStructureSchema>;
+export type StdioConfigStructure = z.infer<typeof StdioConfigStructureSchema>;
+export type ConfigStructure = z.infer<typeof ConfigStructureSchema>;
+export type PlatformPaths = z.infer<typeof PlatformPathsSchema>;
+export type MCPClientConfig = z.infer<typeof MCPClientConfigSchema>;
+export type GleanServerConfig = z.infer<typeof GleanServerConfigSchema>;
+export type HttpServerConfig = z.infer<typeof HttpServerConfigSchema>;
+export type StdioServerConfig = z.infer<typeof StdioServerConfigSchema>;
+export type StdioServerConfigAlt = z.infer<typeof StdioServerConfigAltSchema>;
+export type ServerConfig = z.infer<typeof ServerConfigSchema>;
+export type McpServersConfig = z.infer<typeof McpServersConfigSchema>;
+export type VsCodeConfig = z.infer<typeof VsCodeConfigSchema>;
+export type GooseServerConfig = z.infer<typeof GooseServerConfigSchema>;
+export type GooseConfig = z.infer<typeof GooseConfigSchema>;
+export interface ValidationResult {
+  success: boolean;
+  data?: unknown;
+  error?: z.ZodError;
 }
 
-export interface PlatformPaths {
-  darwin?: string;
-  linux?: string;
-  win32?: string;
-}
+export {
+  ClientIdSchema,
+  PlatformSchema,
+  ClientConnectionSupportSchema,
+  ServerTypeSchema,
+  LocalConfigSupportSchema,
+  ServerModeSchema,
+  MCPClientConfigSchema,
+  PlatformPathsSchema,
+  ConfigStructureSchema,
+  HttpConfigStructureSchema,
+  StdioConfigStructureSchema,
+  GleanServerConfigSchema,
+  HttpServerConfigSchema,
+  StdioServerConfigSchema,
+  StdioServerConfigAltSchema,
+  ServerConfigSchema,
+  McpServersConfigSchema,
+  VsCodeConfigSchema,
+  GooseServerConfigSchema,
+  GooseConfigSchema,
+} from './schemas.js';
 
-export interface ConfigStructure {
-  serverKey: string;
-  serverNameKey: string;
-  httpConfig?: HttpConfigStructure;
-  stdioConfig?: StdioConfigStructure;
-}
-
-export interface HttpConfigStructure {
-  typeField?: string;
-  urlField: string;
-}
-
-export interface StdioConfigStructure {
-  typeField?: string;
-  commandField: string;
-  argsField: string;
-  envField?: string;
-}
-
-export interface GleanServerConfig {
-  serverUrl: string;
-  serverName?: string;
-}
+export {
+  validateClientConfig,
+  validateServerConfig,
+  safeValidateClientConfig,
+  safeValidateServerConfig,
+  validateGeneratedConfig,
+  validateMcpServersConfig,
+  validateVsCodeConfig,
+  validateGooseConfig,
+  safeValidateMcpServersConfig,
+  safeValidateVsCodeConfig,
+  safeValidateGooseConfig,
+} from './schemas.js';

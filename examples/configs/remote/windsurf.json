@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "glean": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://glean-dev-be.glean.com/mcp/default"
+      ]
+    }
+  }
+}

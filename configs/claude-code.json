@@ -3,7 +3,8 @@
   "name": "claude-code",
   "displayName": "Claude Code",
   "description": "Claude Code with native HTTP support",
-  "compatibility": "full",
+  "localConfigSupport": "full",
+  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code",
   "clientSupports": "http",
   "requiresMcpRemoteForHttp": false,
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -15,10 +16,15 @@
   },
   "configStructure": {
     "serverKey": "mcpServers",
-    "serverNameKey": "glean",
     "httpConfig": {
       "typeField": "type",
       "urlField": "url"
+    },
+    "stdioConfig": {
+      "typeField": "type",
+      "commandField": "command",
+      "argsField": "args",
+      "envField": "env"
     }
   }
 }

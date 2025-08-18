@@ -3,8 +3,9 @@
   "name": "goose",
   "displayName": "Goose",
   "description": "Goose only supports stdio, requires mcp-remote for HTTP servers",
-  "compatibility": "full",
-  "compatibilityNotes": "Requires mcp-remote",
+  "localConfigSupport": "full",
+  "localConfigNotes": "Requires mcp-remote for remote servers",
+  "documentationUrl": "https://github.com/square/goose",
   "clientSupports": "stdio-only",
   "requiresMcpRemoteForHttp": true,
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -16,7 +17,6 @@
   },
   "configStructure": {
     "serverKey": "extensions",
-    "serverNameKey": "glean",
     "stdioConfig": {
       "commandField": "cmd",
       "argsField": "args"

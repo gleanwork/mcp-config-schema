@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { MCPConfigRegistry } from '../src/registry';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -71,21 +71,17 @@ describe('MCPConfigRegistry', () => {
     it('should get supported clients', () => {
       const clients = registry.getSupportedClients();
       expect(clients.length).toBeGreaterThan(0);
-      expect(clients.every((c) => c.compatibility === 'full')).toBe(true);
-    });
-
-    it('should get investigating clients', () => {
-      const clients = registry.getInvestigatingClients();
-      const claudeDesktopOrg = clients.find((c) => c.id === 'claude-desktop-org');
-      expect(claudeDesktopOrg).toBeDefined();
-      expect(claudeDesktopOrg?.compatibility).toBe('investigating');
+      expect(clients.every((c) => c.localConfigSupport === 'full')).toBe(true);
     });
 
     it('should get unsupported clients', () => {
       const clients = registry.getUnsupportedClients();
       const chatgpt = clients.find((c) => c.id === 'chatgpt');
+      const claudeDesktopOrg = clients.find((c) => c.id === 'claude-desktop-org');
       expect(chatgpt).toBeDefined();
-      expect(chatgpt?.compatibility).toBe('none');
+      expect(claudeDesktopOrg).toBeDefined();
+      expect(chatgpt?.localConfigSupport).toBe('none');
+      expect(claudeDesktopOrg?.localConfigSupport).toBe('none');
     });
 
     it('should get clients with one-click protocol', () => {

@@ -1,0 +1,15 @@
+extensions:
+  glean:
+    name: glean
+    cmd: npx
+    args:
+      - '-y'
+      - mcp-remote
+      - https://glean-dev-be.glean.com/mcp/default
+    type: stdio
+    timeout: 300
+    enabled: true
+    bundled: null
+    description: null
+    env_keys: []
+    envs: {}

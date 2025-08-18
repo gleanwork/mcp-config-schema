@@ -8,3 +8,4 @@ coverage/
 .env.local
 .vscode/
 .idea/
+.mise.local.toml

@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/browser.ts'],
   format: ['cjs', 'esm'],
   dts: true,
   splitting: false,
@@ -10,5 +10,5 @@ export default defineConfig({
   shims: true,
   minify: process.env.NODE_ENV === 'production',
   target: 'node18',
-  external: ['configs']
+  external: ['configs'],
 });

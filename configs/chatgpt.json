@@ -2,24 +2,16 @@
   "id": "chatgpt",
   "name": "chatgpt",
   "displayName": "ChatGPT",
-  "description": "ChatGPT - future support planned",
-  "compatibility": "none",
-  "compatibilityNotes": "Connects but requires nonstandard tools format. ETA release 2025-08-12",
+  "description": "ChatGPT web interface - requires GPT configuration through web UI",
+  "localConfigSupport": "none",
+  "localConfigNotes": "ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.",
   "clientSupports": "stdio-only",
   "requiresMcpRemoteForHttp": true,
-  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "supportedPlatforms": [],
   "configFormat": "json",
-  "configPath": {
-    "darwin": "$HOME/.chatgpt/mcp.json",
-    "linux": "$HOME/.chatgpt/mcp.json",
-    "win32": "%USERPROFILE%\\.chatgpt\\mcp.json"
-  },
+  "configPath": {},
+  "documentationUrl": "https://platform.openai.com/docs",
   "configStructure": {
-    "serverKey": "tools",
-    "serverNameKey": "glean",
-    "stdioConfig": {
-      "commandField": "command",
-      "argsField": "args"
-    }
+    "serverKey": ""
   }
 }

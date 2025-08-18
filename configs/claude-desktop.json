@@ -3,8 +3,9 @@
   "name": "claude-desktop",
   "displayName": "Claude for Desktop",
   "description": "Claude Desktop only supports stdio, requires mcp-remote for HTTP servers",
-  "compatibility": "full",
-  "compatibilityNotes": "Requires mcp-remote",
+  "localConfigSupport": "full",
+  "localConfigNotes": "Requires mcp-remote for remote servers",
+  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
   "clientSupports": "stdio-only",
   "requiresMcpRemoteForHttp": true,
   "supportedPlatforms": ["darwin", "win32"],
@@ -15,11 +16,11 @@
   },
   "configStructure": {
     "serverKey": "mcpServers",
-    "serverNameKey": "glean",
     "stdioConfig": {
       "typeField": "type",
       "commandField": "command",
-      "argsField": "args"
+      "argsField": "args",
+      "envField": "env"
     }
   }
 }
