@@ -1,0 +1,25 @@
+{
+  "id": "vscode",
+  "name": "vscode",
+  "displayName": "Visual Studio Code",
+  "description": "VS Code with native HTTP support",
+  "compatibility": "full",
+  "clientSupports": "http",
+  "requiresMcpRemoteForHttp": false,
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/Library/Application Support/Code/User/mcp.json",
+    "linux": "$HOME/.config/Code/User/mcp.json",
+    "win32": "%APPDATA%\\Code\\User\\mcp.json"
+  },
+  "oneClickProtocol": "vscode://",
+  "configStructure": {
+    "serverKey": "servers",
+    "serverNameKey": "glean",
+    "httpConfig": {
+      "typeField": "type",
+      "urlField": "url"
+    }
+  }
+}

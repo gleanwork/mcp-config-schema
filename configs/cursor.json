@@ -1,0 +1,28 @@
+{
+  "id": "cursor",
+  "name": "cursor",
+  "displayName": "Cursor",
+  "description": "Cursor only supports stdio, requires mcp-remote for HTTP servers",
+  "compatibility": "full",
+  "compatibilityNotes": "Requires mcp-remote. Native OAuth has security vulnerability (no state parameter)",
+  "clientSupports": "stdio-only",
+  "requiresMcpRemoteForHttp": true,
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/.cursor/mcp.json",
+    "linux": "$HOME/.cursor/mcp.json",
+    "win32": "%USERPROFILE%\\.cursor\\mcp.json"
+  },
+  "oneClickProtocol": "cursor://",
+  "configStructure": {
+    "serverKey": "mcpServers",
+    "serverNameKey": "glean",
+    "stdioConfig": {
+      "typeField": "type",
+      "commandField": "command",
+      "argsField": "args"
+    }
+  },
+  "securityNotes": "As of Jan 8, 2025, Cursor does not use a state parameter when requesting authorization and its callback is presumably vulnerable to CSRF attacks"
+}

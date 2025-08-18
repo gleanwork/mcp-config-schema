@@ -1,0 +1,25 @@
+{
+  "id": "chatgpt",
+  "name": "chatgpt",
+  "displayName": "ChatGPT",
+  "description": "ChatGPT - future support planned",
+  "compatibility": "none",
+  "compatibilityNotes": "Connects but requires nonstandard tools format. ETA release 2025-08-12",
+  "clientSupports": "stdio-only",
+  "requiresMcpRemoteForHttp": true,
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/.chatgpt/mcp.json",
+    "linux": "$HOME/.chatgpt/mcp.json",
+    "win32": "%USERPROFILE%\\.chatgpt\\mcp.json"
+  },
+  "configStructure": {
+    "serverKey": "tools",
+    "serverNameKey": "glean",
+    "stdioConfig": {
+      "commandField": "command",
+      "argsField": "args"
+    }
+  }
+}

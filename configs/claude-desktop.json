@@ -1,0 +1,25 @@
+{
+  "id": "claude-desktop",
+  "name": "claude-desktop",
+  "displayName": "Claude for Desktop",
+  "description": "Claude Desktop only supports stdio, requires mcp-remote for HTTP servers",
+  "compatibility": "full",
+  "compatibilityNotes": "Requires mcp-remote",
+  "clientSupports": "stdio-only",
+  "requiresMcpRemoteForHttp": true,
+  "supportedPlatforms": ["darwin", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/Library/Application Support/Claude/claude_desktop_config.json",
+    "win32": "%APPDATA%\\Claude\\claude_desktop_config.json"
+  },
+  "configStructure": {
+    "serverKey": "mcpServers",
+    "serverNameKey": "glean",
+    "stdioConfig": {
+      "typeField": "type",
+      "commandField": "command",
+      "argsField": "args"
+    }
+  }
+}

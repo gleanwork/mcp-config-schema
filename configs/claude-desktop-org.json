@@ -1,0 +1,25 @@
+{
+  "id": "claude-desktop-org",
+  "name": "claude-desktop-org",
+  "displayName": "Claude for Desktop - Organization Connectors",
+  "description": "Claude Desktop Organization Connectors - currently investigating compatibility",
+  "compatibility": "investigating",
+  "compatibilityNotes": "Investigating - likely missing some OAuth features",
+  "clientSupports": "stdio-only",
+  "requiresMcpRemoteForHttp": true,
+  "supportedPlatforms": ["darwin", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/Library/Application Support/Claude/claude_desktop_config.json",
+    "win32": "%APPDATA%\\Claude\\claude_desktop_config.json"
+  },
+  "configStructure": {
+    "serverKey": "mcpServers",
+    "serverNameKey": "glean",
+    "stdioConfig": {
+      "typeField": "type",
+      "commandField": "command",
+      "argsField": "args"
+    }
+  }
+}

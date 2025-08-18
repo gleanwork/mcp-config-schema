@@ -1,0 +1,25 @@
+{
+  "id": "windsurf",
+  "name": "windsurf",
+  "displayName": "Windsurf",
+  "description": "Windsurf only supports stdio, requires mcp-remote for HTTP servers",
+  "compatibility": "full",
+  "compatibilityNotes": "Requires mcp-remote",
+  "clientSupports": "stdio-only",
+  "requiresMcpRemoteForHttp": true,
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/.codeium/windsurf/mcp_config.json",
+    "linux": "$HOME/.codeium/windsurf/mcp_config.json",
+    "win32": "%USERPROFILE%\\.codeium\\windsurf\\mcp_config.json"
+  },
+  "configStructure": {
+    "serverKey": "mcpServers",
+    "serverNameKey": "glean",
+    "stdioConfig": {
+      "commandField": "command",
+      "argsField": "args"
+    }
+  }
+}

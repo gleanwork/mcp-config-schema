@@ -1,0 +1,24 @@
+{
+  "id": "claude-code",
+  "name": "claude-code",
+  "displayName": "Claude Code",
+  "description": "Claude Code with native HTTP support",
+  "compatibility": "full",
+  "clientSupports": "http",
+  "requiresMcpRemoteForHttp": false,
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/.claude.json",
+    "linux": "$HOME/.claude.json",
+    "win32": "%USERPROFILE%\\.claude.json"
+  },
+  "configStructure": {
+    "serverKey": "mcpServers",
+    "serverNameKey": "glean",
+    "httpConfig": {
+      "typeField": "type",
+      "urlField": "url"
+    }
+  }
+}
