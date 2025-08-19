@@ -16,6 +16,53 @@ const __dirname = dirname(__filename);
 describe('ConfigBuilder', () => {
   const registry = new MCPConfigRegistry();
 
+  describe('buildOneClickUrl', () => {
+    it('generates one-click URL for Cursor with remote config', () => {
+      const cursorBuilder = registry.createBuilder('cursor');
+      const config = {
+        mode: 'remote' as const,
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server'
+      };
+      const url = cursorBuilder.buildOneClickUrl(config);
+      
+      // Decode the config parameter to verify it
+      const urlObj = new URL(url.replace('cursor://', 'https://'));
+      expect(urlObj.hostname).toBe('anysphere.cursor-deeplink');
+      expect(urlObj.pathname).toBe('/mcp/install');
+      expect(urlObj.searchParams.get('name')).toBe('test-server');
+      
+      const encodedConfig = urlObj.searchParams.get('config');
+      const decodedConfig = JSON.parse(Buffer.from(encodedConfig!, 'base64').toString());
+      expect(decodedConfig).toEqual({
+        command: 'npx',
+        args: ['-y', 'mcp-remote', 'https://example.com/mcp/default']
+      });
+    });
+
+    it('throws for VSCode since one-click is not configured', () => {
+      const vscodeBuilder = registry.createBuilder('vscode');
+      const config = {
+        mode: 'remote' as const,
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server'
+      };
+      expect(() => vscodeBuilder.buildOneClickUrl(config))
+        .toThrow('Visual Studio Code does not support one-click installation');
+    });
+
+    it('throws for clients without one-click support', () => {
+      const claudeBuilder = registry.createBuilder('claude-desktop');
+      const config = {
+        mode: 'remote' as const,
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server'
+      };
+      expect(() => claudeBuilder.buildOneClickUrl(config))
+        .toThrow('Claude for Desktop does not support one-click installation');
+    });
+  });
+
   describe('Remote configurations', () => {
     const remoteConfig = {
       mode: 'remote' as const,

@@ -14,7 +14,6 @@
     "linux": "$HOME/.config/Code/User/mcp.json",
     "win32": "%APPDATA%\\Code\\User\\mcp.json"
   },
-  "oneClickProtocol": "vscode://",
   "configStructure": {
     "serverKey": "servers",
     "httpConfig": {

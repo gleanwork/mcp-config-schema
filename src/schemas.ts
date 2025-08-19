@@ -54,7 +54,11 @@ export const MCPClientConfigSchema = z.object({
   supportedPlatforms: z.array(PlatformSchema),
   configFormat: z.enum(['json', 'yaml']),
   configPath: PlatformPathsSchema,
-  oneClickProtocol: z.string().optional(),
+  oneClick: z.object({
+    protocol: z.string(),
+    urlTemplate: z.string(),
+    configFormat: z.enum(['base64-json', 'url-encoded-json'])
+  }).optional(),
   configStructure: ConfigStructureSchema,
   securityNotes: z.string().optional(),
 });

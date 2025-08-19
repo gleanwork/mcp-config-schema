@@ -31,6 +31,14 @@ await builder.writeConfiguration({
   serverUrl: 'https://your-server.com/mcp/default',
   serverName: 'my-server'
 });
+
+// Generate one-click install URL for supported clients (currently only Cursor)
+const oneClickUrl = builder.buildOneClickUrl({
+  mode: 'remote',
+  serverUrl: 'https://your-server.com/mcp/default',
+  serverName: 'my-server'
+});
+// Returns: cursor://anysphere.cursor-deeplink/mcp/install?name=my-server&config=...
 ```
 
 ## What This Package Does
@@ -62,6 +70,16 @@ For detailed configuration examples and requirements for each client, see **[CLI
 
 - **ChatGPT** - Requires web UI configuration
 - **Claude Desktop (Organization)** - Managed by organization admins
+
+### One-Click Installation Support
+
+Currently, only Cursor has documented one-click installation support:
+
+| Client | Protocol | Format |
+|--------|----------|--------|
+| **Cursor** | `cursor://` | `cursor://anysphere.cursor-deeplink/mcp/install?name=...&config=...` |
+
+Note: VSCode may support one-click installation in the future, but the format has not been documented yet.
 
 ## Core Usage
 

@@ -99,7 +99,7 @@ export class MCPConfigRegistry {
   }
 
   getClientsWithOneClick(): MCPClientConfig[] {
-    return this.getAllConfigs().filter((config) => config.oneClickProtocol !== undefined);
+    return this.getAllConfigs().filter((config) => config.oneClick !== undefined);
   }
 
   getSupportedClients(): MCPClientConfig[] {

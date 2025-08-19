@@ -194,6 +194,56 @@ export class ConfigBuilder {
     }
   }
 
+    buildOneClickUrl(gleanConfig: GleanServerConfig): string {
+    if (!this.config.oneClick) {
+      throw new Error(`${this.config.displayName} does not support one-click installation`);
+    }
+    
+    const serverName = gleanConfig.serverName || 'glean';
+    
+    // Build the appropriate config based on the client's capabilities
+    let configObj: Record<string, unknown>;
+    
+    if (this.config.clientSupports === 'stdio-only' && gleanConfig.mode === 'remote') {
+      // stdio-only clients need mcp-remote for remote servers
+      configObj = {
+        command: 'npx',
+        args: ['-y', 'mcp-remote', gleanConfig.serverUrl]
+      };
+    } else if (this.config.clientSupports === 'http' && gleanConfig.mode === 'remote') {
+      // HTTP clients can connect directly
+      configObj = {
+        url: gleanConfig.serverUrl
+      };
+    } else if (gleanConfig.mode === 'local') {
+      // Local mode
+      configObj = {
+        command: 'npx',
+        args: ['-y', '@gleanwork/local-mcp-server']
+      };
+    } else {
+      configObj = {
+        command: 'npx',
+        args: ['-y', 'mcp-remote', gleanConfig.serverUrl]
+      };
+    }
+    
+    // Encode the config based on the format
+    let encodedConfig: string;
+    if (this.config.oneClick.configFormat === 'base64-json') {
+      encodedConfig = Buffer.from(JSON.stringify(configObj)).toString('base64');
+    } else if (this.config.oneClick.configFormat === 'url-encoded-json') {
+      encodedConfig = encodeURIComponent(JSON.stringify(configObj));
+    } else {
+      throw new Error(`Unknown one-click config format: ${this.config.oneClick.configFormat}`);
+    }
+    
+    // Replace placeholders in the template
+    return this.config.oneClick.urlTemplate
+      .replace('{{name}}', encodeURIComponent(serverName))
+      .replace('{{config}}', encodedConfig);
+  }
+
   getConfigPath(): string {
     if (!isNodeEnvironment()) {
       throw new Error('getConfigPath() is only available in Node.js environment');

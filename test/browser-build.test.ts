@@ -26,10 +26,10 @@ describe('Browser Build', () => {
 
   it('MCPConfigRegistry works without Node.js dependencies', () => {
     const registry = new browserExports.MCPConfigRegistry();
-    
+
     expect(registry.getAllConfigs()).toBeDefined();
     expect(registry.getAllConfigs().length).toBeGreaterThan(0);
-    
+
     const cursorConfig = registry.getConfig('cursor');
     expect(cursorConfig).toBeDefined();
     expect(cursorConfig?.displayName).toBe('Cursor');
@@ -38,15 +38,15 @@ describe('Browser Build', () => {
   it('ConfigBuilder can generate configurations in browser', () => {
     const registry = new browserExports.MCPConfigRegistry();
     const builder = registry.createBuilder('cursor');
-    
+
     expect(builder).toBeDefined();
-    
+
     const config = builder.buildConfiguration({
       mode: 'remote',
       serverUrl: 'https://example.com/mcp',
-      serverName: 'test-server'
+      serverName: 'test-server',
     });
-    
+
     expect(config).toBeDefined();
     expect(typeof config).toBe('string');
     expect(config).toContain('test-server');
@@ -55,8 +55,24 @@ describe('Browser Build', () => {
   it('ConfigBuilder.writeConfiguration is properly guarded', () => {
     const registry = new browserExports.MCPConfigRegistry();
     const builder = registry.createBuilder('cursor');
-    
+
     expect(builder.writeConfiguration).toBeDefined();
     expect(typeof builder.writeConfiguration).toBe('function');
+  });
+
+    it('ConfigBuilder can generate one-click URLs in browser', () => {
+    const registry = new browserExports.MCPConfigRegistry();
+    const cursorBuilder = registry.createBuilder('cursor');
+    
+    const config = {
+      mode: 'remote' as const,
+      serverUrl: 'https://example.com/mcp/default',
+      serverName: 'test-server'
+    };
+    
+    const cursorUrl = cursorBuilder.buildOneClickUrl(config);
+    expect(cursorUrl).toContain('cursor://anysphere.cursor-deeplink/mcp/install');
+    expect(cursorUrl).toContain('name=test-server');
+    expect(cursorUrl).toContain('config=');
   });
 });

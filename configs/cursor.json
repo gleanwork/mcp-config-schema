@@ -15,7 +15,11 @@
     "linux": "$HOME/.cursor/mcp.json",
     "win32": "%USERPROFILE%\\.cursor\\mcp.json"
   },
-  "oneClickProtocol": "cursor://",
+  "oneClick": {
+    "protocol": "cursor://",
+    "urlTemplate": "cursor://anysphere.cursor-deeplink/mcp/install?name={{name}}&config={{config}}",
+    "configFormat": "base64-json"
+  },
   "configStructure": {
     "serverKey": "mcpServers",
     "stdioConfig": {

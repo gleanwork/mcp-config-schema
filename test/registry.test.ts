@@ -84,14 +84,12 @@ describe('MCPConfigRegistry', () => {
       expect(claudeDesktopOrg?.localConfigSupport).toBe('none');
     });
 
-    it('should get clients with one-click protocol', () => {
+    it('should get clients with one-click support', () => {
       const clients = registry.getClientsWithOneClick();
-      const vscode = clients.find((c) => c.id === 'vscode');
+      expect(clients.length).toBeGreaterThan(0);
       const cursor = clients.find((c) => c.id === 'cursor');
-      expect(vscode).toBeDefined();
       expect(cursor).toBeDefined();
-      expect(vscode?.oneClickProtocol).toBe('vscode://');
-      expect(cursor?.oneClickProtocol).toBe('cursor://');
+      expect(cursor?.oneClick?.protocol).toBe('cursor://');
     });
 
     it('should get clients by platform', () => {
