@@ -215,8 +215,6 @@ export class ConfigBuilder {
   }
 
   private expandPath(filepath: string): string {
-    // Simple approach: use Node.js built-ins directly
-    // This method is only called from getConfigPath which already checks for Node.js
     const homedir = process.env.HOME || process.env.USERPROFILE || '';
     const sep = process.platform === 'win32' ? '\\' : '/';
 
@@ -251,7 +249,6 @@ export class ConfigBuilder {
     const content = this.buildConfiguration(gleanConfig);
     const configPath = this.getConfigPath();
 
-    // Import Node.js modules on demand
     const fs = await import('fs');
     const path = await import('path');
     const { mkdirp } = await import('mkdirp');

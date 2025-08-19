@@ -1,10 +1,3 @@
-/**
- * Browser-safe exports for @gleanwork/mcp-config-schema
- *
- * Import from '@gleanwork/mcp-config-schema/browser' to use in browser environments.
- * This module only exports functionality that works in browsers.
- */
-
 export * from './types.js';
 
 export {
