@@ -1,6 +1,16 @@
 
 
 
+
+## v0.4.4 (2025-08-21)
+
+#### :bug: Bug Fix
+* [#7](https://github.com/gleanwork/mcp-config-schema/pull/7) fix: Updates Claude to use Teams/Enterprise for org connectors ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.4.3 (2025-08-21)
 
 #### :bug: Bug Fix
