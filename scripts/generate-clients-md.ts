@@ -296,26 +296,37 @@ function generateDocument(): string {
   // Additional sections
   sections.push('## Connection Types Explained');
   sections.push('');
+
+  // Generate dynamic client lists based on actual configuration
+  const nativeHttpClients = clients.filter(
+    (c) => c.clientSupports === 'http' && c.localConfigSupport === 'full'
+  );
+  const stdioOnlyClients = clients.filter(
+    (c) => c.clientSupports === 'stdio-only' && c.localConfigSupport === 'full'
+  );
+  const managedClients = clients.filter((c) => c.localConfigSupport === 'none');
+
   sections.push('### Native HTTP Clients');
   sections.push(
     'Clients that can connect directly to HTTP MCP servers without additional tooling:'
   );
-  sections.push('- Claude Code');
-  sections.push('- Visual Studio Code');
+  nativeHttpClients.forEach((c) => sections.push(`- ${c.displayName}`));
   sections.push('');
+
   sections.push('### stdio-only Clients');
   sections.push(
     'Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP servers:'
   );
-  sections.push('- Claude for Desktop');
-  sections.push('- Cursor');
-  sections.push('- Goose');
-  sections.push('- Windsurf');
+  stdioOnlyClients.forEach((c) => sections.push(`- ${c.displayName}`));
   sections.push('');
+
   sections.push('### Web-based/Managed Clients');
   sections.push("Clients that don't support local configuration files:");
-  sections.push('- ChatGPT (requires web UI configuration)');
-  sections.push('- Claude Desktop Organization (centrally managed)');
+  managedClients.forEach((c) =>
+    sections.push(
+      `- ${c.displayName} (${c.localConfigNotes?.toLowerCase() || 'centrally managed'})`
+    )
+  );
   sections.push('');
 
   // Security considerations
