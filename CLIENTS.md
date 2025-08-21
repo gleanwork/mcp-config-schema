@@ -10,7 +10,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 | **Claude Code** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Claude for Desktop** | Full | stdio only | Yes (for HTTP) | macOS, Windows |
 | **Claude for Desktop - Organization Connectors** | None | stdio only | Yes (for HTTP) | Organization-managed |
-| **Cursor** | Full | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
+| **Cursor** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Goose** | Full | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
 | **Visual Studio Code** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Windsurf** | Full | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
@@ -270,11 +270,9 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ### Cursor
 
 - **Compatibility**: Full local configuration support
-- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
+- **Connection Type**: Native HTTP support
 - **Documentation**: [Cursor MCP Docs](https://docs.cursor.com/context/model-context-protocol)
 - **Supported Platforms**: macOS, Linux, Windows
-- **⚠️ Security Note**: As of Jan 8, 2025, Cursor does not use a state parameter when requesting authorization and its callback is presumably vulnerable to CSRF attacks
-- **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
   - **macOS/Linux: `$HOME/.cursor/mcp.json`
   - **Windows**: `%USERPROFILE%\.cursor\mcp.json`
@@ -287,12 +285,11 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "id": "cursor",
   "name": "cursor",
   "displayName": "Cursor",
-  "description": "Cursor only supports stdio, requires mcp-remote for HTTP servers",
+  "description": "Cursor with native HTTP support",
   "localConfigSupport": "full",
-  "localConfigNotes": "Requires mcp-remote for remote servers. Native OAuth has security vulnerability (no state parameter)",
   "documentationUrl": "https://docs.cursor.com/context/model-context-protocol",
-  "clientSupports": "stdio-only",
-  "requiresMcpRemoteForHttp": true,
+  "clientSupports": "http",
+  "requiresMcpRemoteForHttp": false,
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {
@@ -307,33 +304,31 @@ This document provides a comprehensive overview of all supported MCP clients, th
   },
   "configStructure": {
     "serverKey": "mcpServers",
+    "httpConfig": {
+      "typeField": "type",
+      "urlField": "url"
+    },
     "stdioConfig": {
       "typeField": "type",
       "commandField": "command",
       "argsField": "args",
       "envField": "env"
     }
-  },
-  "securityNotes": "As of Jan 8, 2025, Cursor does not use a state parameter when requesting authorization and its callback is presumably vulnerable to CSRF attacks"
+  }
 }
 ```
 
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (via stdio with mcp-remote bridge)</strong></summary>
+<summary><strong>HTTP Configuration (native)</strong></summary>
 
 ```json snippet=examples/configs/remote/cursor.json
 {
   "mcpServers": {
     "glean": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://glean-dev-be.glean.com/mcp/default"
-      ]
+      "type": "http",
+      "url": "https://glean-dev-be.glean.com/mcp/default"
     }
   }
 }
@@ -645,12 +640,12 @@ extensions:
 ### Native HTTP Clients
 Clients that can connect directly to HTTP MCP servers without additional tooling:
 - Claude Code
+- Cursor
 - Visual Studio Code
 
 ### stdio-only Clients
 Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP servers:
 - Claude for Desktop
-- Cursor
 - Goose
 - Windsurf
 
@@ -658,11 +653,6 @@ Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP
 Clients that don't support local configuration files:
 - ChatGPT (chatgpt is web-based and requires creating custom gpts through their web ui. no local configuration file support.)
 - Claude for Desktop - Organization Connectors (organization connectors are centrally managed by admins. no local configuration support - connectors must be configured at the organization level.)
-
-## Security Considerations
-
-### Cursor OAuth Vulnerability
-As of Jan 8, 2025, Cursor does not use a state parameter when requesting authorization and its callback is presumably vulnerable to CSRF attacks
 
 ## Configuration File Formats
 

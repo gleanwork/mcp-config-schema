@@ -36,10 +36,11 @@ describe('MCPConfigRegistry', () => {
       expect(config?.configStructure.serverKey).toBe('servers');
     });
 
-    it('should load Cursor config with security notes', () => {
+    it('should load Cursor config with HTTP support', () => {
       const config = registry.getConfig('cursor');
       expect(config).toBeDefined();
-      expect(config?.securityNotes).toContain('CSRF');
+      expect(config?.clientSupports).toBe('http');
+      expect(config?.requiresMcpRemoteForHttp).toBe(false);
     });
 
     it('should load Goose config with YAML format', () => {

@@ -60,16 +60,16 @@ describe('Browser Build', () => {
     expect(typeof builder.writeConfiguration).toBe('function');
   });
 
-    it('ConfigBuilder can generate one-click URLs in browser', () => {
+  it('ConfigBuilder can generate one-click URLs in browser', () => {
     const registry = new browserExports.MCPConfigRegistry();
     const cursorBuilder = registry.createBuilder('cursor');
-    
+
     const config = {
       mode: 'remote' as const,
       serverUrl: 'https://example.com/mcp/default',
-      serverName: 'test-server'
+      serverName: 'test-server',
     };
-    
+
     const cursorUrl = cursorBuilder.buildOneClickUrl(config);
     expect(cursorUrl).toContain('cursor://anysphere.cursor-deeplink/mcp/install');
     expect(cursorUrl).toContain('name=test-server');
