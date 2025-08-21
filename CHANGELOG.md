@@ -1,5 +1,15 @@
 
 
+
+## v0.4.3 (2025-08-21)
+
+#### :bug: Bug Fix
+* [#6](https://github.com/gleanwork/mcp-config-schema/pull/6) fix: Fixes broken package exports ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.4.2 (2025-08-21)
 
 #### :bug: Bug Fix
