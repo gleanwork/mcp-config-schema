@@ -273,7 +273,6 @@ This document provides a comprehensive overview of all supported MCP clients, th
 - **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
 - **Documentation**: [Cursor MCP Docs](https://docs.cursor.com/context/model-context-protocol)
 - **Supported Platforms**: macOS, Linux, Windows
-- **One-Click Protocol**: `cursor://`
 - **⚠️ Security Note**: As of Jan 8, 2025, Cursor does not use a state parameter when requesting authorization and its callback is presumably vulnerable to CSRF attacks
 - **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
@@ -301,7 +300,11 @@ This document provides a comprehensive overview of all supported MCP clients, th
     "linux": "$HOME/.cursor/mcp.json",
     "win32": "%USERPROFILE%\\.cursor\\mcp.json"
   },
-  "oneClickProtocol": "cursor://",
+  "oneClick": {
+    "protocol": "cursor://",
+    "urlTemplate": "cursor://anysphere.cursor-deeplink/mcp/install?name={{name}}&config={{config}}",
+    "configFormat": "base64-json"
+  },
   "configStructure": {
     "serverKey": "mcpServers",
     "stdioConfig": {
@@ -462,7 +465,6 @@ extensions:
 - **Connection Type**: Native HTTP support
 - **Documentation**: [Visual Studio Code Docs](https://code.visualstudio.com/docs)
 - **Supported Platforms**: macOS, Linux, Windows
-- **One-Click Protocol**: `vscode://`
 - **Configuration Paths**:
   - **macOS**: `$HOME/Library/Application Support/Code/User/mcp.json`
   - **Linux**: `$HOME/.config/Code/User/mcp.json`
@@ -488,7 +490,6 @@ extensions:
     "linux": "$HOME/.config/Code/User/mcp.json",
     "win32": "%APPDATA%\\Code\\User\\mcp.json"
   },
-  "oneClickProtocol": "vscode://",
   "configStructure": {
     "serverKey": "servers",
     "httpConfig": {
@@ -655,8 +656,8 @@ Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP
 
 ### Web-based/Managed Clients
 Clients that don't support local configuration files:
-- ChatGPT (requires web UI configuration)
-- Claude Desktop Organization (centrally managed)
+- ChatGPT (chatgpt is web-based and requires creating custom gpts through their web ui. no local configuration file support.)
+- Claude for Desktop - Organization Connectors (organization connectors are centrally managed by admins. no local configuration support - connectors must be configured at the organization level.)
 
 ## Security Considerations
 
@@ -688,8 +689,6 @@ Used by: Goose
 ## One-Click Protocol Support
 
 Some clients support one-click installation via custom protocols:
-- **Cursor**: `cursor://`
-- **Visual Studio Code**: `vscode://`
 
 ## Additional Resources
 
