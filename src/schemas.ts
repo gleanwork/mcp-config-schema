@@ -54,22 +54,30 @@ export const MCPClientConfigSchema = z.object({
   supportedPlatforms: z.array(PlatformSchema),
   configFormat: z.enum(['json', 'yaml']),
   configPath: PlatformPathsSchema,
-  oneClick: z.object({
-    protocol: z.string(),
-    urlTemplate: z.string(),
-    configFormat: z.enum(['base64-json', 'url-encoded-json'])
-  }).optional(),
+  oneClick: z
+    .object({
+      protocol: z.string(),
+      urlTemplate: z.string(),
+      configFormat: z.enum(['base64-json', 'url-encoded-json']),
+    })
+    .optional(),
   configStructure: ConfigStructureSchema,
   securityNotes: z.string().optional(),
 });
 
-export const GleanServerConfigSchema = z.object({
-  mode: ServerModeSchema,
-  serverUrl: z.string().url().optional(),
-  serverName: z.string().optional(),
-  instance: z.string().optional(),
-  apiToken: z.string().optional(),
+export const BuildOptionsSchema = z.object({
+  includeWrapper: z.boolean().optional(),
 });
+
+export const GleanServerConfigSchema = z
+  .object({
+    mode: ServerModeSchema,
+    serverUrl: z.string().url().optional(),
+    serverName: z.string().optional(),
+    instance: z.string().optional(),
+    apiToken: z.string().optional(),
+  })
+  .merge(BuildOptionsSchema);
 
 export function validateClientConfig(data: unknown) {
   return MCPClientConfigSchema.parse(data);
