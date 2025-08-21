@@ -78,11 +78,11 @@ describe('MCPConfigRegistry', () => {
     it('should get unsupported clients', () => {
       const clients = registry.getUnsupportedClients();
       const chatgpt = clients.find((c) => c.id === 'chatgpt');
-      const claudeDesktopOrg = clients.find((c) => c.id === 'claude-desktop-org');
+      const claudeTeamsEnterprise = clients.find((c) => c.id === 'claude-teams-enterprise');
       expect(chatgpt).toBeDefined();
-      expect(claudeDesktopOrg).toBeDefined();
+      expect(claudeTeamsEnterprise).toBeDefined();
       expect(chatgpt?.localConfigSupport).toBe('none');
-      expect(claudeDesktopOrg?.localConfigSupport).toBe('none');
+      expect(claudeTeamsEnterprise?.localConfigSupport).toBe('none');
     });
 
     it('should get clients with one-click support', () => {

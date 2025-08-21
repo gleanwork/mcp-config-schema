@@ -245,9 +245,9 @@ describe('ConfigBuilder', () => {
       );
     });
 
-    it('should throw when trying to create builder for Claude Desktop Org', () => {
-      expect(() => registry.createBuilder('claude-desktop-org')).toThrow(
-        'Cannot create builder for Claude for Desktop - Organization Connectors: Organization connectors are centrally managed by admins. No local configuration support - connectors must be configured at the organization level.'
+    it('should throw when trying to create builder for Claude Teams/Enterprise', () => {
+      expect(() => registry.createBuilder('claude-teams-enterprise')).toThrow(
+        'Cannot create builder for Claude for Teams/Enterprise: MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.'
       );
     });
   });
