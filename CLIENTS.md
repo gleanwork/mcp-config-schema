@@ -9,7 +9,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 | **ChatGPT** | None | stdio only | Yes (for HTTP) | Web only |
 | **Claude Code** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Claude for Desktop** | Full | stdio only | Yes (for HTTP) | macOS, Windows |
-| **Claude for Desktop - Organization Connectors** | None | stdio only | Yes (for HTTP) | Organization-managed |
+| **Claude for Teams/Enterprise** | None | stdio only | Yes (for HTTP) | Organization-managed |
 | **Cursor** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Goose** | Full | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
 | **Visual Studio Code** | Full | HTTP native | No | macOS, Linux, Windows |
@@ -233,24 +233,24 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 ---
 
-### Claude for Desktop - Organization Connectors
+### Claude for Teams/Enterprise
 
 - **Compatibility**: No local configuration support
 - **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
 - **Documentation**: [Documentation](https://docs.anthropic.com/en/docs/claude-desktop)
-- **Notes**: Organization connectors are centrally managed by admins. No local configuration support - connectors must be configured at the organization level.
+- **Notes**: MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.
 
 <details>
 <summary><strong>Internal Configuration Schema</strong></summary>
 
-```json snippet=configs/claude-desktop-org.json
+```json snippet=configs/claude-teams-enterprise.json
 {
-  "id": "claude-desktop-org",
-  "name": "claude-desktop-org",
-  "displayName": "Claude for Desktop - Organization Connectors",
-  "description": "Claude Desktop with organization-managed connectors",
+  "id": "claude-teams-enterprise",
+  "name": "claude-teams-enterprise",
+  "displayName": "Claude for Teams/Enterprise",
+  "description": "Claude for Teams and Enterprise",
   "localConfigSupport": "none",
-  "localConfigNotes": "Organization connectors are centrally managed by admins. No local configuration support - connectors must be configured at the organization level.",
+  "localConfigNotes": "MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.",
   "clientSupports": "stdio-only",
   "requiresMcpRemoteForHttp": true,
   "supportedPlatforms": [],
@@ -652,7 +652,7 @@ Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP
 ### Web-based/Managed Clients
 Clients that don't support local configuration files:
 - ChatGPT (chatgpt is web-based and requires creating custom gpts through their web ui. no local configuration file support.)
-- Claude for Desktop - Organization Connectors (organization connectors are centrally managed by admins. no local configuration support - connectors must be configured at the organization level.)
+- Claude for Teams/Enterprise (mcp servers are centrally managed by admins. no local configuration support - servers must be configured at the organization level.)
 
 ## Configuration File Formats
 

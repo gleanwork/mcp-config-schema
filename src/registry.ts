@@ -3,7 +3,7 @@ import { ConfigBuilder } from './builder.js';
 import chatgptConfig from '../configs/chatgpt.json';
 import claudeCodeConfig from '../configs/claude-code.json';
 import claudeDesktopConfig from '../configs/claude-desktop.json';
-import claudeDesktopOrgConfig from '../configs/claude-desktop-org.json';
+import claudeTeamsEnterpriseConfig from '../configs/claude-teams-enterprise.json';
 import cursorConfig from '../configs/cursor.json';
 import gooseConfig from '../configs/goose.json';
 import vscodeConfig from '../configs/vscode.json';
@@ -12,7 +12,7 @@ const allConfigs = [
   chatgptConfig,
   claudeCodeConfig,
   claudeDesktopConfig,
-  claudeDesktopOrgConfig,
+  claudeTeamsEnterpriseConfig,
   cursorConfig,
   gooseConfig,
   vscodeConfig,
