@@ -45,13 +45,14 @@ export class ConfigBuilder {
     }
 
     const validatedConfig = validateServerConfig(gleanConfig);
+    const includeWrapper = validatedConfig.includeWrapper !== false;
 
     let configObj: Record<string, unknown> = {};
 
     if (validatedConfig.mode === 'local') {
-      configObj = this.buildLocalConfig(validatedConfig);
+      configObj = this.buildLocalConfig(validatedConfig, includeWrapper);
     } else if (validatedConfig.mode === 'remote') {
-      configObj = this.buildRemoteConfig(validatedConfig);
+      configObj = this.buildRemoteConfig(validatedConfig, includeWrapper);
     } else {
       throw new Error(`Invalid server mode: ${validatedConfig.mode}`);
     }
@@ -65,7 +66,10 @@ export class ConfigBuilder {
     throw new Error(`Unsupported config format: ${this.config.configFormat}`);
   }
 
-  private buildLocalConfig(gleanConfig: GleanServerConfig): Record<string, unknown> {
+  private buildLocalConfig(
+    gleanConfig: GleanServerConfig,
+    includeWrapper: boolean = true
+  ): Record<string, unknown> {
     const { serverKey, stdioConfig } = this.config.configStructure;
 
     if (!stdioConfig) {
@@ -106,20 +110,52 @@ export class ConfigBuilder {
     }
 
     if (this.config.id === 'goose') {
+      // Goose uses 'envs' field directly, not through stdioConfig.envField
+      const envs: Record<string, string> = {};
+
+      if (gleanConfig.instance) {
+        if (
+          gleanConfig.instance.startsWith('http://') ||
+          gleanConfig.instance.startsWith('https://')
+        ) {
+          envs.GLEAN_URL = gleanConfig.instance;
+        } else {
+          envs.GLEAN_INSTANCE = gleanConfig.instance;
+        }
+      }
+
+      if (gleanConfig.apiToken) {
+        envs.GLEAN_API_TOKEN = gleanConfig.apiToken;
+      }
+
+      const gooseServerConfig = {
+        name: serverName,
+        ...serverConfig,
+        type: 'stdio',
+        timeout: 300,
+        enabled: true,
+        bundled: null,
+        description: null,
+        env_keys: [],
+        envs: envs,
+      };
+
+      if (!includeWrapper) {
+        return {
+          [serverName]: gooseServerConfig,
+        };
+      }
+
       return {
         extensions: {
-          [serverName]: {
-            name: serverName,
-            ...serverConfig,
-            type: 'stdio',
-            timeout: 300,
-            enabled: true,
-            bundled: null,
-            description: null,
-            env_keys: [],
-            envs: serverConfig.env || {},
-          },
+          [serverName]: gooseServerConfig,
         },
+      };
+    }
+
+    if (!includeWrapper) {
+      return {
+        [serverName]: serverConfig,
       };
     }
 
@@ -130,7 +166,10 @@ export class ConfigBuilder {
     };
   }
 
-  private buildRemoteConfig(gleanConfig: GleanServerConfig): Record<string, unknown> {
+  private buildRemoteConfig(
+    gleanConfig: GleanServerConfig,
+    includeWrapper: boolean = true
+  ): Record<string, unknown> {
     if (!gleanConfig.serverUrl) {
       throw new Error('Remote configuration requires serverUrl');
     }
@@ -151,6 +190,12 @@ export class ConfigBuilder {
 
       serverConfig[httpConfig.urlField] = gleanConfig.serverUrl;
 
+      if (!includeWrapper) {
+        return {
+          [serverName]: serverConfig,
+        };
+      }
+
       return {
         [serverKey]: {
           [serverName]: serverConfig,
@@ -167,20 +212,34 @@ export class ConfigBuilder {
       serverConfig[stdioConfig.argsField] = ['-y', 'mcp-remote', gleanConfig.serverUrl];
 
       if (this.config.id === 'goose') {
+        const gooseServerConfig = {
+          name: serverName,
+          ...serverConfig,
+          type: 'stdio',
+          timeout: 300,
+          enabled: true,
+          bundled: null,
+          description: null,
+          env_keys: [],
+          envs: {},
+        };
+
+        if (!includeWrapper) {
+          return {
+            [serverName]: gooseServerConfig,
+          };
+        }
+
         return {
           extensions: {
-            [serverName]: {
-              name: serverName,
-              ...serverConfig,
-              type: 'stdio',
-              timeout: 300,
-              enabled: true,
-              bundled: null,
-              description: null,
-              env_keys: [],
-              envs: {},
-            },
+            [serverName]: gooseServerConfig,
           },
+        };
+      }
+
+      if (!includeWrapper) {
+        return {
+          [serverName]: serverConfig,
         };
       }
 
@@ -194,40 +253,40 @@ export class ConfigBuilder {
     }
   }
 
-    buildOneClickUrl(gleanConfig: GleanServerConfig): string {
+  buildOneClickUrl(gleanConfig: GleanServerConfig): string {
     if (!this.config.oneClick) {
       throw new Error(`${this.config.displayName} does not support one-click installation`);
     }
-    
+
     const serverName = gleanConfig.serverName || 'glean';
-    
+
     // Build the appropriate config based on the client's capabilities
     let configObj: Record<string, unknown>;
-    
+
     if (this.config.clientSupports === 'stdio-only' && gleanConfig.mode === 'remote') {
       // stdio-only clients need mcp-remote for remote servers
       configObj = {
         command: 'npx',
-        args: ['-y', 'mcp-remote', gleanConfig.serverUrl]
+        args: ['-y', 'mcp-remote', gleanConfig.serverUrl],
       };
     } else if (this.config.clientSupports === 'http' && gleanConfig.mode === 'remote') {
       // HTTP clients can connect directly
       configObj = {
-        url: gleanConfig.serverUrl
+        url: gleanConfig.serverUrl,
       };
     } else if (gleanConfig.mode === 'local') {
       // Local mode
       configObj = {
         command: 'npx',
-        args: ['-y', '@gleanwork/local-mcp-server']
+        args: ['-y', '@gleanwork/local-mcp-server'],
       };
     } else {
       configObj = {
         command: 'npx',
-        args: ['-y', 'mcp-remote', gleanConfig.serverUrl]
+        args: ['-y', 'mcp-remote', gleanConfig.serverUrl],
       };
     }
-    
+
     // Encode the config based on the format
     let encodedConfig: string;
     if (this.config.oneClick.configFormat === 'base64-json') {
@@ -237,7 +296,7 @@ export class ConfigBuilder {
     } else {
       throw new Error(`Unknown one-click config format: ${this.config.oneClick.configFormat}`);
     }
-    
+
     // Replace placeholders in the template
     return this.config.oneClick.urlTemplate
       .replace('{{name}}', encodeURIComponent(serverName))

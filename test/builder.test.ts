@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import * as yaml from 'js-yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -139,7 +140,6 @@ describe('ConfigBuilder', () => {
       const builder = registry.createBuilder('goose');
       const result = builder.buildConfiguration(remoteConfig);
 
-      const yaml = require('js-yaml');
       const parsed = yaml.load(result);
       const validation = validateGeneratedConfig(parsed, 'goose');
       expect(validation.success).toBe(true);
@@ -531,6 +531,310 @@ describe('ConfigBuilder', () => {
           expect(() => registry.createBuilder(config.id)).toThrow();
         }
       }
+    });
+  });
+
+  describe('Partial Configuration (includeWrapper: false)', () => {
+    describe('Remote configurations', () => {
+      const remoteConfig = {
+        mode: 'remote' as const,
+        serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
+        serverName: 'glean_default',
+        includeWrapper: false,
+      };
+
+      it('should generate partial HTTP config for Claude Code', () => {
+        const builder = registry.createBuilder('claude-code');
+        const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+
+        expect(result).toEqual({
+          glean_default: {
+            type: 'http',
+            url: 'https://glean-dev-be.glean.com/mcp/default',
+          },
+        });
+
+        expect(result).not.toHaveProperty('mcpServers');
+      });
+
+      it('should generate partial HTTP config for VS Code', () => {
+        const builder = registry.createBuilder('vscode');
+        const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+
+        expect(result).toEqual({
+          glean_default: {
+            type: 'http',
+            url: 'https://glean-dev-be.glean.com/mcp/default',
+          },
+        });
+
+        expect(result).not.toHaveProperty('servers');
+      });
+
+      it('should generate partial bridge config for Claude Desktop', () => {
+        const builder = registry.createBuilder('claude-desktop');
+        const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+
+        expect(result).toEqual({
+          glean_default: {
+            type: 'stdio',
+            command: 'npx',
+            args: ['-y', 'mcp-remote', 'https://glean-dev-be.glean.com/mcp/default'],
+          },
+        });
+
+        expect(result).not.toHaveProperty('mcpServers');
+      });
+
+      it('should generate partial config for Cursor', () => {
+        const builder = registry.createBuilder('cursor');
+        const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+
+        expect(result).toEqual({
+          glean_default: {
+            type: 'stdio',
+            command: 'npx',
+            args: ['-y', 'mcp-remote', 'https://glean-dev-be.glean.com/mcp/default'],
+          },
+        });
+
+        expect(result).not.toHaveProperty('mcpServers');
+      });
+
+      it('should generate partial config for Windsurf', () => {
+        const builder = registry.createBuilder('windsurf');
+        const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+
+        expect(result).toEqual({
+          glean_default: {
+            command: 'npx',
+            args: ['-y', 'mcp-remote', 'https://glean-dev-be.glean.com/mcp/default'],
+          },
+        });
+
+        expect(result).not.toHaveProperty('type');
+        expect(result).not.toHaveProperty('mcpServers');
+      });
+
+      it('should generate partial YAML config for Goose', () => {
+        const builder = registry.createBuilder('goose');
+        const yamlResult = builder.buildConfiguration(remoteConfig);
+        const result = yaml.load(yamlResult) as Record<string, unknown>;
+
+        expect(result).toEqual({
+          glean_default: {
+            name: 'glean_default',
+            cmd: 'npx',
+            args: ['-y', 'mcp-remote', 'https://glean-dev-be.glean.com/mcp/default'],
+            type: 'stdio',
+            timeout: 300,
+            enabled: true,
+            bundled: null,
+            description: null,
+            env_keys: [],
+            envs: {},
+          },
+        });
+
+        expect(result).not.toHaveProperty('extensions');
+      });
+    });
+
+    describe('Local configurations', () => {
+      const localConfig = {
+        mode: 'local' as const,
+        instance: 'my-company',
+        apiToken: 'test-token',
+        serverName: 'glean_local',
+        includeWrapper: false,
+      };
+
+      it('should generate partial local config for Claude Code', () => {
+        const builder = registry.createBuilder('claude-code');
+        const result = JSON.parse(builder.buildConfiguration(localConfig));
+
+        expect(result).toEqual({
+          glean_local: {
+            type: 'stdio',
+            command: 'npx',
+            args: ['-y', '@gleanwork/local-mcp-server'],
+            env: {
+              GLEAN_INSTANCE: 'my-company',
+              GLEAN_API_TOKEN: 'test-token',
+            },
+          },
+        });
+
+        expect(result).not.toHaveProperty('mcpServers');
+      });
+
+      it('should generate partial local config for Cursor', () => {
+        const builder = registry.createBuilder('cursor');
+        const result = JSON.parse(builder.buildConfiguration(localConfig));
+
+        expect(result).toEqual({
+          glean_local: {
+            type: 'stdio',
+            command: 'npx',
+            args: ['-y', '@gleanwork/local-mcp-server'],
+            env: {
+              GLEAN_INSTANCE: 'my-company',
+              GLEAN_API_TOKEN: 'test-token',
+            },
+          },
+        });
+
+        expect(result).not.toHaveProperty('mcpServers');
+      });
+
+      it('should handle URL-style instance with partial config', () => {
+        const builder = registry.createBuilder('claude-code');
+        const result = JSON.parse(
+          builder.buildConfiguration({
+            mode: 'local',
+            instance: 'https://my-company.glean.com',
+            apiToken: 'test-token',
+            serverName: 'glean_custom',
+            includeWrapper: false,
+          })
+        );
+
+        expect(result).toEqual({
+          glean_custom: {
+            type: 'stdio',
+            command: 'npx',
+            args: ['-y', '@gleanwork/local-mcp-server'],
+            env: {
+              GLEAN_URL: 'https://my-company.glean.com',
+              GLEAN_API_TOKEN: 'test-token',
+            },
+          },
+        });
+
+        expect(result).not.toHaveProperty('mcpServers');
+      });
+
+      it('should generate partial YAML config for Goose local', () => {
+        const builder = registry.createBuilder('goose');
+        const yamlResult = builder.buildConfiguration(localConfig);
+        const result = yaml.load(yamlResult) as Record<string, unknown>;
+
+        expect(result).toEqual({
+          glean_local: {
+            name: 'glean_local',
+            cmd: 'npx',
+            args: ['-y', '@gleanwork/local-mcp-server'],
+            type: 'stdio',
+            timeout: 300,
+            enabled: true,
+            bundled: null,
+            description: null,
+            env_keys: [],
+            envs: {
+              GLEAN_INSTANCE: 'my-company',
+              GLEAN_API_TOKEN: 'test-token',
+            },
+          },
+        });
+
+        expect(result).not.toHaveProperty('extensions');
+      });
+    });
+
+    describe('Backward compatibility', () => {
+      it('should default to including wrapper when includeWrapper is not specified', () => {
+        const builder = registry.createBuilder('claude-code');
+        const config = {
+          mode: 'remote' as const,
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test',
+        };
+
+        const result = JSON.parse(builder.buildConfiguration(config));
+
+        expect(result).toHaveProperty('mcpServers');
+        expect(result.mcpServers).toHaveProperty('test');
+      });
+
+      it('should include wrapper when includeWrapper is explicitly true', () => {
+        const builder = registry.createBuilder('claude-code');
+        const config = {
+          mode: 'remote' as const,
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test',
+          includeWrapper: true,
+        };
+
+        const result = JSON.parse(builder.buildConfiguration(config));
+
+        expect(result).toHaveProperty('mcpServers');
+        expect(result.mcpServers).toHaveProperty('test');
+      });
+
+      it('should maintain backward compatibility for VS Code', () => {
+        const builder = registry.createBuilder('vscode');
+        const config = {
+          mode: 'remote' as const,
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test',
+        };
+
+        const result = JSON.parse(builder.buildConfiguration(config));
+
+        expect(result).toHaveProperty('servers');
+        expect(result.servers).toHaveProperty('test');
+      });
+
+      it('should maintain backward compatibility for Goose', () => {
+        const builder = registry.createBuilder('goose');
+        const config = {
+          mode: 'remote' as const,
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test',
+        };
+
+        const yamlResult = builder.buildConfiguration(config);
+        const result = yaml.load(yamlResult) as Record<string, unknown>;
+
+        expect(result).toHaveProperty('extensions');
+        expect(result.extensions).toHaveProperty('test');
+      });
+    });
+
+    describe('Edge cases', () => {
+      it('should use default server name "glean" when not provided with partial config', () => {
+        const builder = registry.createBuilder('claude-code');
+        const config = {
+          mode: 'remote' as const,
+          serverUrl: 'https://example.com/mcp/default',
+          includeWrapper: false,
+        };
+
+        const result = JSON.parse(builder.buildConfiguration(config));
+
+        expect(result).toHaveProperty('glean');
+        expect(result).not.toHaveProperty('mcpServers');
+      });
+
+      it('should handle partial config for local mode without env vars', () => {
+        const builder = registry.createBuilder('claude-code');
+        const config = {
+          mode: 'local' as const,
+          includeWrapper: false,
+        };
+
+        const result = JSON.parse(builder.buildConfiguration(config));
+
+        expect(result).toEqual({
+          glean: {
+            type: 'stdio',
+            command: 'npx',
+            args: ['-y', '@gleanwork/local-mcp-server'],
+          },
+        });
+
+        expect(result.glean).not.toHaveProperty('env');
+      });
     });
   });
 });

@@ -119,6 +119,38 @@ const localConfig = builder.buildConfiguration({
   instance: 'your-instance',
   apiToken: 'your-api-token'
 });
+
+// Generate partial configuration (without wrapper)
+const partialConfig = builder.buildConfiguration({
+  mode: 'remote',
+  serverUrl: 'https://api.example.com/mcp/default',
+  serverName: 'my-server',
+  includeWrapper: false  // Returns just the server entry without mcpServers wrapper
+});
+// Returns: { "my-server": { "type": "http", "url": "..." } }
+// Instead of: { "mcpServers": { "my-server": { "type": "http", "url": "..." } } }
+```
+
+#### Partial Configuration (without wrapper)
+
+The `includeWrapper` option allows you to generate just the server configuration entry without the outer wrapper (`mcpServers`, `servers`, or `extensions` depending on the client). This is useful when you need to merge configurations into an existing setup:
+
+```typescript
+// Generate partial config for merging into existing configuration
+const partialConfig = JSON.parse(builder.buildConfiguration({
+  mode: 'remote',
+  serverUrl: 'https://api.example.com/mcp/default',
+  serverName: 'glean_custom',
+  includeWrapper: false
+}));
+
+// Now you can easily merge it into an existing config
+const existingConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+existingConfig.mcpServers = {
+  ...existingConfig.mcpServers,
+  ...partialConfig
+};
+fs.writeFileSync(configPath, JSON.stringify(existingConfig, null, 2));
 ```
 
 ### Validate Configurations
