@@ -1,6 +1,6 @@
 {
   "name": "@gleanwork/mcp-config-schema",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "description": "Type-safe schemas and builders for MCP client configurations",
   "keywords": [
     "mcp",
