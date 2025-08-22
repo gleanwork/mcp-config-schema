@@ -4,6 +4,8 @@ import {
   validateGeneratedConfig,
   validateMcpServersConfig,
   validateVsCodeConfig,
+  CLIENT,
+  CLIENT_DISPLAY_NAME,
 } from '../src/index';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -19,7 +21,7 @@ describe('ConfigBuilder', () => {
 
   describe('buildOneClickUrl', () => {
     it('generates one-click URL for Cursor with HTTP native', () => {
-      const cursorBuilder = registry.createBuilder('cursor');
+      const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
       const config = {
         mode: 'remote' as const,
         serverUrl: 'https://example.com/mcp/default',
@@ -41,7 +43,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('throws for VSCode since one-click is not configured', () => {
-      const vscodeBuilder = registry.createBuilder('vscode');
+      const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
       const config = {
         mode: 'remote' as const,
         serverUrl: 'https://example.com/mcp/default',
@@ -53,7 +55,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('throws for clients without one-click support', () => {
-      const claudeBuilder = registry.createBuilder('claude-desktop');
+      const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_DESKTOP);
       const config = {
         mode: 'remote' as const,
         serverUrl: 'https://example.com/mcp/default',
@@ -73,7 +75,7 @@ describe('ConfigBuilder', () => {
     };
 
     it('should generate correct HTTP config for Claude Code', () => {
-      const builder = registry.createBuilder('claude-code');
+      const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const result = JSON.parse(builder.buildConfiguration(remoteConfig));
 
       expect(() => validateMcpServersConfig(result)).not.toThrow();
@@ -93,7 +95,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should generate correct HTTP config for VS Code', () => {
-      const builder = registry.createBuilder('vscode');
+      const builder = registry.createBuilder(CLIENT.VSCODE);
       const result = JSON.parse(builder.buildConfiguration(remoteConfig));
 
       expect(() => validateVsCodeConfig(result)).not.toThrow();
@@ -114,7 +116,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should generate correct bridge config for Claude Desktop', () => {
-      const builder = registry.createBuilder('claude-desktop');
+      const builder = registry.createBuilder(CLIENT.CLAUDE_DESKTOP);
       const result = JSON.parse(builder.buildConfiguration(remoteConfig));
 
       const validation = validateGeneratedConfig(result, 'claude-desktop');
@@ -138,7 +140,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should generate correct YAML config for Goose', () => {
-      const builder = registry.createBuilder('goose');
+      const builder = registry.createBuilder(CLIENT.GOOSE);
       const result = builder.buildConfiguration(remoteConfig);
 
       const parsed = yaml.load(result);
@@ -174,7 +176,7 @@ describe('ConfigBuilder', () => {
     };
 
     it('should generate correct local config for Claude Code', () => {
-      const builder = registry.createBuilder('claude-code');
+      const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const result = JSON.parse(builder.buildConfiguration(localConfig));
 
       const validation = validateGeneratedConfig(result, 'claude-code');
@@ -201,7 +203,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should generate correct local config for Cursor', () => {
-      const builder = registry.createBuilder('cursor');
+      const builder = registry.createBuilder(CLIENT.CURSOR);
       const result = JSON.parse(builder.buildConfiguration(localConfig));
 
       const validation = validateGeneratedConfig(result, 'cursor');
@@ -230,7 +232,7 @@ describe('ConfigBuilder', () => {
 
   describe('path expansion', () => {
     it('should expand $HOME correctly', () => {
-      const builder = registry.createBuilder('claude-code');
+      const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const path = builder.getConfigPath();
 
       expect(path).not.toContain('$HOME');
@@ -240,13 +242,13 @@ describe('ConfigBuilder', () => {
 
   describe('Unsupported clients', () => {
     it('should throw when trying to create builder for ChatGPT', () => {
-      expect(() => registry.createBuilder('chatgpt')).toThrow(
+      expect(() => registry.createBuilder(CLIENT.CHATGPT)).toThrow(
         'Cannot create builder for ChatGPT: ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.'
       );
     });
 
     it('should throw when trying to create builder for Claude Teams/Enterprise', () => {
-      expect(() => registry.createBuilder('claude-teams-enterprise')).toThrow(
+      expect(() => registry.createBuilder(CLIENT.CLAUDE_TEAMS_ENTERPRISE)).toThrow(
         'Cannot create builder for Claude for Teams/Enterprise: MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.'
       );
     });
@@ -254,27 +256,27 @@ describe('ConfigBuilder', () => {
 
   describe('Client-specific configurations', () => {
     it('should use correct server key for VS Code', () => {
-      const config = registry.getConfig('vscode');
+      const config = registry.getConfig(CLIENT.VSCODE);
       expect(config?.configStructure.serverKey).toBe('servers');
     });
 
     it('should use correct server key for Goose', () => {
-      const config = registry.getConfig('goose');
+      const config = registry.getConfig(CLIENT.GOOSE);
       expect(config?.configStructure.serverKey).toBe('extensions');
     });
 
     it('should use correct command field for Goose', () => {
-      const config = registry.getConfig('goose');
+      const config = registry.getConfig(CLIENT.GOOSE);
       expect(config?.configStructure.stdioConfig?.commandField).toBe('cmd');
     });
 
     it('should not have type field for Windsurf', () => {
-      const config = registry.getConfig('windsurf');
+      const config = registry.getConfig(CLIENT.WINDSURF);
       expect(config?.configStructure.stdioConfig?.typeField).toBeUndefined();
     });
 
     it('should handle Claude Desktop which has no Linux support', () => {
-      const config = registry.getConfig('claude-desktop');
+      const config = registry.getConfig(CLIENT.CLAUDE_DESKTOP);
       expect(config?.supportedPlatforms).toEqual(['darwin', 'win32']);
       expect(config?.supportedPlatforms).not.toContain('linux');
     });
@@ -282,7 +284,7 @@ describe('ConfigBuilder', () => {
 
   describe('Special configuration generation', () => {
     it('should generate correct Goose YAML with special fields', () => {
-      const builder = registry.createBuilder('goose');
+      const builder = registry.createBuilder(CLIENT.GOOSE);
       const config = builder.buildConfiguration({
         mode: 'remote',
         serverUrl: 'https://example.com/mcp/default',
@@ -315,7 +317,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should generate HTTP config for Claude Code', () => {
-      const builder = registry.createBuilder('claude-code');
+      const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const config = builder.buildConfiguration({
         mode: 'remote',
         serverUrl: 'https://example.com/mcp/default',
@@ -340,7 +342,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should generate HTTP config for Cursor', () => {
-      const builder = registry.createBuilder('cursor');
+      const builder = registry.createBuilder(CLIENT.CURSOR);
       const config = builder.buildConfiguration({
         mode: 'remote',
         serverUrl: 'https://example.com/mcp/default',
@@ -365,7 +367,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should default server name to "glean" when not provided', () => {
-      const builder = registry.createBuilder('claude-code');
+      const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const config = builder.buildConfiguration({
         mode: 'remote',
         serverUrl: 'https://example.com/mcp/default',
@@ -389,7 +391,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle URL-style instance for local config', () => {
-      const builder = registry.createBuilder('claude-code');
+      const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const config = builder.buildConfiguration({
         mode: 'local',
         instance: 'https://my-company.glean.com',
@@ -427,7 +429,7 @@ describe('ConfigBuilder', () => {
       const configPath = path.join(__dirname, '../configs/claude-code.json');
       const jsonConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
-      const registryConfig = registry.getConfig('claude-code');
+      const registryConfig = registry.getConfig(CLIENT.CLAUDE_CODE);
 
       expect(registryConfig).toEqual(jsonConfig);
     });
@@ -436,7 +438,7 @@ describe('ConfigBuilder', () => {
       const configPath = path.join(__dirname, '../configs/vscode.json');
       const jsonConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
-      const builder = registry.createBuilder('vscode');
+      const builder = registry.createBuilder(CLIENT.VSCODE);
       const generatedConfig = JSON.parse(
         builder.buildConfiguration({
           mode: 'remote',
@@ -457,7 +459,7 @@ describe('ConfigBuilder', () => {
       const configPath = path.join(__dirname, '../configs/goose.json');
       const jsonConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
-      const builder = registry.createBuilder('goose');
+      const builder = registry.createBuilder(CLIENT.GOOSE);
       const generatedYaml = builder.buildConfiguration({
         mode: 'remote',
         serverUrl: 'https://example.com/mcp/default',
@@ -476,10 +478,10 @@ describe('ConfigBuilder', () => {
     });
 
     it('should respect client-specific field presence from JSON', () => {
-      const windsurfConfig = registry.getConfig('windsurf');
+      const windsurfConfig = registry.getConfig(CLIENT.WINDSURF);
       expect(windsurfConfig?.configStructure.stdioConfig?.typeField).toBeUndefined();
 
-      const builder = registry.createBuilder('windsurf');
+      const builder = registry.createBuilder(CLIENT.WINDSURF);
       const generatedConfig = JSON.parse(
         builder.buildConfiguration({
           mode: 'remote',
@@ -494,7 +496,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should use platform-specific paths from JSON config', () => {
-      const cursorConfig = registry.getConfig('cursor');
+      const cursorConfig = registry.getConfig(CLIENT.CURSOR);
 
       expect(cursorConfig?.configPath.darwin).toBe('$HOME/.cursor/mcp.json');
       expect(cursorConfig?.configPath.linux).toBe('$HOME/.cursor/mcp.json');
@@ -506,10 +508,10 @@ describe('ConfigBuilder', () => {
     });
 
     it('should fail for unsupported clients defined in JSON', () => {
-      const chatgptConfig = registry.getConfig('chatgpt');
+      const chatgptConfig = registry.getConfig(CLIENT.CHATGPT);
       expect(chatgptConfig?.localConfigSupport).toBe('none');
 
-      expect(() => registry.createBuilder('chatgpt')).toThrow();
+      expect(() => registry.createBuilder(CLIENT.CHATGPT)).toThrow();
     });
 
     it('should handle all clients consistently based on their JSON configs', () => {
@@ -540,7 +542,7 @@ describe('ConfigBuilder', () => {
       };
 
       it('should generate partial HTTP config for Claude Code', () => {
-        const builder = registry.createBuilder('claude-code');
+        const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const result = JSON.parse(builder.buildConfiguration(remoteConfig));
 
         expect(result).toEqual({
@@ -554,7 +556,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should generate partial HTTP config for VS Code', () => {
-        const builder = registry.createBuilder('vscode');
+        const builder = registry.createBuilder(CLIENT.VSCODE);
         const result = JSON.parse(builder.buildConfiguration(remoteConfig));
 
         expect(result).toEqual({
@@ -568,7 +570,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should generate partial bridge config for Claude Desktop', () => {
-        const builder = registry.createBuilder('claude-desktop');
+        const builder = registry.createBuilder(CLIENT.CLAUDE_DESKTOP);
         const result = JSON.parse(builder.buildConfiguration(remoteConfig));
 
         expect(result).toEqual({
@@ -583,7 +585,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should generate partial config for Cursor', () => {
-        const builder = registry.createBuilder('cursor');
+        const builder = registry.createBuilder(CLIENT.CURSOR);
         const result = JSON.parse(builder.buildConfiguration(remoteConfig));
 
         expect(result).toEqual({
@@ -597,7 +599,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should generate partial config for Windsurf', () => {
-        const builder = registry.createBuilder('windsurf');
+        const builder = registry.createBuilder(CLIENT.WINDSURF);
         const result = JSON.parse(builder.buildConfiguration(remoteConfig));
 
         expect(result).toEqual({
@@ -612,7 +614,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should generate partial YAML config for Goose', () => {
-        const builder = registry.createBuilder('goose');
+        const builder = registry.createBuilder(CLIENT.GOOSE);
         const yamlResult = builder.buildConfiguration(remoteConfig);
         const result = yaml.load(yamlResult) as Record<string, unknown>;
 
@@ -645,7 +647,7 @@ describe('ConfigBuilder', () => {
       };
 
       it('should generate partial local config for Claude Code', () => {
-        const builder = registry.createBuilder('claude-code');
+        const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const result = JSON.parse(builder.buildConfiguration(localConfig));
 
         expect(result).toEqual({
@@ -664,7 +666,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should generate partial local config for Cursor', () => {
-        const builder = registry.createBuilder('cursor');
+        const builder = registry.createBuilder(CLIENT.CURSOR);
         const result = JSON.parse(builder.buildConfiguration(localConfig));
 
         expect(result).toEqual({
@@ -683,7 +685,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should handle URL-style instance with partial config', () => {
-        const builder = registry.createBuilder('claude-code');
+        const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const result = JSON.parse(
           builder.buildConfiguration({
             mode: 'local',
@@ -710,7 +712,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should generate partial YAML config for Goose local', () => {
-        const builder = registry.createBuilder('goose');
+        const builder = registry.createBuilder(CLIENT.GOOSE);
         const yamlResult = builder.buildConfiguration(localConfig);
         const result = yaml.load(yamlResult) as Record<string, unknown>;
 
@@ -738,7 +740,7 @@ describe('ConfigBuilder', () => {
 
     describe('Backward compatibility', () => {
       it('should default to including wrapper when includeWrapper is not specified', () => {
-        const builder = registry.createBuilder('claude-code');
+        const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
           mode: 'remote' as const,
           serverUrl: 'https://example.com/mcp/default',
@@ -752,7 +754,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should include wrapper when includeWrapper is explicitly true', () => {
-        const builder = registry.createBuilder('claude-code');
+        const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
           mode: 'remote' as const,
           serverUrl: 'https://example.com/mcp/default',
@@ -767,7 +769,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should maintain backward compatibility for VS Code', () => {
-        const builder = registry.createBuilder('vscode');
+        const builder = registry.createBuilder(CLIENT.VSCODE);
         const config = {
           mode: 'remote' as const,
           serverUrl: 'https://example.com/mcp/default',
@@ -781,7 +783,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should maintain backward compatibility for Goose', () => {
-        const builder = registry.createBuilder('goose');
+        const builder = registry.createBuilder(CLIENT.GOOSE);
         const config = {
           mode: 'remote' as const,
           serverUrl: 'https://example.com/mcp/default',
@@ -798,7 +800,7 @@ describe('ConfigBuilder', () => {
 
     describe('Edge cases', () => {
       it('should use default server name "glean" when not provided with partial config', () => {
-        const builder = registry.createBuilder('claude-code');
+        const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
           mode: 'remote' as const,
           serverUrl: 'https://example.com/mcp/default',
@@ -812,7 +814,7 @@ describe('ConfigBuilder', () => {
       });
 
       it('should handle partial config for local mode without env vars', () => {
-        const builder = registry.createBuilder('claude-code');
+        const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
           mode: 'local' as const,
           includeWrapper: false,

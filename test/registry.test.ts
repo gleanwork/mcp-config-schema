@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { MCPConfigRegistry } from '../src/registry';
+import { CLIENT, CLIENT_DISPLAY_NAME } from '../src/constants';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -22,29 +23,29 @@ describe('MCPConfigRegistry', () => {
     });
 
     it('should load Claude Code config', () => {
-      const config = registry.getConfig('claude-code');
+      const config = registry.getConfig(CLIENT.CLAUDE_CODE);
       expect(config).toBeDefined();
-      expect(config?.displayName).toBe('Claude Code');
+      expect(config?.displayName).toBe(CLIENT_DISPLAY_NAME.CLAUDE_CODE);
       expect(config?.clientSupports).toBe('http');
       expect(config?.requiresMcpRemoteForHttp).toBe(false);
     });
 
     it('should load VS Code config', () => {
-      const config = registry.getConfig('vscode');
+      const config = registry.getConfig(CLIENT.VSCODE);
       expect(config).toBeDefined();
       expect(config?.displayName).toBe('Visual Studio Code');
       expect(config?.configStructure.serverKey).toBe('servers');
     });
 
     it('should load Cursor config with HTTP support', () => {
-      const config = registry.getConfig('cursor');
+      const config = registry.getConfig(CLIENT.CURSOR);
       expect(config).toBeDefined();
       expect(config?.clientSupports).toBe('http');
       expect(config?.requiresMcpRemoteForHttp).toBe(false);
     });
 
     it('should load Goose config with YAML format', () => {
-      const config = registry.getConfig('goose');
+      const config = registry.getConfig(CLIENT.GOOSE);
       expect(config).toBeDefined();
       expect(config?.configFormat).toBe('yaml');
     });
@@ -77,8 +78,8 @@ describe('MCPConfigRegistry', () => {
 
     it('should get unsupported clients', () => {
       const clients = registry.getUnsupportedClients();
-      const chatgpt = clients.find((c) => c.id === 'chatgpt');
-      const claudeTeamsEnterprise = clients.find((c) => c.id === 'claude-teams-enterprise');
+      const chatgpt = clients.find((c) => c.id === CLIENT.CHATGPT);
+      const claudeTeamsEnterprise = clients.find((c) => c.id === CLIENT.CLAUDE_TEAMS_ENTERPRISE);
       expect(chatgpt).toBeDefined();
       expect(claudeTeamsEnterprise).toBeDefined();
       expect(chatgpt?.localConfigSupport).toBe('none');
@@ -88,7 +89,7 @@ describe('MCPConfigRegistry', () => {
     it('should get clients with one-click support', () => {
       const clients = registry.getClientsWithOneClick();
       expect(clients.length).toBeGreaterThan(0);
-      const cursor = clients.find((c) => c.id === 'cursor');
+      const cursor = clients.find((c) => c.id === CLIENT.CURSOR);
       expect(cursor).toBeDefined();
       expect(cursor?.oneClick?.protocol).toBe('cursor://');
     });
@@ -102,7 +103,7 @@ describe('MCPConfigRegistry', () => {
       expect(linuxClients.length).toBeGreaterThan(0);
       expect(win32Clients.length).toBeGreaterThan(0);
 
-      const claudeDesktop = registry.getConfig('claude-desktop');
+      const claudeDesktop = registry.getConfig(CLIENT.CLAUDE_DESKTOP);
       expect(darwinClients).toContainEqual(claudeDesktop);
       expect(linuxClients).not.toContainEqual(claudeDesktop);
     });
