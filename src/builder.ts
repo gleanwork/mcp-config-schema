@@ -1,4 +1,5 @@
 import { MCPClientConfig, GleanServerConfig, Platform, validateServerConfig } from './types.js';
+import { buildMcpServerName } from './server-name.js';
 import * as yaml from 'js-yaml';
 
 function isNodeEnvironment(): boolean {
@@ -76,7 +77,10 @@ export class ConfigBuilder {
       throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
     }
 
-    const serverName = gleanConfig.serverName || 'glean';
+    const serverName = buildMcpServerName({
+      mode: 'local',
+      serverName: gleanConfig.serverName
+    });
     const serverConfig: Record<string, unknown> = {};
 
     serverConfig[stdioConfig.commandField] = 'npx';
@@ -176,7 +180,11 @@ export class ConfigBuilder {
 
     const { serverKey, httpConfig, stdioConfig } = this.config.configStructure;
 
-    const serverName = gleanConfig.serverName || 'glean';
+    const serverName = buildMcpServerName({
+      mode: 'remote',
+      serverUrl: gleanConfig.serverUrl,
+      serverName: gleanConfig.serverName
+    });
 
     if (
       httpConfig &&
@@ -258,7 +266,11 @@ export class ConfigBuilder {
       throw new Error(`${this.config.displayName} does not support one-click installation`);
     }
 
-    const serverName = gleanConfig.serverName || 'glean';
+    const serverName = buildMcpServerName({
+      mode: gleanConfig.mode,
+      serverUrl: gleanConfig.serverUrl,
+      serverName: gleanConfig.serverName
+    });
 
     // Build the appropriate config based on the client's capabilities
     let configObj: Record<string, unknown>;
