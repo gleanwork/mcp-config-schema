@@ -275,10 +275,19 @@ describe('ConfigBuilder', () => {
       expect(config?.configStructure.stdioConfig?.typeField).toBeUndefined();
     });
 
-    it('should handle Claude Desktop which has no Linux support', () => {
+    it('should handle Claude Desktop with Linux support', () => {
       const config = registry.getConfig(CLIENT.CLAUDE_DESKTOP);
-      expect(config?.supportedPlatforms).toEqual(['darwin', 'win32']);
-      expect(config?.supportedPlatforms).not.toContain('linux');
+      expect(config?.supportedPlatforms).toEqual(['darwin', 'win32', 'linux']);
+      expect(config?.supportedPlatforms).toContain('linux');
+    });
+
+    it('should have correct platform-specific paths for Claude Desktop', () => {
+      const config = registry.getConfig(CLIENT.CLAUDE_DESKTOP);
+      expect(config?.configPath.darwin).toBe(
+        '$HOME/Library/Application Support/Claude/claude_desktop_config.json'
+      );
+      expect(config?.configPath.win32).toBe('%APPDATA%\\Claude\\claude_desktop_config.json');
+      expect(config?.configPath.linux).toBe('$HOME/.config/Claude/claude_desktop_config.json');
     });
   });
 
