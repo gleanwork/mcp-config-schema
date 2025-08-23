@@ -2,6 +2,16 @@
 
 
 
+
+## v0.6.0 (2025-08-23)
+
+#### :rocket: Enhancement
+* [#9](https://github.com/gleanwork/mcp-config-schema/pull/9) feat: Adds the ability to build glean MCP server names ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.5.0 (2025-08-22)
 
 ## v0.4.4 (2025-08-21)
