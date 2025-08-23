@@ -79,7 +79,7 @@ export class ConfigBuilder {
 
     const serverName = buildMcpServerName({
       mode: 'local',
-      serverName: gleanConfig.serverName
+      serverName: gleanConfig.serverName,
     });
     const serverConfig: Record<string, unknown> = {};
 
@@ -183,7 +183,7 @@ export class ConfigBuilder {
     const serverName = buildMcpServerName({
       mode: 'remote',
       serverUrl: gleanConfig.serverUrl,
-      serverName: gleanConfig.serverName
+      serverName: gleanConfig.serverName,
     });
 
     if (
@@ -269,7 +269,7 @@ export class ConfigBuilder {
     const serverName = buildMcpServerName({
       mode: gleanConfig.mode,
       serverUrl: gleanConfig.serverUrl,
-      serverName: gleanConfig.serverName
+      serverName: gleanConfig.serverName,
     });
 
     // Build the appropriate config based on the client's capabilities

@@ -13,7 +13,7 @@ export function extractServerNameFromUrl(url: string): string | null {
 
 /**
  * Builds a consistent server name for MCP configurations
- * 
+ *
  * Rules:
  * - Local mode: 'glean_local'
  * - Agents mode: 'glean_agents'
@@ -66,12 +66,12 @@ export function buildMcpServerName(options: {
 export function normalizeServerName(name: string): string {
   // Remove any existing glean prefix to avoid duplication
   const withoutPrefix = name.replace(/^glean_?/i, '');
-  
+
   // If it's empty after removing prefix, return default
   if (!withoutPrefix) {
     return 'glean';
   }
-  
+
   // Apply consistent formatting
   return `glean_${withoutPrefix.toLowerCase()}`;
 }
