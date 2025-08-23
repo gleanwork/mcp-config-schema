@@ -72,7 +72,7 @@ describe('Browser Build', () => {
 
     const cursorUrl = cursorBuilder.buildOneClickUrl(config);
     expect(cursorUrl).toContain('cursor://anysphere.cursor-deeplink/mcp/install');
-    expect(cursorUrl).toContain('name=test-server');
+    expect(cursorUrl).toContain('name=glean_test-server');
     expect(cursorUrl).toContain('config=');
   });
 });

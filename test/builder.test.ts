@@ -33,7 +33,7 @@ describe('ConfigBuilder', () => {
       const urlObj = new URL(url.replace('cursor://', 'https://'));
       expect(urlObj.hostname).toBe('anysphere.cursor-deeplink');
       expect(urlObj.pathname).toBe('/mcp/install');
-      expect(urlObj.searchParams.get('name')).toBe('test-server');
+      expect(urlObj.searchParams.get('name')).toBe('glean_test-server');
 
       const encodedConfig = urlObj.searchParams.get('config');
       const decodedConfig = JSON.parse(Buffer.from(encodedConfig!, 'base64').toString());
@@ -185,7 +185,7 @@ describe('ConfigBuilder', () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean": {
+            "glean_local": {
               "args": [
                 "-y",
                 "@gleanwork/local-mcp-server",
@@ -212,7 +212,7 @@ describe('ConfigBuilder', () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean": {
+            "glean_local": {
               "args": [
                 "-y",
                 "@gleanwork/local-mcp-server",
@@ -298,8 +298,8 @@ describe('ConfigBuilder', () => {
 
       expect(config).toMatchInlineSnapshot(`
         "extensions:
-          test:
-            name: test
+          glean_test:
+            name: glean_test
             cmd: npx
             args:
               - '-y'
@@ -332,7 +332,7 @@ describe('ConfigBuilder', () => {
       expect(parsed).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "test": {
+            "glean_test": {
               "type": "http",
               "url": "https://example.com/mcp/default",
             },
@@ -357,7 +357,7 @@ describe('ConfigBuilder', () => {
       expect(parsed).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "test": {
+            "glean_test": {
               "type": "http",
               "url": "https://example.com/mcp/default",
             },
@@ -381,7 +381,7 @@ describe('ConfigBuilder', () => {
       expect(parsed).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean": {
+            "glean_default": {
               "type": "http",
               "url": "https://example.com/mcp/default",
             },
@@ -406,7 +406,7 @@ describe('ConfigBuilder', () => {
       expect(parsed).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean": {
+            "glean_local": {
               "args": [
                 "-y",
                 "@gleanwork/local-mcp-server",
@@ -450,7 +450,7 @@ describe('ConfigBuilder', () => {
       expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serverKey);
       expect(generatedConfig).toHaveProperty('servers'); // VS Code uses 'servers'
 
-      const serverConfig = generatedConfig.servers.test;
+      const serverConfig = generatedConfig.servers.glean_test;
       expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpConfig.typeField);
       expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpConfig.urlField);
     });
@@ -472,7 +472,7 @@ describe('ConfigBuilder', () => {
       expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serverKey);
       expect(generatedConfig).toHaveProperty('extensions'); // Goose uses 'extensions'
 
-      const serverConfig = generatedConfig.extensions.test;
+      const serverConfig = generatedConfig.extensions.glean_test;
       expect(serverConfig).toHaveProperty(jsonConfig.configStructure.stdioConfig.commandField); // 'cmd' for Goose
       expect(serverConfig.cmd).toBe('npx'); // Should use 'cmd' not 'command'
     });
@@ -490,9 +490,9 @@ describe('ConfigBuilder', () => {
         })
       );
 
-      expect(generatedConfig.mcpServers.test).not.toHaveProperty('type');
-      expect(generatedConfig.mcpServers.test).toHaveProperty('command');
-      expect(generatedConfig.mcpServers.test).toHaveProperty('args');
+      expect(generatedConfig.mcpServers.glean_test).not.toHaveProperty('type');
+      expect(generatedConfig.mcpServers.glean_test).toHaveProperty('command');
+      expect(generatedConfig.mcpServers.glean_test).toHaveProperty('args');
     });
 
     it('should use platform-specific paths from JSON config', () => {
@@ -750,7 +750,7 @@ describe('ConfigBuilder', () => {
         const result = JSON.parse(builder.buildConfiguration(config));
 
         expect(result).toHaveProperty('mcpServers');
-        expect(result.mcpServers).toHaveProperty('test');
+        expect(result.mcpServers).toHaveProperty('glean_test');
       });
 
       it('should include wrapper when includeWrapper is explicitly true', () => {
@@ -765,7 +765,7 @@ describe('ConfigBuilder', () => {
         const result = JSON.parse(builder.buildConfiguration(config));
 
         expect(result).toHaveProperty('mcpServers');
-        expect(result.mcpServers).toHaveProperty('test');
+        expect(result.mcpServers).toHaveProperty('glean_test');
       });
 
       it('should maintain backward compatibility for VS Code', () => {
@@ -779,7 +779,7 @@ describe('ConfigBuilder', () => {
         const result = JSON.parse(builder.buildConfiguration(config));
 
         expect(result).toHaveProperty('servers');
-        expect(result.servers).toHaveProperty('test');
+        expect(result.servers).toHaveProperty('glean_test');
       });
 
       it('should maintain backward compatibility for Goose', () => {
@@ -794,7 +794,7 @@ describe('ConfigBuilder', () => {
         const result = yaml.load(yamlResult) as Record<string, unknown>;
 
         expect(result).toHaveProperty('extensions');
-        expect(result.extensions).toHaveProperty('test');
+        expect(result.extensions).toHaveProperty('glean_test');
       });
     });
 
@@ -809,7 +809,7 @@ describe('ConfigBuilder', () => {
 
         const result = JSON.parse(builder.buildConfiguration(config));
 
-        expect(result).toHaveProperty('glean');
+        expect(result).toHaveProperty('glean_default');
         expect(result).not.toHaveProperty('mcpServers');
       });
 
@@ -823,14 +823,14 @@ describe('ConfigBuilder', () => {
         const result = JSON.parse(builder.buildConfiguration(config));
 
         expect(result).toEqual({
-          glean: {
+          glean_local: {
             type: 'stdio',
             command: 'npx',
             args: ['-y', '@gleanwork/local-mcp-server'],
           },
         });
 
-        expect(result.glean).not.toHaveProperty('env');
+        expect(result.glean_local).not.toHaveProperty('env');
       });
     });
   });
