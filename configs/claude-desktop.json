@@ -8,11 +8,12 @@
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
   "clientSupports": "stdio-only",
   "requiresMcpRemoteForHttp": true,
-  "supportedPlatforms": ["darwin", "win32"],
+  "supportedPlatforms": ["darwin", "win32", "linux"],
   "configFormat": "json",
   "configPath": {
     "darwin": "$HOME/Library/Application Support/Claude/claude_desktop_config.json",
-    "win32": "%APPDATA%\\Claude\\claude_desktop_config.json"
+    "win32": "%APPDATA%\\Claude\\claude_desktop_config.json",
+    "linux": "$HOME/.config/Claude/claude_desktop_config.json"
   },
   "configStructure": {
     "serverKey": "mcpServers",

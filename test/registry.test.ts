@@ -105,7 +105,8 @@ describe('MCPConfigRegistry', () => {
 
       const claudeDesktop = registry.getConfig(CLIENT.CLAUDE_DESKTOP);
       expect(darwinClients).toContainEqual(claudeDesktop);
-      expect(linuxClients).not.toContainEqual(claudeDesktop);
+      expect(linuxClients).toContainEqual(claudeDesktop);
+      expect(win32Clients).toContainEqual(claudeDesktop);
     });
   });
 });
