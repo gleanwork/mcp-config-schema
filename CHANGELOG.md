@@ -3,6 +3,16 @@
 
 
 
+
+## v0.7.0 (2025-08-23)
+
+#### :rocket: Enhancement
+* [#10](https://github.com/gleanwork/mcp-config-schema/pull/10) feat: Adds claude desktop linux support ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.6.0 (2025-08-23)
 
 #### :rocket: Enhancement
