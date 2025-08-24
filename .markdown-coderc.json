@@ -1,0 +1,13 @@
+{
+  "snippetRoot": ".",
+  "markdownGlob": "{README,CLIENTS}.md",
+  "excludeGlob": [
+    "node_modules/**",
+    ".git/**",
+    "dist/**",
+    "build/**",
+    "coverage/**",
+    "examples/**"
+  ],
+  "includeExtensions": [".ts", ".js"]
+}
