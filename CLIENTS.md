@@ -8,7 +8,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 |--------|--------------|-----------------|---------------------|-----------|
 | **ChatGPT** | None | stdio only | Yes (for HTTP) | Web only |
 | **Claude Code** | Full | HTTP native | No | macOS, Linux, Windows |
-| **Claude for Desktop** | Full | stdio only | Yes (for HTTP) | macOS, Windows |
+| **Claude for Desktop** | Full | stdio only | Yes (for HTTP) | macOS, Windows, Linux |
 | **Claude for Teams/Enterprise** | None | stdio only | Yes (for HTTP) | Organization-managed |
 | **Cursor** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Goose** | Full | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
@@ -146,10 +146,11 @@ This document provides a comprehensive overview of all supported MCP clients, th
 - **Compatibility**: Full local configuration support
 - **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
 - **Documentation**: [Documentation](https://docs.anthropic.com/en/docs/claude-desktop)
-- **Supported Platforms**: macOS, Windows
+- **Supported Platforms**: macOS, Windows, Linux
 - **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
   - **macOS**: `$HOME/Library/Application Support/Claude/claude_desktop_config.json`
+  - **Linux**: `$HOME/.config/Claude/claude_desktop_config.json`
   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
 <details>
@@ -166,11 +167,12 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
   "clientSupports": "stdio-only",
   "requiresMcpRemoteForHttp": true,
-  "supportedPlatforms": ["darwin", "win32"],
+  "supportedPlatforms": ["darwin", "win32", "linux"],
   "configFormat": "json",
   "configPath": {
     "darwin": "$HOME/Library/Application Support/Claude/claude_desktop_config.json",
-    "win32": "%APPDATA%\\Claude\\claude_desktop_config.json"
+    "win32": "%APPDATA%\\Claude\\claude_desktop_config.json",
+    "linux": "$HOME/.config/Claude/claude_desktop_config.json"
   },
   "configStructure": {
     "serverKey": "mcpServers",
@@ -447,7 +449,9 @@ extensions:
     bundled: null
     description: null
     env_keys: []
-    envs: {}
+    envs:
+      GLEAN_INSTANCE: your-instance
+      GLEAN_API_TOKEN: your-api-token
 ```
 
 </details>

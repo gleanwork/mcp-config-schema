@@ -11,4 +11,6 @@ extensions:
     bundled: null
     description: null
     env_keys: []
-    envs: {}
+    envs:
+      GLEAN_INSTANCE: your-instance
+      GLEAN_API_TOKEN: your-api-token
