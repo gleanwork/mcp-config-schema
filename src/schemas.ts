@@ -128,7 +128,6 @@ export const VsCodeConfigSchema = z.object({
   servers: z.record(z.string(), ServerConfigSchema),
 });
 
-// Goose stdio configuration
 const GooseStdioServerConfigSchema = z.object({
   name: z.string(),
   cmd: z.string(),
@@ -142,7 +141,6 @@ const GooseStdioServerConfigSchema = z.object({
   envs: z.record(z.string(), z.string()),
 });
 
-// Goose HTTP configuration
 const GooseHttpServerConfigSchema = z.object({
   enabled: z.boolean(),
   type: z.literal('streamable_http'),
@@ -157,7 +155,6 @@ const GooseHttpServerConfigSchema = z.object({
   available_tools: z.array(z.string()),
 });
 
-// Goose supports both stdio and HTTP configurations
 export const GooseServerConfigSchema = z.union([
   GooseStdioServerConfigSchema,
   GooseHttpServerConfigSchema,

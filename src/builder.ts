@@ -200,7 +200,6 @@ export class ConfigBuilder {
 
       serverConfig[httpConfig.urlField] = gleanConfig.serverUrl;
 
-      // Goose requires additional fields for HTTP configuration
       if (this.config.id === 'goose') {
         const gooseServerConfig = {
           enabled: true,

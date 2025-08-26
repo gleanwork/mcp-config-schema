@@ -475,12 +475,12 @@ describe('ConfigBuilder', () => {
       const generatedConfig = yaml.load(generatedYaml);
 
       expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serverKey);
-      expect(generatedConfig).toHaveProperty('extensions'); // Goose uses 'extensions'
+      expect(generatedConfig).toHaveProperty('extensions');
 
       const serverConfig = generatedConfig.extensions.glean_test;
-      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpConfig.urlField); // 'uri' for Goose
+      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpConfig.urlField);
       expect(serverConfig.uri).toBe('https://example.com/mcp/default');
-      expect(serverConfig.type).toBe('streamable_http'); // Goose uses 'streamable_http' for HTTP
+      expect(serverConfig.type).toBe('streamable_http');
     });
 
     it('should respect client-specific field presence from JSON', () => {
