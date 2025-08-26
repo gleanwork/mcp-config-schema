@@ -1,9 +1,9 @@
 extensions:
   glean:
     enabled: true
-    type: streamable_http
     name: glean
-    uri: https://scio-prod-be.glean.com/mcp/default
+    type: streamable_http
+    uri: https://glean-dev-be.glean.com/mcp/default
     envs: {}
     env_keys: []
     headers: {}
