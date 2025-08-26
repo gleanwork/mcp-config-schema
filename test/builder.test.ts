@@ -478,7 +478,6 @@ describe('ConfigBuilder', () => {
       expect(generatedConfig).toHaveProperty('extensions'); // Goose uses 'extensions'
 
       const serverConfig = generatedConfig.extensions.glean_test;
-      // Goose now prefers HTTP, so check HTTP configuration structure
       expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpConfig.urlField); // 'uri' for Goose
       expect(serverConfig.uri).toBe('https://example.com/mcp/default');
       expect(serverConfig.type).toBe('streamable_http'); // Goose uses 'streamable_http' for HTTP

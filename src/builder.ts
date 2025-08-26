@@ -249,8 +249,6 @@ export class ConfigBuilder {
       serverConfig[stdioConfig.commandField] = 'npx';
       serverConfig[stdioConfig.argsField] = ['-y', 'mcp-remote', gleanConfig.serverUrl];
 
-      // Goose now supports native HTTP, so it should not reach this stdio fallback section
-
       if (!includeWrapper) {
         return {
           [serverName]: serverConfig,
