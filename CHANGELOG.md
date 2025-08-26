@@ -5,6 +5,16 @@
 
 
 
+
+## v0.9.0 (2025-08-26)
+
+#### :rocket: Enhancement
+* [#13](https://github.com/gleanwork/mcp-config-schema/pull/13) Export CLIENT and CLIENT_DISPLAY_NAME constants in browser bundle ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.8.0 (2025-08-26)
 
 #### :rocket: Enhancement
