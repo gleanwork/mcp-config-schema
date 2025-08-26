@@ -24,6 +24,37 @@ describe('Browser Build', () => {
     expect(browserExports.ConfigBuilder).toBeDefined();
   });
 
+  it('exports CLIENT constants', () => {
+    expect(browserExports.CLIENT).toBeDefined();
+    expect(browserExports.CLIENT.CLAUDE_CODE).toBe('claude-code');
+    expect(browserExports.CLIENT.CLAUDE_DESKTOP).toBe('claude-desktop');
+    expect(browserExports.CLIENT.CLAUDE_TEAMS_ENTERPRISE).toBe('claude-teams-enterprise');
+    expect(browserExports.CLIENT.CURSOR).toBe('cursor');
+    expect(browserExports.CLIENT.VSCODE).toBe('vscode');
+    expect(browserExports.CLIENT.WINDSURF).toBe('windsurf');
+    expect(browserExports.CLIENT.GOOSE).toBe('goose');
+    expect(browserExports.CLIENT.CHATGPT).toBe('chatgpt');
+  });
+
+  it('exports CLIENT_DISPLAY_NAME constants', () => {
+    expect(browserExports.CLIENT_DISPLAY_NAME).toBeDefined();
+    expect(browserExports.CLIENT_DISPLAY_NAME.CLAUDE_CODE).toBe('Claude Code');
+    expect(browserExports.CLIENT_DISPLAY_NAME.CLAUDE_DESKTOP).toBe('Claude for Desktop');
+    expect(browserExports.CLIENT_DISPLAY_NAME.CLAUDE_TEAMS_ENTERPRISE).toBe('Claude for Teams/Enterprise');
+    expect(browserExports.CLIENT_DISPLAY_NAME.CURSOR).toBe('Cursor');
+    expect(browserExports.CLIENT_DISPLAY_NAME.VSCODE).toBe('VS Code');
+    expect(browserExports.CLIENT_DISPLAY_NAME.WINDSURF).toBe('Windsurf');
+    expect(browserExports.CLIENT_DISPLAY_NAME.GOOSE).toBe('Goose');
+    expect(browserExports.CLIENT_DISPLAY_NAME.CHATGPT).toBe('ChatGPT');
+  });
+
+  it('exports getDisplayName helper function', () => {
+    expect(browserExports.getDisplayName).toBeDefined();
+    expect(typeof browserExports.getDisplayName).toBe('function');
+    expect(browserExports.getDisplayName(browserExports.CLIENT.CURSOR)).toBe('Cursor');
+    expect(browserExports.getDisplayName(browserExports.CLIENT.CLAUDE_DESKTOP)).toBe('Claude for Desktop');
+  });
+
   it('MCPConfigRegistry works without Node.js dependencies', () => {
     const registry = new browserExports.MCPConfigRegistry();
 
