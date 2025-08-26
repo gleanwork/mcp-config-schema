@@ -193,10 +193,40 @@ export class ConfigBuilder {
       const serverConfig: Record<string, unknown> = {};
 
       if (httpConfig.typeField) {
-        serverConfig[httpConfig.typeField] = 'http';
+        // Goose uses 'streamable_http' instead of 'http'
+        serverConfig[httpConfig.typeField] =
+          this.config.id === 'goose' ? 'streamable_http' : 'http';
       }
 
       serverConfig[httpConfig.urlField] = gleanConfig.serverUrl;
+
+      // Goose requires additional fields for HTTP configuration
+      if (this.config.id === 'goose') {
+        const gooseServerConfig = {
+          enabled: true,
+          name: serverName,
+          ...serverConfig,
+          envs: {},
+          env_keys: [],
+          headers: {},
+          description: '',
+          timeout: 300,
+          bundled: null,
+          available_tools: [],
+        };
+
+        if (!includeWrapper) {
+          return {
+            [serverName]: gooseServerConfig,
+          };
+        }
+
+        return {
+          [serverKey]: {
+            [serverName]: gooseServerConfig,
+          },
+        };
+      }
 
       if (!includeWrapper) {
         return {
@@ -219,31 +249,7 @@ export class ConfigBuilder {
       serverConfig[stdioConfig.commandField] = 'npx';
       serverConfig[stdioConfig.argsField] = ['-y', 'mcp-remote', gleanConfig.serverUrl];
 
-      if (this.config.id === 'goose') {
-        const gooseServerConfig = {
-          name: serverName,
-          ...serverConfig,
-          type: 'stdio',
-          timeout: 300,
-          enabled: true,
-          bundled: null,
-          description: null,
-          env_keys: [],
-          envs: {},
-        };
-
-        if (!includeWrapper) {
-          return {
-            [serverName]: gooseServerConfig,
-          };
-        }
-
-        return {
-          extensions: {
-            [serverName]: gooseServerConfig,
-          },
-        };
-      }
+      // Goose now supports native HTTP, so it should not reach this stdio fallback section
 
       if (!includeWrapper) {
         return {

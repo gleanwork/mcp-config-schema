@@ -22,21 +22,21 @@ const builder = registry.createBuilder('cursor');
 const config = builder.buildConfiguration({
   mode: 'remote',
   serverUrl: 'https://your-server.com/mcp/default',
-  serverName: 'my-server'
+  serverName: 'my-server',
 });
 
 // Write configuration to the client's config file (Node.js only)
 await builder.writeConfiguration({
   mode: 'remote',
   serverUrl: 'https://your-server.com/mcp/default',
-  serverName: 'my-server'
+  serverName: 'my-server',
 });
 
 // Generate one-click install URL for supported clients (currently only Cursor)
 const oneClickUrl = builder.buildOneClickUrl({
   mode: 'remote',
   serverUrl: 'https://your-server.com/mcp/default',
-  serverName: 'my-server'
+  serverName: 'my-server',
 });
 // Returns: cursor://anysphere.cursor-deeplink/mcp/install?name=my-server&config=...
 ```
@@ -57,14 +57,14 @@ For detailed configuration examples and requirements for each client, see **[CLI
 
 ### Fully Supported (can generate local configs)
 
-| Client | Connection Type | Requires mcp-remote? | Platform |
-|--------|----------------|---------------------|----------|
-| **Claude Code** | HTTP native | No | macOS |
-| **Visual Studio Code** | HTTP native | No | All |
-| **Claude Desktop** | stdio only | Yes (for HTTP) | macOS |
-| **Cursor** | stdio only | Yes (for HTTP) | All |
-| **Goose** | stdio only | Yes (for HTTP) | macOS, Linux |
-| **Windsurf** | stdio only | Yes (for HTTP) | All |
+| Client                 | Connection Type | Requires mcp-remote? | Platform              |
+| ---------------------- | --------------- | -------------------- | --------------------- |
+| **Claude Code**        | HTTP native     | No                   | macOS                 |
+| **Visual Studio Code** | HTTP native     | No                   | All                   |
+| **Claude Desktop**     | stdio only      | Yes (for HTTP)       | macOS                 |
+| **Cursor**             | stdio only      | Yes (for HTTP)       | All                   |
+| **Goose**              | HTTP native     | No                   | macOS, Linux, Windows |
+| **Windsurf**           | stdio only      | Yes (for HTTP)       | All                   |
 
 ### Not Configurable via Local Files
 
@@ -75,8 +75,8 @@ For detailed configuration examples and requirements for each client, see **[CLI
 
 Currently, only Cursor has documented one-click installation support:
 
-| Client | Protocol | Format |
-|--------|----------|--------|
+| Client     | Protocol    | Format                                                               |
+| ---------- | ----------- | -------------------------------------------------------------------- |
 | **Cursor** | `cursor://` | `cursor://anysphere.cursor-deeplink/mcp/install?name=...&config=...` |
 
 Note: VSCode may support one-click installation in the future, but the format has not been documented yet.
@@ -92,7 +92,7 @@ const registry = new MCPConfigRegistry();
 
 // Get client configuration
 const cursorConfig = registry.getConfig('cursor');
-console.log(cursorConfig.displayName);              // "Cursor"
+console.log(cursorConfig.displayName); // "Cursor"
 console.log(cursorConfig.requiresMcpRemoteForHttp); // true
 
 // Query different client groups
@@ -110,14 +110,14 @@ const builder = registry.createBuilder('claude-code');
 const remoteConfig = builder.buildConfiguration({
   mode: 'remote',
   serverUrl: 'https://api.example.com/mcp/default',
-  serverName: 'my-server'
+  serverName: 'my-server',
 });
 
 // Local server configuration
 const localConfig = builder.buildConfiguration({
   mode: 'local',
   instance: 'your-instance',
-  apiToken: 'your-api-token'
+  apiToken: 'your-api-token',
 });
 
 // Generate partial configuration (without wrapper)
@@ -125,7 +125,7 @@ const partialConfig = builder.buildConfiguration({
   mode: 'remote',
   serverUrl: 'https://api.example.com/mcp/default',
   serverName: 'my-server',
-  includeWrapper: false  // Returns just the server entry without mcpServers wrapper
+  includeWrapper: false, // Returns just the server entry without mcpServers wrapper
 });
 // Returns: { "my-server": { "type": "http", "url": "..." } }
 // Instead of: { "mcpServers": { "my-server": { "type": "http", "url": "..." } } }
@@ -137,18 +137,20 @@ The `includeWrapper` option allows you to generate just the server configuration
 
 ```typescript
 // Generate partial config for merging into existing configuration
-const partialConfig = JSON.parse(builder.buildConfiguration({
-  mode: 'remote',
-  serverUrl: 'https://api.example.com/mcp/default',
-  serverName: 'glean_custom',
-  includeWrapper: false
-}));
+const partialConfig = JSON.parse(
+  builder.buildConfiguration({
+    mode: 'remote',
+    serverUrl: 'https://api.example.com/mcp/default',
+    serverName: 'glean_custom',
+    includeWrapper: false,
+  })
+);
 
 // Now you can easily merge it into an existing config
 const existingConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 existingConfig.mcpServers = {
   ...existingConfig.mcpServers,
-  ...partialConfig
+  ...partialConfig,
 };
 fs.writeFileSync(configPath, JSON.stringify(existingConfig, null, 2));
 ```
@@ -161,7 +163,7 @@ import { validateServerConfig, safeValidateServerConfig } from '@gleanwork/mcp-c
 // Validate input configuration
 const result = safeValidateServerConfig({
   mode: 'remote',
-  serverUrl: 'https://your-server.com/mcp/default'
+  serverUrl: 'https://your-server.com/mcp/default',
 });
 
 if (!result.success) {
@@ -183,7 +185,7 @@ const builder = registry.createBuilder('cursor');
 // Generate configuration (works in browser)
 const config = builder.buildConfiguration({
   mode: 'remote',
-  serverUrl: 'https://your-server.com/mcp/default'
+  serverUrl: 'https://your-server.com/mcp/default',
 });
 
 // Copy to clipboard
@@ -200,24 +202,24 @@ import { MCPConfigRegistry, ClientId } from '@gleanwork/mcp-config-schema/browse
 
 function MCPConfigGenerator() {
   const registry = new MCPConfigRegistry();
-  
+
   const handleGenerateConfig = (clientId: ClientId, serverUrl: string) => {
     const builder = registry.createBuilder(clientId);
     const config = builder.buildConfiguration({
       mode: 'remote',
       serverUrl,
-      serverName: 'glean'
+      serverName: 'glean',
     });
-    
+
     navigator.clipboard.writeText(config);
   };
 
   const clients = registry.getSupportedClients();
-  
+
   return (
     <div>
-      {clients.map(client => (
-        <button 
+      {clients.map((client) => (
+        <button
           key={client.id}
           onClick={() => handleGenerateConfig(client.id, 'https://api.example.com/mcp')}
         >
@@ -234,6 +236,7 @@ function MCPConfigGenerator() {
 > **📖 For complete configuration examples for all clients, see [CLIENTS.md](CLIENTS.md)**
 
 ### Native HTTP Client (Claude Code, VS Code)
+
 ```json
 {
   "mcpServers": {
@@ -246,6 +249,7 @@ function MCPConfigGenerator() {
 ```
 
 ### Bridge Client (Cursor, Claude Desktop, Windsurf)
+
 ```json
 {
   "mcpServers": {
@@ -259,6 +263,7 @@ function MCPConfigGenerator() {
 ```
 
 ### Goose (YAML format)
+
 ```yaml
 extensions:
   my-server:
@@ -272,14 +277,14 @@ extensions:
 
 ## Configuration File Locations
 
-| Client | macOS | Linux | Windows |
-|--------|-------|-------|---------|
-| Claude Code | `~/.claude.json` | - | - |
-| VS Code | `~/Library/Application Support/Code/User/mcp.json` | `~/.config/Code/User/mcp.json` | `%APPDATA%\Code\User\mcp.json` |
-| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` | - | - |
-| Cursor | `~/.cursor/mcp.json` | `~/.cursor/mcp.json` | `%USERPROFILE%\.cursor\mcp.json` |
-| Goose | `~/.config/goose/config.yaml` | `~/.config/goose/config.yaml` | - |
-| Windsurf | `~/.codeium/windsurf/mcp_config.json` | `~/.codeium/windsurf/mcp_config.json` | `%USERPROFILE%\.codeium\windsurf\mcp_config.json` |
+| Client         | macOS                                                             | Linux                                 | Windows                                           |
+| -------------- | ----------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------- |
+| Claude Code    | `~/.claude.json`                                                  | -                                     | -                                                 |
+| VS Code        | `~/Library/Application Support/Code/User/mcp.json`                | `~/.config/Code/User/mcp.json`        | `%APPDATA%\Code\User\mcp.json`                    |
+| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` | -                                     | -                                                 |
+| Cursor         | `~/.cursor/mcp.json`                                              | `~/.cursor/mcp.json`                  | `%USERPROFILE%\.cursor\mcp.json`                  |
+| Goose          | `~/.config/goose/config.yaml`                                     | `~/.config/goose/config.yaml`         | `%APPDATA%\Block\goose\config\config.yaml`        |
+| Windsurf       | `~/.codeium/windsurf/mcp_config.json`                             | `~/.codeium/windsurf/mcp_config.json` | `%USERPROFILE%\.codeium\windsurf\mcp_config.json` |
 
 ## API Reference
 
