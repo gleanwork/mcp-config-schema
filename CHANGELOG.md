@@ -4,6 +4,20 @@
 
 
 
+
+## v0.8.0 (2025-08-26)
+
+#### :rocket: Enhancement
+* [#11](https://github.com/gleanwork/mcp-config-schema/pull/11) feat: Update Goose to support native HTTP ([@chris-freeman-glean](https://github.com/chris-freeman-glean))
+
+#### :house: Internal
+* [#12](https://github.com/gleanwork/mcp-config-schema/pull/12) internal: Updates CLIENTS.md following config changes ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 2
+- Chris Freeman ([@chris-freeman-glean](https://github.com/chris-freeman-glean))
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.7.0 (2025-08-23)
 
 #### :rocket: Enhancement
