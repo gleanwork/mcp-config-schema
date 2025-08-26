@@ -2,12 +2,11 @@
   "id": "goose",
   "name": "goose",
   "displayName": "Goose",
-  "description": "Goose only supports stdio, requires mcp-remote for HTTP servers",
+  "description": "Goose with native HTTP support",
   "localConfigSupport": "full",
-  "localConfigNotes": "Requires mcp-remote for remote servers",
-  "documentationUrl": "https://github.com/square/goose",
-  "clientSupports": "stdio-only",
-  "requiresMcpRemoteForHttp": true,
+  "documentationUrl": "https://github.com/block/goose",
+  "clientSupports": "http",
+  "requiresMcpRemoteForHttp": false,
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "yaml",
   "configPath": {
@@ -17,9 +16,15 @@
   },
   "configStructure": {
     "serverKey": "extensions",
+    "httpConfig": {
+      "typeField": "type",
+      "urlField": "uri"
+    },
     "stdioConfig": {
+      "typeField": "type",
       "commandField": "cmd",
-      "argsField": "args"
+      "argsField": "args",
+      "envField": "envs"
     }
   }
 }

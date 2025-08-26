@@ -150,19 +150,17 @@ describe('ConfigBuilder', () => {
       expect(result).toMatchInlineSnapshot(`
         "extensions:
           glean:
-            name: glean
-            cmd: npx
-            args:
-              - '-y'
-              - mcp-remote
-              - https://glean-dev-be.glean.com/mcp/default
-            type: stdio
-            timeout: 300
             enabled: true
-            bundled: null
-            description: null
-            env_keys: []
+            name: glean
+            type: streamable_http
+            uri: https://glean-dev-be.glean.com/mcp/default
             envs: {}
+            env_keys: []
+            headers: {}
+            description: ''
+            timeout: 300
+            bundled: null
+            available_tools: []
         "
       `);
     });
@@ -308,19 +306,17 @@ describe('ConfigBuilder', () => {
       expect(config).toMatchInlineSnapshot(`
         "extensions:
           glean_test:
-            name: glean_test
-            cmd: npx
-            args:
-              - '-y'
-              - mcp-remote
-              - https://example.com/mcp/default
-            type: stdio
-            timeout: 300
             enabled: true
-            bundled: null
-            description: null
-            env_keys: []
+            name: glean_test
+            type: streamable_http
+            uri: https://example.com/mcp/default
             envs: {}
+            env_keys: []
+            headers: {}
+            description: ''
+            timeout: 300
+            bundled: null
+            available_tools: []
         "
       `);
     });
@@ -479,11 +475,12 @@ describe('ConfigBuilder', () => {
       const generatedConfig = yaml.load(generatedYaml);
 
       expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serverKey);
-      expect(generatedConfig).toHaveProperty('extensions'); // Goose uses 'extensions'
+      expect(generatedConfig).toHaveProperty('extensions');
 
       const serverConfig = generatedConfig.extensions.glean_test;
-      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.stdioConfig.commandField); // 'cmd' for Goose
-      expect(serverConfig.cmd).toBe('npx'); // Should use 'cmd' not 'command'
+      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpConfig.urlField);
+      expect(serverConfig.uri).toBe('https://example.com/mcp/default');
+      expect(serverConfig.type).toBe('streamable_http');
     });
 
     it('should respect client-specific field presence from JSON', () => {
@@ -629,16 +626,17 @@ describe('ConfigBuilder', () => {
 
         expect(result).toEqual({
           glean_default: {
-            name: 'glean_default',
-            cmd: 'npx',
-            args: ['-y', 'mcp-remote', 'https://glean-dev-be.glean.com/mcp/default'],
-            type: 'stdio',
-            timeout: 300,
             enabled: true,
-            bundled: null,
-            description: null,
-            env_keys: [],
+            type: 'streamable_http',
+            name: 'glean_default',
+            uri: 'https://glean-dev-be.glean.com/mcp/default',
             envs: {},
+            env_keys: [],
+            headers: {},
+            description: '',
+            timeout: 300,
+            bundled: null,
+            available_tools: [],
           },
         });
 

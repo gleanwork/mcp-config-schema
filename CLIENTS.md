@@ -8,10 +8,10 @@ This document provides a comprehensive overview of all supported MCP clients, th
 |--------|--------------|-----------------|---------------------|-----------|
 | **ChatGPT** | None | stdio only | Yes (for HTTP) | Web only |
 | **Claude Code** | Full | HTTP native | No | macOS, Linux, Windows |
-| **Claude for Desktop** | Full | stdio only | Yes (for HTTP) | macOS, Windows |
+| **Claude for Desktop** | Full | stdio only | Yes (for HTTP) | macOS, Windows, Linux |
 | **Claude for Teams/Enterprise** | None | stdio only | Yes (for HTTP) | Organization-managed |
 | **Cursor** | Full | HTTP native | No | macOS, Linux, Windows |
-| **Goose** | Full | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
+| **Goose** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Visual Studio Code** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Windsurf** | Full | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
 
@@ -146,10 +146,11 @@ This document provides a comprehensive overview of all supported MCP clients, th
 - **Compatibility**: Full local configuration support
 - **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
 - **Documentation**: [Documentation](https://docs.anthropic.com/en/docs/claude-desktop)
-- **Supported Platforms**: macOS, Windows
+- **Supported Platforms**: macOS, Windows, Linux
 - **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
   - **macOS**: `$HOME/Library/Application Support/Claude/claude_desktop_config.json`
+  - **Linux**: `$HOME/.config/Claude/claude_desktop_config.json`
   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
 <details>
@@ -166,11 +167,12 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
   "clientSupports": "stdio-only",
   "requiresMcpRemoteForHttp": true,
-  "supportedPlatforms": ["darwin", "win32"],
+  "supportedPlatforms": ["darwin", "win32", "linux"],
   "configFormat": "json",
   "configPath": {
     "darwin": "$HOME/Library/Application Support/Claude/claude_desktop_config.json",
-    "win32": "%APPDATA%\\Claude\\claude_desktop_config.json"
+    "win32": "%APPDATA%\\Claude\\claude_desktop_config.json",
+    "linux": "$HOME/.config/Claude/claude_desktop_config.json"
   },
   "configStructure": {
     "serverKey": "mcpServers",
@@ -365,11 +367,10 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ### Goose
 
 - **Compatibility**: Full local configuration support
-- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
-- **Documentation**: [Goose GitHub](https://github.com/square/goose)
+- **Connection Type**: Native HTTP support
+- **Documentation**: [Goose GitHub](https://github.com/block/goose)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Format**: YAML
-- **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
   - **macOS/Linux: `$HOME/.config/goose/config.yaml`
   - **Windows**: `%USERPROFILE%\.config\goose\config.yaml`
@@ -382,12 +383,11 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "id": "goose",
   "name": "goose",
   "displayName": "Goose",
-  "description": "Goose only supports stdio, requires mcp-remote for HTTP servers",
+  "description": "Goose with native HTTP support",
   "localConfigSupport": "full",
-  "localConfigNotes": "Requires mcp-remote for remote servers",
-  "documentationUrl": "https://github.com/square/goose",
-  "clientSupports": "stdio-only",
-  "requiresMcpRemoteForHttp": true,
+  "documentationUrl": "https://github.com/block/goose",
+  "clientSupports": "http",
+  "requiresMcpRemoteForHttp": false,
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "yaml",
   "configPath": {
@@ -397,9 +397,15 @@ This document provides a comprehensive overview of all supported MCP clients, th
   },
   "configStructure": {
     "serverKey": "extensions",
+    "httpConfig": {
+      "typeField": "type",
+      "urlField": "uri"
+    },
     "stdioConfig": {
+      "typeField": "type",
       "commandField": "cmd",
-      "argsField": "args"
+      "argsField": "args",
+      "envField": "envs"
     }
   }
 }
@@ -408,24 +414,22 @@ This document provides a comprehensive overview of all supported MCP clients, th
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (via stdio with mcp-remote bridge)</strong></summary>
+<summary><strong>HTTP Configuration (native)</strong></summary>
 
 ```yaml snippet=examples/configs/remote/goose.yaml
 extensions:
   glean:
-    name: glean
-    cmd: npx
-    args:
-      - '-y'
-      - mcp-remote
-      - https://glean-dev-be.glean.com/mcp/default
-    type: stdio
-    timeout: 300
     enabled: true
-    bundled: null
-    description: null
-    env_keys: []
+    name: glean
+    type: streamable_http
+    uri: https://glean-dev-be.glean.com/mcp/default
     envs: {}
+    env_keys: []
+    headers: {}
+    description: ''
+    timeout: 300
+    bundled: null
+    available_tools: []
 ```
 
 </details>
@@ -442,12 +446,14 @@ extensions:
       - '-y'
       - '@gleanwork/local-mcp-server'
     type: stdio
+    envs:
+      GLEAN_INSTANCE: your-instance
+      GLEAN_API_TOKEN: your-api-token
     timeout: 300
     enabled: true
     bundled: null
     description: null
     env_keys: []
-    envs: {}
 ```
 
 </details>
@@ -641,12 +647,12 @@ extensions:
 Clients that can connect directly to HTTP MCP servers without additional tooling:
 - Claude Code
 - Cursor
+- Goose
 - Visual Studio Code
 
 ### stdio-only Clients
 Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP servers:
 - Claude for Desktop
-- Goose
 - Windsurf
 
 ### Web-based/Managed Clients

@@ -128,7 +128,7 @@ export const VsCodeConfigSchema = z.object({
   servers: z.record(z.string(), ServerConfigSchema),
 });
 
-export const GooseServerConfigSchema = z.object({
+const GooseStdioServerConfigSchema = z.object({
   name: z.string(),
   cmd: z.string(),
   args: z.array(z.union([z.string(), z.number()])),
@@ -140,6 +140,25 @@ export const GooseServerConfigSchema = z.object({
   env_keys: z.array(z.string()),
   envs: z.record(z.string(), z.string()),
 });
+
+const GooseHttpServerConfigSchema = z.object({
+  enabled: z.boolean(),
+  type: z.literal('streamable_http'),
+  name: z.string(),
+  uri: z.string(),
+  envs: z.record(z.string(), z.string()),
+  env_keys: z.array(z.string()),
+  headers: z.record(z.string(), z.string()),
+  description: z.string(),
+  timeout: z.number(),
+  bundled: z.null(),
+  available_tools: z.array(z.string()),
+});
+
+export const GooseServerConfigSchema = z.union([
+  GooseStdioServerConfigSchema,
+  GooseHttpServerConfigSchema,
+]);
 
 export const GooseConfigSchema = z.object({
   extensions: z.record(z.string(), GooseServerConfigSchema),

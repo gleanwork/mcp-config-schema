@@ -20,7 +20,7 @@ This is `@gleanwork/mcp-config-schema`, a TypeScript library that provides type-
 ### Client Types
 
 - **Native HTTP**: Can connect directly to HTTP servers (Claude Code, VS Code)
-- **stdio-only**: Require `mcp-remote` bridge for HTTP connections (Cursor, Claude Desktop, Windsurf, Goose)
+- **stdio-only**: Require `mcp-remote` bridge for HTTP connections (Cursor, Claude Desktop, Windsurf)
 
 ## Architecture
 
@@ -139,4 +139,3 @@ Key dependencies:
 - **mkdirp**: Directory creation for config files
 
 Dev dependencies include TypeScript, ESLint, Prettier, Vitest for testing.
-
