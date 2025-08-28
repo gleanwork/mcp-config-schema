@@ -33,13 +33,15 @@ describe('Server Name Logic', () => {
   });
 
   describe('buildMcpServerName', () => {
-    describe('local mode', () => {
-      it('returns glean_local for local mode', () => {
-        expect(buildMcpServerName({ mode: 'local' })).toBe('glean_local');
+    describe('stdio transport', () => {
+      it('returns glean_local for stdio transport', () => {
+        expect(buildMcpServerName({ transport: 'stdio' })).toBe('glean_local');
       });
 
-      it('returns glean_local even with custom serverName in local mode', () => {
-        expect(buildMcpServerName({ mode: 'local', serverName: 'custom' })).toBe('glean_custom');
+      it('returns glean_local even with custom serverName in stdio transport', () => {
+        expect(buildMcpServerName({ transport: 'stdio', serverName: 'custom' })).toBe(
+          'glean_custom'
+        );
       });
     });
 
@@ -58,11 +60,11 @@ describe('Server Name Logic', () => {
       });
     });
 
-    describe('remote mode with URL', () => {
+    describe('http transport with URL', () => {
       it('extracts and prefixes server name from URL', () => {
         expect(
           buildMcpServerName({
-            mode: 'remote',
+            transport: 'http',
             serverUrl: 'https://my-be.glean.com/mcp/analytics',
           })
         ).toBe('glean_analytics');
@@ -71,7 +73,7 @@ describe('Server Name Logic', () => {
       it('returns glean_default for default endpoint (consistent behavior)', () => {
         expect(
           buildMcpServerName({
-            mode: 'remote',
+            transport: 'http',
             serverUrl: 'https://my-be.glean.com/mcp/default',
           })
         ).toBe('glean_default');
@@ -80,7 +82,7 @@ describe('Server Name Logic', () => {
       it('handles custom-agent URLs', () => {
         expect(
           buildMcpServerName({
-            mode: 'remote',
+            transport: 'http',
             serverUrl: 'https://my-be.glean.com/mcp/custom-agent',
           })
         ).toBe('glean_custom-agent');
@@ -101,7 +103,7 @@ describe('Server Name Logic', () => {
       it('explicit serverName overrides URL extraction', () => {
         expect(
           buildMcpServerName({
-            mode: 'remote',
+            transport: 'http',
             serverUrl: 'https://my-be.glean.com/mcp/analytics',
             serverName: 'custom',
           })
@@ -112,7 +114,7 @@ describe('Server Name Logic', () => {
     describe('fallback behavior', () => {
       it('returns glean as default fallback', () => {
         expect(buildMcpServerName({})).toBe('glean');
-        expect(buildMcpServerName({ mode: 'remote' })).toBe('glean');
+        expect(buildMcpServerName({ transport: 'http' })).toBe('glean');
       });
     });
   });

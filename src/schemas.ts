@@ -10,13 +10,13 @@ export const ClientIdSchema = z.enum([
   'windsurf',
   'chatgpt',
 ]);
-export const ClientConnectionSupportSchema = z.enum(['http', 'stdio-only', 'both']);
 
 export const ServerTypeSchema = z.enum(['http', 'stdio']);
 
 export const LocalConfigSupportSchema = z.enum(['full', 'none']);
 
-export const ServerModeSchema = z.enum(['local', 'remote']);
+export const TransportSchema = z.enum(['stdio', 'http']);
+export const SupportedTransportsSchema = z.array(TransportSchema).min(1);
 export const HttpConfigStructureSchema = z.object({
   typeField: z.string().optional(),
   urlField: z.string(),
@@ -50,7 +50,7 @@ export const MCPClientConfigSchema = z.object({
   localConfigSupport: LocalConfigSupportSchema,
   localConfigNotes: z.string().optional(),
   documentationUrl: z.string().url().optional(),
-  clientSupports: ClientConnectionSupportSchema,
+  transports: SupportedTransportsSchema,
   requiresMcpRemoteForHttp: z.boolean(),
   supportedPlatforms: z.array(PlatformSchema),
   configFormat: z.enum(['json', 'yaml']),
@@ -68,11 +68,12 @@ export const MCPClientConfigSchema = z.object({
 
 export const BuildOptionsSchema = z.object({
   includeWrapper: z.boolean().optional(),
+  mcpRemoteVersion: z.string().optional(),
 });
 
 export const GleanServerConfigSchema = z
   .object({
-    mode: ServerModeSchema,
+    transport: TransportSchema,
     serverUrl: z.string().url().optional(),
     serverName: z.string().optional(),
     instance: z.string().optional(),

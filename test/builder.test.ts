@@ -23,7 +23,7 @@ describe('ConfigBuilder', () => {
     it('generates one-click URL for Cursor with HTTP native', () => {
       const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
       const config = {
-        mode: 'remote' as const,
+        transport: 'http' as const,
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
       };
@@ -38,6 +38,7 @@ describe('ConfigBuilder', () => {
       const encodedConfig = urlObj.searchParams.get('config');
       const decodedConfig = JSON.parse(Buffer.from(encodedConfig!, 'base64').toString());
       expect(decodedConfig).toEqual({
+        type: 'http',
         url: 'https://example.com/mcp/default',
       });
     });
@@ -45,7 +46,7 @@ describe('ConfigBuilder', () => {
     it('generates one-click URL for VSCode with HTTP native', () => {
       const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
       const config = {
-        mode: 'remote' as const,
+        transport: 'http' as const,
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
       };
@@ -53,11 +54,11 @@ describe('ConfigBuilder', () => {
 
       // VSCode uses the entire config as URL-encoded query string
       expect(url.startsWith('vscode://mcp/install?')).toBe(true);
-      
+
       // Extract and decode the config
       const queryString = url.replace('vscode://mcp/install?', '');
       const decodedConfig = JSON.parse(decodeURIComponent(queryString));
-      
+
       expect(decodedConfig).toEqual({
         name: 'glean_test-server',
         type: 'http',
@@ -68,7 +69,7 @@ describe('ConfigBuilder', () => {
     it('generates one-click URL for VSCode with local mode', () => {
       const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
       const config = {
-        mode: 'local' as const,
+        transport: 'stdio' as const,
         serverName: 'local-test',
         instance: 'test-instance',
         apiToken: 'test-token',
@@ -77,11 +78,11 @@ describe('ConfigBuilder', () => {
 
       // VSCode uses the entire config as URL-encoded query string
       expect(url.startsWith('vscode://mcp/install?')).toBe(true);
-      
+
       // Extract and decode the config
       const queryString = url.replace('vscode://mcp/install?', '');
       const decodedConfig = JSON.parse(decodeURIComponent(queryString));
-      
+
       expect(decodedConfig).toEqual({
         name: 'glean_local-test',
         type: 'stdio',
@@ -97,7 +98,7 @@ describe('ConfigBuilder', () => {
     it('throws for clients without one-click support', () => {
       const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_DESKTOP);
       const config = {
-        mode: 'remote' as const,
+        transport: 'http' as const,
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
       };
@@ -109,14 +110,14 @@ describe('ConfigBuilder', () => {
 
   describe('Remote configurations', () => {
     const remoteConfig = {
-      mode: 'remote' as const,
+      transport: 'http' as const,
       serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
       serverName: 'glean',
     };
 
     it('should generate correct HTTP config for Claude Code', () => {
       const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
-      const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+      const result = builder.buildConfiguration(remoteConfig);
 
       expect(() => validateMcpServersConfig(result)).not.toThrow();
       const validation = validateGeneratedConfig(result, 'claude-code');
@@ -136,7 +137,7 @@ describe('ConfigBuilder', () => {
 
     it('should generate correct HTTP config for VS Code', () => {
       const builder = registry.createBuilder(CLIENT.VSCODE);
-      const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+      const result = builder.buildConfiguration(remoteConfig);
 
       expect(() => validateVsCodeConfig(result)).not.toThrow();
 
@@ -157,7 +158,7 @@ describe('ConfigBuilder', () => {
 
     it('should generate correct bridge config for Claude Desktop', () => {
       const builder = registry.createBuilder(CLIENT.CLAUDE_DESKTOP);
-      const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+      const result = builder.buildConfiguration(remoteConfig);
 
       const validation = validateGeneratedConfig(result, 'claude-desktop');
       expect(validation.success).toBe(true);
@@ -183,11 +184,11 @@ describe('ConfigBuilder', () => {
       const builder = registry.createBuilder(CLIENT.GOOSE);
       const result = builder.buildConfiguration(remoteConfig);
 
-      const parsed = yaml.load(result);
-      const validation = validateGeneratedConfig(parsed, 'goose');
+      const validation = validateGeneratedConfig(result, 'goose');
       expect(validation.success).toBe(true);
 
-      expect(result).toMatchInlineSnapshot(`
+      const yamlString = builder.toString(result);
+      expect(yamlString).toMatchInlineSnapshot(`
         "extensions:
           glean:
             enabled: true
@@ -208,14 +209,14 @@ describe('ConfigBuilder', () => {
 
   describe('Local configurations', () => {
     const localConfig = {
-      mode: 'local' as const,
+      transport: 'stdio' as const,
       instance: 'my-company',
       apiToken: 'test-token',
     };
 
     it('should generate correct local config for Claude Code', () => {
       const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
-      const result = JSON.parse(builder.buildConfiguration(localConfig));
+      const result = builder.buildConfiguration(localConfig);
 
       const validation = validateGeneratedConfig(result, 'claude-code');
       expect(validation.success).toBe(true);
@@ -242,7 +243,7 @@ describe('ConfigBuilder', () => {
 
     it('should generate correct local config for Cursor', () => {
       const builder = registry.createBuilder(CLIENT.CURSOR);
-      const result = JSON.parse(builder.buildConfiguration(localConfig));
+      const result = builder.buildConfiguration(localConfig);
 
       const validation = validateGeneratedConfig(result, 'cursor');
       expect(validation.success).toBe(true);
@@ -333,17 +334,16 @@ describe('ConfigBuilder', () => {
     it('should generate correct Goose YAML with special fields', () => {
       const builder = registry.createBuilder(CLIENT.GOOSE);
       const config = builder.buildConfiguration({
-        mode: 'remote',
+        transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test',
       });
 
-      const yaml = require('js-yaml');
-      const parsed = yaml.load(config);
-      const validation = validateGeneratedConfig(parsed, 'goose');
+      const validation = validateGeneratedConfig(config, 'goose');
       expect(validation.success).toBe(true);
 
-      expect(config).toMatchInlineSnapshot(`
+      const yamlString = builder.toString(config);
+      expect(yamlString).toMatchInlineSnapshot(`
         "extensions:
           glean_test:
             enabled: true
@@ -364,12 +364,12 @@ describe('ConfigBuilder', () => {
     it('should generate HTTP config for Claude Code', () => {
       const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const config = builder.buildConfiguration({
-        mode: 'remote',
+        transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test',
       });
 
-      const parsed = JSON.parse(config);
+      const parsed = config;
 
       const validation = validateGeneratedConfig(parsed, 'claude-code');
       expect(validation.success).toBe(true);
@@ -389,12 +389,12 @@ describe('ConfigBuilder', () => {
     it('should generate HTTP config for Cursor', () => {
       const builder = registry.createBuilder(CLIENT.CURSOR);
       const config = builder.buildConfiguration({
-        mode: 'remote',
+        transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test',
       });
 
-      const parsed = JSON.parse(config);
+      const parsed = config;
 
       const validation = validateGeneratedConfig(parsed, 'cursor');
       expect(validation.success).toBe(true);
@@ -414,11 +414,11 @@ describe('ConfigBuilder', () => {
     it('should default server name to "glean" when not provided', () => {
       const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const config = builder.buildConfiguration({
-        mode: 'remote',
+        transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
       });
 
-      const parsed = JSON.parse(config);
+      const parsed = config;
 
       const validation = validateGeneratedConfig(parsed, 'claude-code');
       expect(validation.success).toBe(true);
@@ -438,12 +438,12 @@ describe('ConfigBuilder', () => {
     it('should handle URL-style instance for local config', () => {
       const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const config = builder.buildConfiguration({
-        mode: 'local',
+        transport: 'stdio',
         instance: 'https://my-company.glean.com',
         apiToken: 'test-token',
       });
 
-      const parsed = JSON.parse(config);
+      const parsed = config;
 
       const validation = validateGeneratedConfig(parsed, 'claude-code');
       expect(validation.success).toBe(true);
@@ -484,13 +484,11 @@ describe('ConfigBuilder', () => {
       const jsonConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
       const builder = registry.createBuilder(CLIENT.VSCODE);
-      const generatedConfig = JSON.parse(
-        builder.buildConfiguration({
-          mode: 'remote',
-          serverUrl: 'https://example.com/mcp/default',
-          serverName: 'test',
-        })
-      );
+      const generatedConfig = builder.buildConfiguration({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test',
+      });
 
       expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serverKey);
       expect(generatedConfig).toHaveProperty('servers'); // VS Code uses 'servers'
@@ -505,14 +503,11 @@ describe('ConfigBuilder', () => {
       const jsonConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
       const builder = registry.createBuilder(CLIENT.GOOSE);
-      const generatedYaml = builder.buildConfiguration({
-        mode: 'remote',
+      const generatedConfig = builder.buildConfiguration({
+        transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test',
       });
-
-      const yaml = require('js-yaml');
-      const generatedConfig = yaml.load(generatedYaml);
 
       expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serverKey);
       expect(generatedConfig).toHaveProperty('extensions');
@@ -528,13 +523,11 @@ describe('ConfigBuilder', () => {
       expect(windsurfConfig?.configStructure.stdioConfig?.typeField).toBeUndefined();
 
       const builder = registry.createBuilder(CLIENT.WINDSURF);
-      const generatedConfig = JSON.parse(
-        builder.buildConfiguration({
-          mode: 'remote',
-          serverUrl: 'https://example.com/mcp/default',
-          serverName: 'test',
-        })
-      );
+      const generatedConfig = builder.buildConfiguration({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test',
+      });
 
       expect(generatedConfig.mcpServers.glean_test).not.toHaveProperty('type');
       expect(generatedConfig.mcpServers.glean_test).toHaveProperty('command');
@@ -581,7 +574,7 @@ describe('ConfigBuilder', () => {
   describe('Partial Configuration (includeWrapper: false)', () => {
     describe('Remote configurations', () => {
       const remoteConfig = {
-        mode: 'remote' as const,
+        transport: 'http' as const,
         serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
         serverName: 'glean_default',
         includeWrapper: false,
@@ -589,7 +582,7 @@ describe('ConfigBuilder', () => {
 
       it('should generate partial HTTP config for Claude Code', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
-        const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+        const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
           glean_default: {
@@ -603,7 +596,7 @@ describe('ConfigBuilder', () => {
 
       it('should generate partial HTTP config for VS Code', () => {
         const builder = registry.createBuilder(CLIENT.VSCODE);
-        const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+        const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
           glean_default: {
@@ -617,7 +610,7 @@ describe('ConfigBuilder', () => {
 
       it('should generate partial bridge config for Claude Desktop', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_DESKTOP);
-        const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+        const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
           glean_default: {
@@ -632,7 +625,7 @@ describe('ConfigBuilder', () => {
 
       it('should generate partial config for Cursor', () => {
         const builder = registry.createBuilder(CLIENT.CURSOR);
-        const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+        const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
           glean_default: {
@@ -646,7 +639,7 @@ describe('ConfigBuilder', () => {
 
       it('should generate partial config for Windsurf', () => {
         const builder = registry.createBuilder(CLIENT.WINDSURF);
-        const result = JSON.parse(builder.buildConfiguration(remoteConfig));
+        const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
           glean_default: {
@@ -661,8 +654,7 @@ describe('ConfigBuilder', () => {
 
       it('should generate partial YAML config for Goose', () => {
         const builder = registry.createBuilder(CLIENT.GOOSE);
-        const yamlResult = builder.buildConfiguration(remoteConfig);
-        const result = yaml.load(yamlResult) as Record<string, unknown>;
+        const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
           glean_default: {
@@ -686,7 +678,7 @@ describe('ConfigBuilder', () => {
 
     describe('Local configurations', () => {
       const localConfig = {
-        mode: 'local' as const,
+        transport: 'stdio' as const,
         instance: 'my-company',
         apiToken: 'test-token',
         serverName: 'glean_local',
@@ -695,7 +687,7 @@ describe('ConfigBuilder', () => {
 
       it('should generate partial local config for Claude Code', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
-        const result = JSON.parse(builder.buildConfiguration(localConfig));
+        const result = builder.buildConfiguration(localConfig);
 
         expect(result).toEqual({
           glean_local: {
@@ -714,7 +706,7 @@ describe('ConfigBuilder', () => {
 
       it('should generate partial local config for Cursor', () => {
         const builder = registry.createBuilder(CLIENT.CURSOR);
-        const result = JSON.parse(builder.buildConfiguration(localConfig));
+        const result = builder.buildConfiguration(localConfig);
 
         expect(result).toEqual({
           glean_local: {
@@ -733,15 +725,13 @@ describe('ConfigBuilder', () => {
 
       it('should handle URL-style instance with partial config', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
-        const result = JSON.parse(
-          builder.buildConfiguration({
-            mode: 'local',
-            instance: 'https://my-company.glean.com',
-            apiToken: 'test-token',
-            serverName: 'glean_custom',
-            includeWrapper: false,
-          })
-        );
+        const result = builder.buildConfiguration({
+          transport: 'stdio',
+          instance: 'https://my-company.glean.com',
+          apiToken: 'test-token',
+          serverName: 'glean_custom',
+          includeWrapper: false,
+        });
 
         expect(result).toEqual({
           glean_custom: {
@@ -760,8 +750,7 @@ describe('ConfigBuilder', () => {
 
       it('should generate partial YAML config for Goose local', () => {
         const builder = registry.createBuilder(CLIENT.GOOSE);
-        const yamlResult = builder.buildConfiguration(localConfig);
-        const result = yaml.load(yamlResult) as Record<string, unknown>;
+        const result = builder.buildConfiguration(localConfig);
 
         expect(result).toEqual({
           glean_local: {
@@ -789,12 +778,12 @@ describe('ConfigBuilder', () => {
       it('should default to including wrapper when includeWrapper is not specified', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
-          mode: 'remote' as const,
+          transport: 'http' as const,
           serverUrl: 'https://example.com/mcp/default',
           serverName: 'test',
         };
 
-        const result = JSON.parse(builder.buildConfiguration(config));
+        const result = builder.buildConfiguration(config);
 
         expect(result).toHaveProperty('mcpServers');
         expect(result.mcpServers).toHaveProperty('glean_test');
@@ -803,13 +792,13 @@ describe('ConfigBuilder', () => {
       it('should include wrapper when includeWrapper is explicitly true', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
-          mode: 'remote' as const,
+          transport: 'http' as const,
           serverUrl: 'https://example.com/mcp/default',
           serverName: 'test',
           includeWrapper: true,
         };
 
-        const result = JSON.parse(builder.buildConfiguration(config));
+        const result = builder.buildConfiguration(config);
 
         expect(result).toHaveProperty('mcpServers');
         expect(result.mcpServers).toHaveProperty('glean_test');
@@ -818,12 +807,12 @@ describe('ConfigBuilder', () => {
       it('should maintain backward compatibility for VS Code', () => {
         const builder = registry.createBuilder(CLIENT.VSCODE);
         const config = {
-          mode: 'remote' as const,
+          transport: 'http' as const,
           serverUrl: 'https://example.com/mcp/default',
           serverName: 'test',
         };
 
-        const result = JSON.parse(builder.buildConfiguration(config));
+        const result = builder.buildConfiguration(config);
 
         expect(result).toHaveProperty('servers');
         expect(result.servers).toHaveProperty('glean_test');
@@ -832,13 +821,12 @@ describe('ConfigBuilder', () => {
       it('should maintain backward compatibility for Goose', () => {
         const builder = registry.createBuilder(CLIENT.GOOSE);
         const config = {
-          mode: 'remote' as const,
+          transport: 'http' as const,
           serverUrl: 'https://example.com/mcp/default',
           serverName: 'test',
         };
 
-        const yamlResult = builder.buildConfiguration(config);
-        const result = yaml.load(yamlResult) as Record<string, unknown>;
+        const result = builder.buildConfiguration(config);
 
         expect(result).toHaveProperty('extensions');
         expect(result.extensions).toHaveProperty('glean_test');
@@ -849,12 +837,12 @@ describe('ConfigBuilder', () => {
       it('should use default server name "glean" when not provided with partial config', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
-          mode: 'remote' as const,
+          transport: 'http' as const,
           serverUrl: 'https://example.com/mcp/default',
           includeWrapper: false,
         };
 
-        const result = JSON.parse(builder.buildConfiguration(config));
+        const result = builder.buildConfiguration(config);
 
         expect(result).toHaveProperty('glean_default');
         expect(result).not.toHaveProperty('mcpServers');
@@ -863,11 +851,11 @@ describe('ConfigBuilder', () => {
       it('should handle partial config for local mode without env vars', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
-          mode: 'local' as const,
+          transport: 'stdio' as const,
           includeWrapper: false,
         };
 
-        const result = JSON.parse(builder.buildConfiguration(config));
+        const result = builder.buildConfiguration(config);
 
         expect(result).toEqual({
           glean_local: {

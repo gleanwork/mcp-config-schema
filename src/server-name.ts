@@ -15,14 +15,14 @@ export function extractServerNameFromUrl(url: string): string | null {
  * Builds a consistent server name for MCP configurations
  *
  * Rules:
- * - Local mode: 'glean_local'
+ * - stdio transport (local): 'glean_local'
  * - Agents mode: 'glean_agents'
- * - Remote with URL ending in /mcp/default: 'glean_default' (for consistency)
- * - Remote with other URLs: 'glean_<extracted-name>'
+ * - http transport with URL ending in /mcp/default: 'glean_default' (for consistency)
+ * - http transport with other URLs: 'glean_<extracted-name>'
  * - Fallback: 'glean'
  */
 export function buildMcpServerName(options: {
-  mode?: 'local' | 'remote';
+  transport?: 'stdio' | 'http';
   serverUrl?: string;
   serverName?: string;
   agents?: boolean;
@@ -36,8 +36,8 @@ export function buildMcpServerName(options: {
     return `glean_${options.serverName}`;
   }
 
-  // Local mode
-  if (options.mode === 'local') {
+  // stdio transport (local)
+  if (options.transport === 'stdio') {
     return 'glean_local';
   }
 
@@ -46,8 +46,8 @@ export function buildMcpServerName(options: {
     return 'glean_agents';
   }
 
-  // Remote mode with URL
-  if (options.mode === 'remote' && options.serverUrl) {
+  // http transport with URL
+  if (options.transport === 'http' && options.serverUrl) {
     const extracted = extractServerNameFromUrl(options.serverUrl);
     if (extracted) {
       // Consistent behavior: always prefix with glean_
