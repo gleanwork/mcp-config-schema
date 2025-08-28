@@ -464,7 +464,7 @@ extensions:
 
 - **Compatibility**: Full local configuration support
 - **Connection Type**: Native HTTP support
-- **Documentation**: [Visual Studio Code Docs](https://code.visualstudio.com/docs)
+- **Documentation**: [Visual Studio Code Docs](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Paths**:
   - **macOS**: `$HOME/Library/Application Support/Code/User/mcp.json`
@@ -481,7 +481,7 @@ extensions:
   "displayName": "Visual Studio Code",
   "description": "VS Code with native HTTP support",
   "localConfigSupport": "full",
-  "documentationUrl": "https://code.visualstudio.com/docs",
+  "documentationUrl": "https://code.visualstudio.com/docs/copilot/customization/mcp-servers",
   "clientSupports": "http",
   "requiresMcpRemoteForHttp": false,
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -491,11 +491,17 @@ extensions:
     "linux": "$HOME/.config/Code/User/mcp.json",
     "win32": "%APPDATA%\\Code\\User\\mcp.json"
   },
+  "oneClick": {
+    "protocol": "vscode://",
+    "urlTemplate": "vscode://mcp/install?{{config}}",
+    "configFormat": "url-encoded-json"
+  },
   "configStructure": {
     "serverKey": "servers",
     "httpConfig": {
       "typeField": "type",
-      "urlField": "url"
+      "urlField": "url",
+      "headersField": "headers"
     },
     "stdioConfig": {
       "typeField": "type",

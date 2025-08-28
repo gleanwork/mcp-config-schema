@@ -32,7 +32,7 @@ await builder.writeConfiguration({
   serverName: 'my-server',
 });
 
-// Generate one-click install URL for supported clients (currently only Cursor)
+// Generate one-click install URL for supported clients (Cursor, VS Code)
 const oneClickUrl = builder.buildOneClickUrl({
   mode: 'remote',
   serverUrl: 'https://your-server.com/mcp/default',
@@ -73,13 +73,12 @@ For detailed configuration examples and requirements for each client, see **[CLI
 
 ### One-Click Installation Support
 
-Currently, only Cursor has documented one-click installation support:
+The following clients support one-click installation:
 
-| Client     | Protocol    | Format                                                               |
-| ---------- | ----------- | -------------------------------------------------------------------- |
-| **Cursor** | `cursor://` | `cursor://anysphere.cursor-deeplink/mcp/install?name=...&config=...` |
-
-Note: VSCode may support one-click installation in the future, but the format has not been documented yet.
+| Client       | Protocol    | Format                                                               |
+| ------------ | ----------- | -------------------------------------------------------------------- |
+| **Cursor**   | `cursor://` | `cursor://anysphere.cursor-deeplink/mcp/install?name=...&config=...` |
+| **VS Code**  | `vscode://` | `vscode://mcp/install?{url-encoded-json-config}`                     |
 
 ## Core Usage
 

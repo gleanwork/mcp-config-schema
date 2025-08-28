@@ -42,16 +42,56 @@ describe('ConfigBuilder', () => {
       });
     });
 
-    it('throws for VSCode since one-click is not configured', () => {
+    it('generates one-click URL for VSCode with HTTP native', () => {
       const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
       const config = {
         mode: 'remote' as const,
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
       };
-      expect(() => vscodeBuilder.buildOneClickUrl(config)).toThrow(
-        'Visual Studio Code does not support one-click installation'
-      );
+      const url = vscodeBuilder.buildOneClickUrl(config);
+
+      // VSCode uses the entire config as URL-encoded query string
+      expect(url.startsWith('vscode://mcp/install?')).toBe(true);
+      
+      // Extract and decode the config
+      const queryString = url.replace('vscode://mcp/install?', '');
+      const decodedConfig = JSON.parse(decodeURIComponent(queryString));
+      
+      expect(decodedConfig).toEqual({
+        name: 'glean_test-server',
+        type: 'http',
+        url: 'https://example.com/mcp/default',
+      });
+    });
+
+    it('generates one-click URL for VSCode with local mode', () => {
+      const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+      const config = {
+        mode: 'local' as const,
+        serverName: 'local-test',
+        instance: 'test-instance',
+        apiToken: 'test-token',
+      };
+      const url = vscodeBuilder.buildOneClickUrl(config);
+
+      // VSCode uses the entire config as URL-encoded query string
+      expect(url.startsWith('vscode://mcp/install?')).toBe(true);
+      
+      // Extract and decode the config
+      const queryString = url.replace('vscode://mcp/install?', '');
+      const decodedConfig = JSON.parse(decodeURIComponent(queryString));
+      
+      expect(decodedConfig).toEqual({
+        name: 'glean_local-test',
+        type: 'stdio',
+        command: 'npx',
+        args: ['-y', '@gleanwork/local-mcp-server'],
+        env: {
+          GLEAN_INSTANCE: 'test-instance',
+          GLEAN_API_TOKEN: 'test-token',
+        },
+      });
     });
 
     it('throws for clients without one-click support', () => {
