@@ -20,6 +20,7 @@ export const ServerModeSchema = z.enum(['local', 'remote']);
 export const HttpConfigStructureSchema = z.object({
   typeField: z.string().optional(),
   urlField: z.string(),
+  headersField: z.string().optional(),
 });
 
 export const StdioConfigStructureSchema = z.object({

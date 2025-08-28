@@ -200,6 +200,13 @@ export class ConfigBuilder {
 
       serverConfig[httpConfig.urlField] = gleanConfig.serverUrl;
 
+      // Add headers for authentication if API token is provided
+      if (httpConfig.headersField && gleanConfig.apiToken) {
+        serverConfig[httpConfig.headersField] = {
+          Authorization: `Bearer ${gleanConfig.apiToken}`,
+        };
+      }
+
       if (this.config.id === 'goose') {
         const gooseServerConfig = {
           enabled: true,
@@ -276,27 +283,57 @@ export class ConfigBuilder {
     });
 
     // Build the appropriate config based on the client's capabilities
-    let configObj: Record<string, unknown>;
+    let config: Record<string, unknown>;
 
-    if (this.config.clientSupports === 'stdio-only' && gleanConfig.mode === 'remote') {
+    // Special handling for VSCode - it includes the name in the config object
+    if (this.config.id === 'vscode') {
+      config = {
+        name: serverName,
+      };
+
+      if (gleanConfig.mode === 'remote') {
+        config['type'] = 'http';
+        config['url'] = gleanConfig.serverUrl;
+
+        // Add headers for authentication if API token is provided
+        if (gleanConfig.apiToken) {
+          config['headers'] = {
+            Authorization: `Bearer ${gleanConfig.apiToken}`,
+          };
+        }
+      } else {
+        config['type'] = 'stdio';
+        config['command'] = 'npx';
+        config['args'] = ['-y', '@gleanwork/local-mcp-server'];
+        if (gleanConfig.instance || gleanConfig.apiToken) {
+          config['env'] = {};
+          if (gleanConfig.instance) {
+            (config['env'] as Record<string, string>)['GLEAN_INSTANCE'] = gleanConfig.instance;
+          }
+          if (gleanConfig.apiToken) {
+            (config['env'] as Record<string, string>)['GLEAN_API_TOKEN'] = gleanConfig.apiToken;
+          }
+        }
+      }
+    } else if (this.config.clientSupports === 'stdio-only' && gleanConfig.mode === 'remote') {
       // stdio-only clients need mcp-remote for remote servers
-      configObj = {
+      config = {
         command: 'npx',
         args: ['-y', 'mcp-remote', gleanConfig.serverUrl],
       };
     } else if (this.config.clientSupports === 'http' && gleanConfig.mode === 'remote') {
       // HTTP clients can connect directly
-      configObj = {
+      config = {
         url: gleanConfig.serverUrl,
       };
     } else if (gleanConfig.mode === 'local') {
       // Local mode
-      configObj = {
+      config = {
         command: 'npx',
         args: ['-y', '@gleanwork/local-mcp-server'],
       };
     } else {
-      configObj = {
+      config = {
         command: 'npx',
         args: ['-y', 'mcp-remote', gleanConfig.serverUrl],
       };
@@ -305,9 +342,9 @@ export class ConfigBuilder {
     // Encode the config based on the format
     let encodedConfig: string;
     if (this.config.oneClick.configFormat === 'base64-json') {
-      encodedConfig = Buffer.from(JSON.stringify(configObj)).toString('base64');
+      encodedConfig = Buffer.from(JSON.stringify(config)).toString('base64');
     } else if (this.config.oneClick.configFormat === 'url-encoded-json') {
-      encodedConfig = encodeURIComponent(JSON.stringify(configObj));
+      encodedConfig = encodeURIComponent(JSON.stringify(config));
     } else {
       throw new Error(`Unknown one-click config format: ${this.config.oneClick.configFormat}`);
     }
