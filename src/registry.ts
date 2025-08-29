@@ -1,5 +1,10 @@
 import { MCPClientConfig, ClientId, Platform, safeValidateClientConfig } from './types.js';
-import { ConfigBuilder } from './builder.js';
+
+import { BaseConfigBuilder } from './builders/BaseConfigBuilder.js';
+import { GenericConfigBuilder } from './builders/GenericConfigBuilder.js';
+import { GooseConfigBuilder } from './builders/GooseConfigBuilder.js';
+import { VSCodeConfigBuilder } from './builders/VSCodeConfigBuilder.js';
+import { CursorConfigBuilder } from './builders/CursorConfigBuilder.js';
 import chatgptConfig from '../configs/chatgpt.json';
 import claudeCodeConfig from '../configs/claude-code.json';
 import claudeDesktopConfig from '../configs/claude-desktop.json';
@@ -21,9 +26,29 @@ const allConfigs = [
 
 export class MCPConfigRegistry {
   private configs: Map<ClientId, MCPClientConfig> = new Map();
+  private builderFactories: Map<ClientId, new (config: MCPClientConfig) => BaseConfigBuilder> =
+    new Map();
 
   constructor() {
     this.loadConfigs();
+    this.registerBuilders();
+  }
+
+  private registerBuilders(): void {
+    // Register specific builders for clients that need special handling
+    this.builderFactories.set(
+      'goose' as ClientId,
+      GooseConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
+    );
+    this.builderFactories.set(
+      'vscode' as ClientId,
+      VSCodeConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
+    );
+    this.builderFactories.set(
+      'cursor' as ClientId,
+      CursorConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
+    );
+    // Other clients will use GenericConfigBuilder by default
   }
 
   private loadConfigs(): void {
@@ -57,10 +82,14 @@ export class MCPConfigRegistry {
     if (config.localConfigSupport === 'none') {
       return;
     }
-    if (config.clientSupports === 'stdio-only' && !config.requiresMcpRemoteForHttp) {
+    if (
+      config.transports.length === 1 &&
+      config.transports[0] === 'stdio' &&
+      !config.requiresMcpRemoteForHttp
+    ) {
       throw new Error(`stdio-only clients must require mcp-remote for HTTP servers`);
     }
-    if (config.clientSupports === 'http' && config.requiresMcpRemoteForHttp) {
+    if (config.transports.includes('http') && config.requiresMcpRemoteForHttp) {
       throw new Error(`HTTP-supporting clients shouldn't require mcp-remote`);
     }
     if (!config.configStructure.httpConfig && !config.configStructure.stdioConfig) {
@@ -68,10 +97,7 @@ export class MCPConfigRegistry {
     }
 
     // Business rule: HTTP support requires httpConfig
-    if (
-      (config.clientSupports === 'http' || config.clientSupports === 'both') &&
-      !config.configStructure.httpConfig
-    ) {
+    if (config.transports.includes('http') && !config.configStructure.httpConfig) {
       throw new Error(`Client with HTTP support must have httpConfig defined`);
     }
   }
@@ -85,9 +111,7 @@ export class MCPConfigRegistry {
   }
 
   getNativeHttpClients(): MCPClientConfig[] {
-    return this.getAllConfigs().filter(
-      (config) => config.clientSupports === 'http' || config.clientSupports === 'both'
-    );
+    return this.getAllConfigs().filter((config) => config.transports.includes('http'));
   }
 
   getBridgeRequiredClients(): MCPClientConfig[] {
@@ -95,7 +119,9 @@ export class MCPConfigRegistry {
   }
 
   getStdioOnlyClients(): MCPClientConfig[] {
-    return this.getAllConfigs().filter((config) => config.clientSupports === 'stdio-only');
+    return this.getAllConfigs().filter(
+      (config) => config.transports.length === 1 && config.transports[0] === 'stdio'
+    );
   }
 
   getClientsWithOneClick(): MCPClientConfig[] {
@@ -114,7 +140,7 @@ export class MCPConfigRegistry {
     return this.getAllConfigs().filter((config) => config.localConfigSupport === 'none');
   }
 
-  createBuilder(clientId: ClientId): ConfigBuilder {
+  createBuilder(clientId: ClientId): BaseConfigBuilder {
     const config = this.getConfig(clientId);
     if (!config) {
       throw new Error(`Unknown client: ${clientId}`);
@@ -124,6 +150,14 @@ export class MCPConfigRegistry {
         `Cannot create builder for ${config.displayName}: ${config.localConfigNotes || 'No local configuration support.'}`
       );
     }
-    return new ConfigBuilder(config);
+
+    // Check if we have a specific builder for this client
+    const BuilderClass = this.builderFactories.get(clientId);
+    if (BuilderClass) {
+      return new BuilderClass(config);
+    }
+
+    // Fall back to GenericConfigBuilder for clients without custom builders
+    return new GenericConfigBuilder(config);
   }
 }

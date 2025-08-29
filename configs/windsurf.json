@@ -6,7 +6,7 @@
   "localConfigSupport": "full",
   "localConfigNotes": "Requires mcp-remote for remote servers",
   "documentationUrl": "https://docs.codeium.com/windsurf",
-  "clientSupports": "stdio-only",
+  "transports": ["stdio"],
   "requiresMcpRemoteForHttp": true,
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",

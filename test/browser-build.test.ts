@@ -20,8 +20,10 @@ describe('Browser Build', () => {
     expect(browserExports.validateGeneratedConfig).toBeDefined();
   });
 
-  it('exports ConfigBuilder', () => {
-    expect(browserExports.ConfigBuilder).toBeDefined();
+  it('exports convenience functions', () => {
+    expect(browserExports.buildConfiguration).toBeDefined();
+    expect(browserExports.buildConfigurationString).toBeDefined();
+    expect(browserExports.buildOneClickUrl).toBeDefined();
   });
 
   it('exports CLIENT constants', () => {
@@ -40,7 +42,9 @@ describe('Browser Build', () => {
     expect(browserExports.CLIENT_DISPLAY_NAME).toBeDefined();
     expect(browserExports.CLIENT_DISPLAY_NAME.CLAUDE_CODE).toBe('Claude Code');
     expect(browserExports.CLIENT_DISPLAY_NAME.CLAUDE_DESKTOP).toBe('Claude for Desktop');
-    expect(browserExports.CLIENT_DISPLAY_NAME.CLAUDE_TEAMS_ENTERPRISE).toBe('Claude for Teams/Enterprise');
+    expect(browserExports.CLIENT_DISPLAY_NAME.CLAUDE_TEAMS_ENTERPRISE).toBe(
+      'Claude for Teams/Enterprise'
+    );
     expect(browserExports.CLIENT_DISPLAY_NAME.CURSOR).toBe('Cursor');
     expect(browserExports.CLIENT_DISPLAY_NAME.VSCODE).toBe('VS Code');
     expect(browserExports.CLIENT_DISPLAY_NAME.WINDSURF).toBe('Windsurf');
@@ -52,7 +56,9 @@ describe('Browser Build', () => {
     expect(browserExports.getDisplayName).toBeDefined();
     expect(typeof browserExports.getDisplayName).toBe('function');
     expect(browserExports.getDisplayName(browserExports.CLIENT.CURSOR)).toBe('Cursor');
-    expect(browserExports.getDisplayName(browserExports.CLIENT.CLAUDE_DESKTOP)).toBe('Claude for Desktop');
+    expect(browserExports.getDisplayName(browserExports.CLIENT.CLAUDE_DESKTOP)).toBe(
+      'Claude for Desktop'
+    );
   });
 
   it('MCPConfigRegistry works without Node.js dependencies', () => {
@@ -66,37 +72,40 @@ describe('Browser Build', () => {
     expect(cursorConfig?.displayName).toBe('Cursor');
   });
 
-  it('ConfigBuilder can generate configurations in browser', () => {
+  it('Registry builders can generate configurations in browser', () => {
     const registry = new browserExports.MCPConfigRegistry();
     const builder = registry.createBuilder('cursor');
 
     expect(builder).toBeDefined();
 
     const config = builder.buildConfiguration({
-      mode: 'remote',
+      transport: 'http',
       serverUrl: 'https://example.com/mcp',
       serverName: 'test-server',
     });
 
     expect(config).toBeDefined();
-    expect(typeof config).toBe('string');
-    expect(config).toContain('test-server');
+    expect(typeof config).toBe('object');
+    expect(JSON.stringify(config)).toContain('test-server');
   });
 
-  it('ConfigBuilder.writeConfiguration is properly guarded', () => {
+  it('Registry builder methods work in browser environment', () => {
     const registry = new browserExports.MCPConfigRegistry();
     const builder = registry.createBuilder('cursor');
 
-    expect(builder.writeConfiguration).toBeDefined();
-    expect(typeof builder.writeConfiguration).toBe('function');
+    // Main methods should be available
+    expect(builder.buildConfiguration).toBeDefined();
+    expect(typeof builder.buildConfiguration).toBe('function');
+    expect(builder.toString).toBeDefined();
+    expect(typeof builder.toString).toBe('function');
   });
 
-  it('ConfigBuilder can generate one-click URLs in browser', () => {
+  it('Registry builders can generate one-click URLs in browser', () => {
     const registry = new browserExports.MCPConfigRegistry();
     const cursorBuilder = registry.createBuilder('cursor');
 
     const config = {
-      mode: 'remote' as const,
+      transport: 'http' as const,
       serverUrl: 'https://example.com/mcp/default',
       serverName: 'test-server',
     };

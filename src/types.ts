@@ -2,10 +2,10 @@ import { z } from 'zod';
 import {
   PlatformSchema,
   ClientIdSchema,
-  ClientConnectionSupportSchema,
+  SupportedTransportsSchema,
   ServerTypeSchema,
   LocalConfigSupportSchema,
-  ServerModeSchema,
+  TransportSchema,
   HttpConfigStructureSchema,
   StdioConfigStructureSchema,
   ConfigStructureSchema,
@@ -25,10 +25,10 @@ import {
 
 export type Platform = z.infer<typeof PlatformSchema>;
 export type ClientId = z.infer<typeof ClientIdSchema>;
-export type ClientConnectionSupport = z.infer<typeof ClientConnectionSupportSchema>;
+export type SupportedTransports = z.infer<typeof SupportedTransportsSchema>;
 export type ServerType = z.infer<typeof ServerTypeSchema>;
 export type LocalConfigSupport = z.infer<typeof LocalConfigSupportSchema>;
-export type ServerMode = z.infer<typeof ServerModeSchema>;
+export type Transport = z.infer<typeof TransportSchema>;
 export type HttpConfigStructure = z.infer<typeof HttpConfigStructureSchema>;
 export type StdioConfigStructure = z.infer<typeof StdioConfigStructureSchema>;
 export type ConfigStructure = z.infer<typeof ConfigStructureSchema>;
@@ -53,10 +53,10 @@ export interface ValidationResult {
 export {
   ClientIdSchema,
   PlatformSchema,
-  ClientConnectionSupportSchema,
+  SupportedTransportsSchema,
   ServerTypeSchema,
   LocalConfigSupportSchema,
-  ServerModeSchema,
+  TransportSchema,
   MCPClientConfigSchema,
   PlatformPathsSchema,
   ConfigStructureSchema,

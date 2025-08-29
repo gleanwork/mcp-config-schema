@@ -14,7 +14,7 @@ describe('Zod Validation', () => {
         displayName: 'Claude Code',
         description: 'Test client',
         localConfigSupport: 'full',
-        clientSupports: 'http',
+        transports: ['http'],
         requiresMcpRemoteForHttp: false,
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
@@ -40,7 +40,7 @@ describe('Zod Validation', () => {
         displayName: 'Invalid',
         description: 'Test',
         localConfigSupport: 'full',
-        clientSupports: 'http',
+        transports: ['http'],
         requiresMcpRemoteForHttp: false,
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
@@ -65,7 +65,7 @@ describe('Zod Validation', () => {
         displayName: 'Claude Code',
         description: 'Test',
         localConfigSupport: 'partial', // Invalid
-        clientSupports: 'http',
+        transports: ['http'],
         requiresMcpRemoteForHttp: false,
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
@@ -92,7 +92,7 @@ describe('Zod Validation', () => {
         description: 'Test',
         localConfigSupport: 'full',
         documentationUrl: 'https://docs.example.com',
-        clientSupports: 'http',
+        transports: ['http'],
         requiresMcpRemoteForHttp: false,
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
@@ -115,7 +115,7 @@ describe('Zod Validation', () => {
         description: 'Test',
         localConfigSupport: 'full',
         documentationUrl: 'not-a-url', // Invalid URL
-        clientSupports: 'http',
+        transports: ['http'],
         requiresMcpRemoteForHttp: false,
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
@@ -137,7 +137,7 @@ describe('Zod Validation', () => {
   describe('Server Config Validation', () => {
     it('should validate remote server config', () => {
       const config = {
-        mode: 'remote',
+        transport: 'http',
         serverUrl: 'https://glean.com/mcp/default',
         serverName: 'glean',
       };
@@ -148,7 +148,7 @@ describe('Zod Validation', () => {
 
     it('should validate local server config', () => {
       const config = {
-        mode: 'local',
+        transport: 'stdio',
         instance: 'my-company',
         apiToken: 'test-token',
       };
@@ -157,22 +157,22 @@ describe('Zod Validation', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should reject invalid mode', () => {
+    it('should reject invalid transport', () => {
       const config = {
-        mode: 'hybrid', // Invalid
+        transport: 'hybrid' as any, // Invalid
         serverUrl: 'https://glean.com/mcp/default',
       };
 
       const result = safeValidateServerConfig(config);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].path).toEqual(['mode']);
+        expect(result.error.issues[0].path).toEqual(['transport']);
       }
     });
 
     it('should reject invalid URL in server config', () => {
       const config = {
-        mode: 'remote',
+        transport: 'http',
         serverUrl: 'not-a-url', // Invalid
       };
 

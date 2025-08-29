@@ -26,7 +26,7 @@ describe('MCPConfigRegistry', () => {
       const config = registry.getConfig(CLIENT.CLAUDE_CODE);
       expect(config).toBeDefined();
       expect(config?.displayName).toBe(CLIENT_DISPLAY_NAME.CLAUDE_CODE);
-      expect(config?.clientSupports).toBe('http');
+      expect(config?.transports).toEqual(['http']);
       expect(config?.requiresMcpRemoteForHttp).toBe(false);
     });
 
@@ -40,7 +40,7 @@ describe('MCPConfigRegistry', () => {
     it('should load Cursor config with HTTP support', () => {
       const config = registry.getConfig(CLIENT.CURSOR);
       expect(config).toBeDefined();
-      expect(config?.clientSupports).toBe('http');
+      expect(config?.transports).toEqual(['http']);
       expect(config?.requiresMcpRemoteForHttp).toBe(false);
     });
 
@@ -67,7 +67,9 @@ describe('MCPConfigRegistry', () => {
     it('should get stdio-only clients', () => {
       const clients = registry.getStdioOnlyClients();
       expect(clients.length).toBeGreaterThan(0);
-      expect(clients.every((c) => c.clientSupports === 'stdio-only')).toBe(true);
+      expect(clients.every((c) => c.transports.length === 1 && c.transports[0] === 'stdio')).toBe(
+        true
+      );
     });
 
     it('should get supported clients', () => {

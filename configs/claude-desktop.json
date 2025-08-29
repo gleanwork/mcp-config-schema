@@ -6,7 +6,7 @@
   "localConfigSupport": "full",
   "localConfigNotes": "Requires mcp-remote for remote servers",
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
-  "clientSupports": "stdio-only",
+  "transports": ["stdio"],
   "requiresMcpRemoteForHttp": true,
   "supportedPlatforms": ["darwin", "win32", "linux"],
   "configFormat": "json",
