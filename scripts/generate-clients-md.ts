@@ -71,7 +71,7 @@ function generateQuickReference(): string {
     } else if (client.transports?.includes('http') && !client.transports?.includes('stdio')) {
       connectionType = 'HTTP only';
     } else if (client.localConfigSupport === 'none') {
-      connectionType = client.id === 'chatgpt' ? 'stdio only' : 'stdio only';
+      connectionType = 'stdio only';
     }
     
     // Determine if mcp-remote is needed
