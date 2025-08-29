@@ -205,6 +205,38 @@ describe('ConfigBuilder', () => {
         "
       `);
     });
+
+    it('should add bearer token to Goose HTTP config', () => {
+      const builder = registry.createBuilder(CLIENT.GOOSE);
+      const result = builder.buildConfiguration({
+        transport: 'http',
+        serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
+        apiToken: 'test-token-123',
+      });
+
+      const validation = validateGeneratedConfig(result, 'goose');
+      expect(validation.success).toBe(true);
+
+      const yamlString = builder.toString(result);
+      expect(yamlString).toContain('Authorization: Bearer test-token-123');
+      expect(yamlString).toMatchInlineSnapshot(`
+        "extensions:
+          glean_default:
+            enabled: true
+            name: glean_default
+            type: streamable_http
+            uri: https://glean-dev-be.glean.com/mcp/default
+            envs: {}
+            env_keys: []
+            headers:
+              Authorization: Bearer test-token-123
+            description: ''
+            timeout: 300
+            bundled: null
+            available_tools: []
+        "
+      `);
+    });
   });
 
   describe('Local configurations', () => {

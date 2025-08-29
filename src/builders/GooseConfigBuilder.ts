@@ -93,11 +93,10 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
 
       serverConfig[httpConfig.urlField] = serverData.serverUrl;
 
-      // Add headers for authentication if API token is provided
-      if (httpConfig.headersField && serverData.apiToken) {
-        serverConfig[httpConfig.headersField] = {
-          Authorization: `Bearer ${serverData.apiToken}`,
-        };
+      // Goose doesn't use httpConfig.headersField, it has its own headers field
+      const headers: Record<string, string> = {};
+      if (serverData.apiToken) {
+        headers['Authorization'] = `Bearer ${serverData.apiToken}`;
       }
 
       const gooseServerConfig = {
@@ -106,7 +105,7 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
         ...serverConfig,
         envs: {},
         env_keys: [],
-        headers: {},
+        headers: headers,
         description: '',
         timeout: 300,
         bundled: null,

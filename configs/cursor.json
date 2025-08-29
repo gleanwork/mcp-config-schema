@@ -5,8 +5,7 @@
   "description": "Cursor with native HTTP support",
   "localConfigSupport": "full",
   "documentationUrl": "https://docs.cursor.com/context/model-context-protocol",
-  "transports": ["http"],
-  "requiresMcpRemoteForHttp": false,
+  "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {
@@ -23,7 +22,8 @@
     "serverKey": "mcpServers",
     "httpConfig": {
       "typeField": "type",
-      "urlField": "url"
+      "urlField": "url",
+      "headersField": "headers"
     },
     "stdioConfig": {
       "typeField": "type",

@@ -52,3 +52,36 @@ export function buildOneClickUrl(clientId: ClientId, serverData: GleanServerConf
   }
   return builder.buildOneClickUrl(serverData);
 }
+
+/**
+ * Determines if a client needs mcp-remote to connect to HTTP servers.
+ * This is a convenience function that doesn't require instantiating the registry.
+ *
+ * @param clientId - The client to check
+ * @returns true if the client needs mcp-remote for HTTP connections
+ */
+export function clientNeedsMcpRemote(clientId: ClientId): boolean {
+  return registry.clientNeedsMcpRemote(clientId);
+}
+
+/**
+ * Determines if a client can connect to HTTP servers natively.
+ * This is a convenience function that doesn't require instantiating the registry.
+ *
+ * @param clientId - The client to check
+ * @returns true if the client supports HTTP natively
+ */
+export function clientSupportsHttpNatively(clientId: ClientId): boolean {
+  return registry.clientSupportsHttpNatively(clientId);
+}
+
+/**
+ * Determines if a client can connect to stdio servers.
+ * This is a convenience function that doesn't require instantiating the registry.
+ *
+ * @param clientId - The client to check
+ * @returns true if the client supports stdio
+ */
+export function clientSupportsStdio(clientId: ClientId): boolean {
+  return registry.clientSupportsStdio(clientId);
+}

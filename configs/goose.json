@@ -5,8 +5,7 @@
   "description": "Goose with native HTTP support",
   "localConfigSupport": "full",
   "documentationUrl": "https://github.com/block/goose",
-  "transports": ["http"],
-  "requiresMcpRemoteForHttp": false,
+  "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "yaml",
   "configPath": {

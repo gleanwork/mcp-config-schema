@@ -5,8 +5,7 @@
   "description": "VS Code with native HTTP support",
   "localConfigSupport": "full",
   "documentationUrl": "https://code.visualstudio.com/docs/copilot/customization/mcp-servers",
-  "transports": ["http"],
-  "requiresMcpRemoteForHttp": false,
+  "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {

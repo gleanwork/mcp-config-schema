@@ -5,8 +5,7 @@
   "description": "Claude Code with native HTTP support",
   "localConfigSupport": "full",
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code",
-  "transports": ["http"],
-  "requiresMcpRemoteForHttp": false,
+  "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {
@@ -18,7 +17,8 @@
     "serverKey": "mcpServers",
     "httpConfig": {
       "typeField": "type",
-      "urlField": "url"
+      "urlField": "url",
+      "headersField": "headers"
     },
     "stdioConfig": {
       "typeField": "type",
