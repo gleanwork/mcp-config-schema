@@ -7,6 +7,16 @@
 
 
 
+
+## v0.11.0 (2025-08-29)
+
+#### :rocket: Enhancement
+* [#16](https://github.com/gleanwork/mcp-config-schema/pull/16) fix: Updates to support more expansive config support coverage ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.10.0 (2025-08-29)
 
 #### :rocket: Enhancement
