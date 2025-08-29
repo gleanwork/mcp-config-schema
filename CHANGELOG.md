@@ -6,6 +6,20 @@
 
 
 
+
+## v0.10.0 (2025-08-29)
+
+#### :rocket: Enhancement
+* [#15](https://github.com/gleanwork/mcp-config-schema/pull/15) internal: Refactors to use a builder pattern. Adds additional functionality to standardize config generation ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#14](https://github.com/gleanwork/mcp-config-schema/pull/14) feat: Adds oneclick support for vscode (as per their docs) ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :house: Internal
+* [#15](https://github.com/gleanwork/mcp-config-schema/pull/15) internal: Refactors to use a builder pattern. Adds additional functionality to standardize config generation ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.9.0 (2025-08-26)
 
 #### :rocket: Enhancement
