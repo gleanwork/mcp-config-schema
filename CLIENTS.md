@@ -6,7 +6,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 | Client | Compatibility | Connection Type | Requires mcp-remote? | Platforms |
 |--------|--------------|-----------------|---------------------|-----------|
-| **ChatGPT** | None | stdio only | Yes (for HTTP) | Web only |
+| **ChatGPT** | None | HTTP only | Yes (for HTTP) | Web only |
 | **Claude Code** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Claude for Desktop** | Full | stdio only | Yes (for HTTP) | macOS, Windows, Linux |
 | **Claude for Teams/Enterprise** | None | stdio only | Yes (for HTTP) | Organization-managed |
@@ -35,8 +35,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "description": "ChatGPT web interface - requires GPT configuration through web UI",
   "localConfigSupport": "none",
   "localConfigNotes": "ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.",
-  "transports": ["stdio"],
-  "requiresMcpRemoteForHttp": true,
+  "transports": ["http"],
   "supportedPlatforms": [],
   "configFormat": "json",
   "configPath": {},
@@ -72,8 +71,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "description": "Claude Code with native HTTP support",
   "localConfigSupport": "full",
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code",
-  "transports": ["http"],
-  "requiresMcpRemoteForHttp": false,
+  "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {
@@ -85,7 +83,8 @@ This document provides a comprehensive overview of all supported MCP clients, th
     "serverKey": "mcpServers",
     "httpConfig": {
       "typeField": "type",
-      "urlField": "url"
+      "urlField": "url",
+      "headersField": "headers"
     },
     "stdioConfig": {
       "typeField": "type",
@@ -166,7 +165,6 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "localConfigNotes": "Requires mcp-remote for remote servers",
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
   "transports": ["stdio"],
-  "requiresMcpRemoteForHttp": true,
   "supportedPlatforms": ["darwin", "win32", "linux"],
   "configFormat": "json",
   "configPath": {
@@ -238,7 +236,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ### Claude for Teams/Enterprise
 
 - **Compatibility**: No local configuration support
-- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
+- **Connection Type**: stdio only
 - **Documentation**: [Documentation](https://docs.anthropic.com/en/docs/claude-desktop)
 - **Notes**: MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.
 
@@ -254,7 +252,6 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "localConfigSupport": "none",
   "localConfigNotes": "MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.",
   "transports": ["stdio"],
-  "requiresMcpRemoteForHttp": true,
   "supportedPlatforms": [],
   "configFormat": "json",
   "configPath": {},
@@ -275,6 +272,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 - **Connection Type**: Native HTTP support
 - **Documentation**: [Cursor MCP Docs](https://docs.cursor.com/context/model-context-protocol)
 - **Supported Platforms**: macOS, Linux, Windows
+- **One-Click Protocol**: `cursor://`
 - **Configuration Paths**:
   - **macOS/Linux: `$HOME/.cursor/mcp.json`
   - **Windows**: `%USERPROFILE%\.cursor\mcp.json`
@@ -290,8 +288,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "description": "Cursor with native HTTP support",
   "localConfigSupport": "full",
   "documentationUrl": "https://docs.cursor.com/context/model-context-protocol",
-  "transports": ["http"],
-  "requiresMcpRemoteForHttp": false,
+  "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {
@@ -308,7 +305,8 @@ This document provides a comprehensive overview of all supported MCP clients, th
     "serverKey": "mcpServers",
     "httpConfig": {
       "typeField": "type",
-      "urlField": "url"
+      "urlField": "url",
+      "headersField": "headers"
     },
     "stdioConfig": {
       "typeField": "type",
@@ -386,8 +384,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "description": "Goose with native HTTP support",
   "localConfigSupport": "full",
   "documentationUrl": "https://github.com/block/goose",
-  "transports": ["http"],
-  "requiresMcpRemoteForHttp": false,
+  "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "yaml",
   "configPath": {
@@ -446,14 +443,14 @@ extensions:
       - '-y'
       - '@gleanwork/local-mcp-server'
     type: stdio
-    envs:
-      GLEAN_INSTANCE: your-instance
-      GLEAN_API_TOKEN: your-api-token
     timeout: 300
     enabled: true
     bundled: null
     description: null
     env_keys: []
+    envs:
+      GLEAN_INSTANCE: your-instance
+      GLEAN_API_TOKEN: your-api-token
 ```
 
 </details>
@@ -466,6 +463,7 @@ extensions:
 - **Connection Type**: Native HTTP support
 - **Documentation**: [Visual Studio Code Docs](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
 - **Supported Platforms**: macOS, Linux, Windows
+- **One-Click Protocol**: `vscode://`
 - **Configuration Paths**:
   - **macOS**: `$HOME/Library/Application Support/Code/User/mcp.json`
   - **Linux**: `$HOME/.config/Code/User/mcp.json`
@@ -482,8 +480,7 @@ extensions:
   "description": "VS Code with native HTTP support",
   "localConfigSupport": "full",
   "documentationUrl": "https://code.visualstudio.com/docs/copilot/customization/mcp-servers",
-  "transports": ["http"],
-  "requiresMcpRemoteForHttp": false,
+  "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {
@@ -581,7 +578,6 @@ extensions:
   "localConfigNotes": "Requires mcp-remote for remote servers",
   "documentationUrl": "https://docs.codeium.com/windsurf",
   "transports": ["stdio"],
-  "requiresMcpRemoteForHttp": true,
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {
@@ -691,6 +687,8 @@ Used by: Goose
 ## One-Click Protocol Support
 
 Some clients support one-click installation via custom protocols:
+- **Cursor**: `cursor://`
+- **Visual Studio Code**: `vscode://`
 
 ## Additional Resources
 

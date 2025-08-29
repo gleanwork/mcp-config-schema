@@ -6,7 +6,6 @@
   "localConfigSupport": "none",
   "localConfigNotes": "MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.",
   "transports": ["stdio"],
-  "requiresMcpRemoteForHttp": true,
   "supportedPlatforms": [],
   "configFormat": "json",
   "configPath": {},

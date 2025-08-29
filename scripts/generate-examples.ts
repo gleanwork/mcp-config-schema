@@ -35,19 +35,20 @@ for (const client of clients) {
 
   // Generate HTTP configuration (for remote servers)
   const remoteConfig = builder.buildConfiguration({
-    mode: 'remote',
+    transport: 'http',
     serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
     serverName: 'glean',
   });
 
   const remoteExtension = client.configFormat === 'yaml' ? 'yaml' : 'json';
   const remoteFile = join(examplesDir, 'remote', `${client.id}.${remoteExtension}`);
-  writeFileSync(remoteFile, remoteConfig);
+  const remoteString = builder.toString(remoteConfig);
+  writeFileSync(remoteFile, remoteString);
   console.log(`  ✓ HTTP config: ${remoteFile}`);
 
   // Generate Standard I/O configuration (for local processes)
   const localConfig = builder.buildConfiguration({
-    mode: 'local',
+    transport: 'stdio',
     instance: 'your-instance',
     apiToken: 'your-api-token',
     serverName: 'glean',
@@ -55,7 +56,8 @@ for (const client of clients) {
 
   const localExtension = client.configFormat === 'yaml' ? 'yaml' : 'json';
   const localFile = join(examplesDir, 'local', `${client.id}.${localExtension}`);
-  writeFileSync(localFile, localConfig);
+  const localString = builder.toString(localConfig);
+  writeFileSync(localFile, localString);
   console.log(`  ✓ Standard I/O config: ${localFile}`);
 }
 

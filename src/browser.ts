@@ -18,4 +18,11 @@ export { GenericConfigBuilder } from './builders/GenericConfigBuilder.js';
 export { VSCodeConfigBuilder } from './builders/VSCodeConfigBuilder.js';
 export { GooseConfigBuilder } from './builders/GooseConfigBuilder.js';
 export { CursorConfigBuilder } from './builders/CursorConfigBuilder.js';
-export { buildConfiguration, buildConfigurationString, buildOneClickUrl } from './builder.js';
+export {
+  buildConfiguration,
+  buildConfigurationString,
+  buildOneClickUrl,
+  clientNeedsMcpRemote,
+  clientSupportsHttpNatively,
+  clientSupportsStdio,
+} from './builder.js';

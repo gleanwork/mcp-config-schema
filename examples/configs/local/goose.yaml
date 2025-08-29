@@ -6,11 +6,11 @@ extensions:
       - '-y'
       - '@gleanwork/local-mcp-server'
     type: stdio
-    envs:
-      GLEAN_INSTANCE: your-instance
-      GLEAN_API_TOKEN: your-api-token
     timeout: 300
     enabled: true
     bundled: null
     description: null
     env_keys: []
+    envs:
+      GLEAN_INSTANCE: your-instance
+      GLEAN_API_TOKEN: your-api-token

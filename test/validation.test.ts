@@ -15,7 +15,7 @@ describe('Zod Validation', () => {
         description: 'Test client',
         localConfigSupport: 'full',
         transports: ['http'],
-        requiresMcpRemoteForHttp: false,
+
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
         configPath: {
@@ -41,7 +41,7 @@ describe('Zod Validation', () => {
         description: 'Test',
         localConfigSupport: 'full',
         transports: ['http'],
-        requiresMcpRemoteForHttp: false,
+
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
         configPath: { darwin: '/test' },
@@ -66,7 +66,7 @@ describe('Zod Validation', () => {
         description: 'Test',
         localConfigSupport: 'partial', // Invalid
         transports: ['http'],
-        requiresMcpRemoteForHttp: false,
+
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
         configPath: { darwin: '/test' },
@@ -93,7 +93,7 @@ describe('Zod Validation', () => {
         localConfigSupport: 'full',
         documentationUrl: 'https://docs.example.com',
         transports: ['http'],
-        requiresMcpRemoteForHttp: false,
+
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
         configPath: { darwin: '/test' },
@@ -116,7 +116,7 @@ describe('Zod Validation', () => {
         localConfigSupport: 'full',
         documentationUrl: 'not-a-url', // Invalid URL
         transports: ['http'],
-        requiresMcpRemoteForHttp: false,
+
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
         configPath: { darwin: '/test' },

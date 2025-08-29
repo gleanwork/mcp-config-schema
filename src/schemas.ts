@@ -51,7 +51,6 @@ export const MCPClientConfigSchema = z.object({
   localConfigNotes: z.string().optional(),
   documentationUrl: z.string().url().optional(),
   transports: SupportedTransportsSchema,
-  requiresMcpRemoteForHttp: z.boolean(),
   supportedPlatforms: z.array(PlatformSchema),
   configFormat: z.enum(['json', 'yaml']),
   configPath: PlatformPathsSchema,

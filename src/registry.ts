@@ -82,16 +82,6 @@ export class MCPConfigRegistry {
     if (config.localConfigSupport === 'none') {
       return;
     }
-    if (
-      config.transports.length === 1 &&
-      config.transports[0] === 'stdio' &&
-      !config.requiresMcpRemoteForHttp
-    ) {
-      throw new Error(`stdio-only clients must require mcp-remote for HTTP servers`);
-    }
-    if (config.transports.includes('http') && config.requiresMcpRemoteForHttp) {
-      throw new Error(`HTTP-supporting clients shouldn't require mcp-remote`);
-    }
     if (!config.configStructure.httpConfig && !config.configStructure.stdioConfig) {
       throw new Error(`Client must support at least one configuration type (http or stdio)`);
     }
@@ -115,7 +105,8 @@ export class MCPConfigRegistry {
   }
 
   getBridgeRequiredClients(): MCPClientConfig[] {
-    return this.getAllConfigs().filter((config) => config.requiresMcpRemoteForHttp === true);
+    // Clients that don't support HTTP natively need mcp-remote bridge
+    return this.getAllConfigs().filter((config) => !config.transports.includes('http'));
   }
 
   getStdioOnlyClients(): MCPClientConfig[] {
@@ -138,6 +129,45 @@ export class MCPConfigRegistry {
 
   getUnsupportedClients(): MCPClientConfig[] {
     return this.getAllConfigs().filter((config) => config.localConfigSupport === 'none');
+  }
+
+  /**
+   * Determines if a client needs mcp-remote to connect to HTTP servers.
+   * @param clientId - The client to check
+   * @returns true if the client needs mcp-remote for HTTP connections
+   */
+  clientNeedsMcpRemote(clientId: ClientId): boolean {
+    const config = this.getConfig(clientId);
+    if (!config) {
+      throw new Error(`Unknown client: ${clientId}`);
+    }
+    return !config.transports.includes('http');
+  }
+
+  /**
+   * Determines if a client can connect to HTTP servers natively.
+   * @param clientId - The client to check
+   * @returns true if the client supports HTTP natively
+   */
+  clientSupportsHttpNatively(clientId: ClientId): boolean {
+    const config = this.getConfig(clientId);
+    if (!config) {
+      throw new Error(`Unknown client: ${clientId}`);
+    }
+    return config.transports.includes('http');
+  }
+
+  /**
+   * Determines if a client can connect to stdio servers.
+   * @param clientId - The client to check
+   * @returns true if the client supports stdio
+   */
+  clientSupportsStdio(clientId: ClientId): boolean {
+    const config = this.getConfig(clientId);
+    if (!config) {
+      throw new Error(`Unknown client: ${clientId}`);
+    }
+    return config.transports.includes('stdio');
   }
 
   createBuilder(clientId: ClientId): BaseConfigBuilder {

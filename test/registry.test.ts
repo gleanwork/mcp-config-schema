@@ -26,8 +26,7 @@ describe('MCPConfigRegistry', () => {
       const config = registry.getConfig(CLIENT.CLAUDE_CODE);
       expect(config).toBeDefined();
       expect(config?.displayName).toBe(CLIENT_DISPLAY_NAME.CLAUDE_CODE);
-      expect(config?.transports).toEqual(['http']);
-      expect(config?.requiresMcpRemoteForHttp).toBe(false);
+      expect(config?.transports).toEqual(['stdio', 'http']);
     });
 
     it('should load VS Code config', () => {
@@ -40,8 +39,7 @@ describe('MCPConfigRegistry', () => {
     it('should load Cursor config with HTTP support', () => {
       const config = registry.getConfig(CLIENT.CURSOR);
       expect(config).toBeDefined();
-      expect(config?.transports).toEqual(['http']);
-      expect(config?.requiresMcpRemoteForHttp).toBe(false);
+      expect(config?.transports).toEqual(['stdio', 'http']);
     });
 
     it('should load Goose config with YAML format', () => {
@@ -55,13 +53,13 @@ describe('MCPConfigRegistry', () => {
     it('should get native HTTP clients', () => {
       const clients = registry.getNativeHttpClients();
       expect(clients.length).toBeGreaterThan(0);
-      expect(clients.every((c) => !c.requiresMcpRemoteForHttp)).toBe(true);
+      expect(clients.every((c) => c.transports.includes('http'))).toBe(true);
     });
 
     it('should get bridge-required clients', () => {
       const clients = registry.getBridgeRequiredClients();
       expect(clients.length).toBeGreaterThan(0);
-      expect(clients.every((c) => c.requiresMcpRemoteForHttp)).toBe(true);
+      expect(clients.every((c) => !c.transports.includes('http'))).toBe(true);
     });
 
     it('should get stdio-only clients', () => {
@@ -109,6 +107,46 @@ describe('MCPConfigRegistry', () => {
       expect(darwinClients).toContainEqual(claudeDesktop);
       expect(linuxClients).toContainEqual(claudeDesktop);
       expect(win32Clients).toContainEqual(claudeDesktop);
+    });
+  });
+
+  describe('transport utility methods', () => {
+    it('should correctly identify clients that need mcp-remote', () => {
+      // Stdio-only clients need mcp-remote for HTTP
+      expect(registry.clientNeedsMcpRemote('claude-desktop')).toBe(true);
+      expect(registry.clientNeedsMcpRemote('windsurf')).toBe(true);
+
+      // Clients with HTTP support don't need mcp-remote
+      expect(registry.clientNeedsMcpRemote('vscode')).toBe(false);
+      expect(registry.clientNeedsMcpRemote('cursor')).toBe(false);
+      expect(registry.clientNeedsMcpRemote('goose')).toBe(false);
+    });
+
+    it('should correctly identify clients that support HTTP natively', () => {
+      // Clients with HTTP in transports
+      expect(registry.clientSupportsHttpNatively('vscode')).toBe(true);
+      expect(registry.clientSupportsHttpNatively('cursor')).toBe(true);
+      expect(registry.clientSupportsHttpNatively('goose')).toBe(true);
+
+      // Stdio-only clients don't support HTTP natively
+      expect(registry.clientSupportsHttpNatively('claude-desktop')).toBe(false);
+      expect(registry.clientSupportsHttpNatively('windsurf')).toBe(false);
+    });
+
+    it('should correctly identify clients that support stdio', () => {
+      // Most clients support stdio
+      expect(registry.clientSupportsStdio('vscode')).toBe(true);
+      expect(registry.clientSupportsStdio('claude-desktop')).toBe(true);
+      expect(registry.clientSupportsStdio('windsurf')).toBe(true);
+
+      // ChatGPT only supports HTTP
+      expect(registry.clientSupportsStdio('chatgpt')).toBe(false);
+    });
+
+    it('should throw for unknown clients', () => {
+      expect(() => registry.clientNeedsMcpRemote('unknown' as any)).toThrow('Unknown client');
+      expect(() => registry.clientSupportsHttpNatively('unknown' as any)).toThrow('Unknown client');
+      expect(() => registry.clientSupportsStdio('unknown' as any)).toThrow('Unknown client');
     });
   });
 });

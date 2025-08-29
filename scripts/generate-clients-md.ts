@@ -61,21 +61,26 @@ function formatPlatforms(platforms: string[]): string {
 function generateQuickReference(): string {
   const rows = clients.map((client) => {
     const compatibility = client.localConfigSupport === 'full' ? 'Full' : 'None';
-    const connectionType =
-      client.clientSupports === 'http'
-        ? 'HTTP native'
-        : client.clientSupports === 'stdio-only'
-          ? 'stdio only'
-          : client.localConfigSupport === 'none'
-            ? client.id === 'chatgpt'
-              ? 'Web-based'
-              : 'Managed'
-            : 'Both';
-    const requiresRemote = client.requiresMcpRemoteForHttp
+    
+    // Determine connection type based on transports array
+    let connectionType = 'Unknown';
+    if (client.transports?.includes('http') && client.transports?.includes('stdio')) {
+      connectionType = 'HTTP native';
+    } else if (client.transports?.includes('stdio') && !client.transports?.includes('http')) {
+      connectionType = 'stdio only';
+    } else if (client.transports?.includes('http') && !client.transports?.includes('stdio')) {
+      connectionType = 'HTTP only';
+    } else if (client.localConfigSupport === 'none') {
+      connectionType = client.id === 'chatgpt' ? 'stdio only' : 'stdio only';
+    }
+    
+    // Determine if mcp-remote is needed
+    const requiresRemote = !client.transports?.includes('http') && client.localConfigSupport === 'full'
       ? 'Yes (for HTTP)'
       : client.localConfigSupport === 'none'
-        ? 'N/A'
+        ? client.id === 'chatgpt' ? 'Yes (for HTTP)' : 'Yes (for HTTP)'
         : 'No';
+        
     const platforms =
       client.supportedPlatforms.length > 0
         ? formatPlatforms(client.supportedPlatforms)
@@ -105,18 +110,19 @@ function generateClientSection(client: any): string {
     `- **Compatibility**: ${client.localConfigSupport === 'full' ? 'Full local configuration support' : 'No local configuration support'}`
   );
 
-  // Connection type
-  if (client.clientSupports === 'http') {
+  // Connection type based on transports array
+  if (client.transports?.includes('http') && client.transports?.includes('stdio')) {
     info.push('- **Connection Type**: Native HTTP support');
-  } else if (client.clientSupports === 'stdio-only') {
+  } else if (client.transports?.includes('stdio') && !client.transports?.includes('http')) {
+    const needsRemote = client.localConfigSupport === 'full';
     info.push(
-      `- **Connection Type**: stdio only${client.requiresMcpRemoteForHttp ? ' (requires mcp-remote for HTTP servers)' : ''}`
+      `- **Connection Type**: stdio only${needsRemote ? ' (requires mcp-remote for HTTP servers)' : ''}`
     );
   } else if (client.localConfigSupport === 'none') {
     if (client.id === 'chatgpt') {
-      info.push('- **Connection Type**: Web-based (requires custom GPT creation)');
+      info.push('- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)');
     } else {
-      info.push('- **Connection Type**: Organization-managed');
+      info.push('- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)');
     }
   }
 
@@ -144,8 +150,8 @@ function generateClientSection(client: any): string {
   }
 
   // Special properties
-  if (client.oneClickProtocol) {
-    info.push(`- **One-Click Protocol**: \`${client.oneClickProtocol}\``);
+  if (client.oneClick?.protocol) {
+    info.push(`- **One-Click Protocol**: \`${client.oneClick.protocol}\``);
   }
 
   if (client.configFormat === 'yaml') {
@@ -194,7 +200,8 @@ function generateClientSection(client: any): string {
     // HTTP configuration (remote servers)
     sections.push('');
     sections.push('<details>');
-    if (client.requiresMcpRemoteForHttp) {
+    const needsMcpRemote = !client.transports?.includes('http');
+    if (needsMcpRemote) {
       sections.push(
         '<summary><strong>HTTP Configuration (via stdio with mcp-remote bridge)</strong></summary>'
       );
@@ -299,10 +306,10 @@ function generateDocument(): string {
 
   // Generate dynamic client lists based on actual configuration
   const nativeHttpClients = clients.filter(
-    (c) => c.clientSupports === 'http' && c.localConfigSupport === 'full'
+    (c) => c.transports?.includes('http') && c.localConfigSupport === 'full'
   );
   const stdioOnlyClients = clients.filter(
-    (c) => c.clientSupports === 'stdio-only' && c.localConfigSupport === 'full'
+    (c) => c.transports?.includes('stdio') && !c.transports?.includes('http') && c.localConfigSupport === 'full'
   );
   const managedClients = clients.filter((c) => c.localConfigSupport === 'none');
 
@@ -368,9 +375,9 @@ function generateDocument(): string {
   sections.push('## One-Click Protocol Support');
   sections.push('');
   sections.push('Some clients support one-click installation via custom protocols:');
-  const oneClickClients = clients.filter((c) => c.oneClickProtocol);
+  const oneClickClients = clients.filter((c) => c.oneClick?.protocol);
   for (const client of oneClickClients) {
-    sections.push(`- **${client.displayName}**: \`${client.oneClickProtocol}\``);
+    sections.push(`- **${client.displayName}**: \`${client.oneClick.protocol}\``);
   }
   sections.push('');
 
