@@ -5,13 +5,11 @@ import {
   validateMcpServersConfig,
   validateVsCodeConfig,
   CLIENT,
-  CLIENT_DISPLAY_NAME,
 } from '../src/index';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import * as yaml from 'js-yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,7 +25,7 @@ describe('ConfigBuilder', () => {
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
       };
-      const url = cursorBuilder.buildOneClickUrl(config);
+      const url = cursorBuilder.buildOneClickUrl!(config);
 
       // Decode the config parameter to verify it
       const urlObj = new URL(url.replace('cursor://', 'https://'));
@@ -50,13 +48,13 @@ describe('ConfigBuilder', () => {
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
       };
-      const url = vscodeBuilder.buildOneClickUrl(config);
+      const url = vscodeBuilder.buildOneClickUrl!(config);
 
-      // VSCode uses the entire config as URL-encoded query string
-      expect(url.startsWith('vscode://mcp/install?')).toBe(true);
+      // VSCode uses single colon format (vscode:) not double slash (vscode://)
+      expect(url.startsWith('vscode:mcp/install?')).toBe(true);
 
       // Extract and decode the config
-      const queryString = url.replace('vscode://mcp/install?', '');
+      const queryString = url.replace('vscode:mcp/install?', '');
       const decodedConfig = JSON.parse(decodeURIComponent(queryString));
 
       expect(decodedConfig).toEqual({
@@ -74,13 +72,13 @@ describe('ConfigBuilder', () => {
         instance: 'test-instance',
         apiToken: 'test-token',
       };
-      const url = vscodeBuilder.buildOneClickUrl(config);
+      const url = vscodeBuilder.buildOneClickUrl!(config);
 
-      // VSCode uses the entire config as URL-encoded query string
-      expect(url.startsWith('vscode://mcp/install?')).toBe(true);
+      // VSCode uses single colon format (vscode:) not double slash (vscode://)
+      expect(url.startsWith('vscode:mcp/install?')).toBe(true);
 
       // Extract and decode the config
-      const queryString = url.replace('vscode://mcp/install?', '');
+      const queryString = url.replace('vscode:mcp/install?', '');
       const decodedConfig = JSON.parse(decodeURIComponent(queryString));
 
       expect(decodedConfig).toEqual({
@@ -102,7 +100,7 @@ describe('ConfigBuilder', () => {
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
       };
-      expect(() => claudeBuilder.buildOneClickUrl(config)).toThrow(
+      expect(() => claudeBuilder.buildOneClickUrl!(config)).toThrow(
         'Claude for Desktop does not support one-click installation'
       );
     });

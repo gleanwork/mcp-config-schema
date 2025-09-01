@@ -75,10 +75,10 @@ For detailed configuration examples and requirements for each client, see **[CLI
 
 The following clients support one-click installation:
 
-| Client       | Protocol    | Format                                                               |
-| ------------ | ----------- | -------------------------------------------------------------------- |
-| **Cursor**   | `cursor://` | `cursor://anysphere.cursor-deeplink/mcp/install?name=...&config=...` |
-| **VS Code**  | `vscode://` | `vscode://mcp/install?{url-encoded-json-config}`                     |
+| Client      | Protocol    | Format                                                               |
+| ----------- | ----------- | -------------------------------------------------------------------- |
+| **Cursor**  | `cursor://` | `cursor://anysphere.cursor-deeplink/mcp/install?name=...&config=...` |
+| **VS Code** | `vscode:`   | `vscode:mcp/install?{url-encoded-json-config}`                       |
 
 ## Core Usage
 
