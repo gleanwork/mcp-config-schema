@@ -151,23 +151,26 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
   }
 
   protected buildRemoteCommand(serverData: GleanServerConfig): string | null {
-    // Check if this client is supported by configure-mcp-server
-    const supportedClients = ['claude-desktop', 'windsurf', 'goose', 'claude-code'];
+    // All clients that can use configure-mcp-server
+    const supportedClients = [
+      'claude-desktop',
+      'windsurf',
+      'goose',
+      'claude-code',
+      'claude-teams-enterprise',
+      'chatgpt',
+    ];
+
     if (!supportedClients.includes(this.config.id)) {
       // No CLI support for this client
       return null;
     }
 
-    if (!serverData.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
-    }
-
-    const packageName = serverData.configureMcpServerVersion
-      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
-      : '@gleanwork/configure-mcp-server';
+    const serverUrl = this.getServerUrl(serverData);
+    const packageName = this.getConfigureMcpServerPackage(serverData);
 
     let command = `npx -y ${packageName} remote`;
-    command += ` --url ${serverData.serverUrl}`;
+    command += ` --url ${serverUrl}`;
     command += ` --client ${this.config.id}`;
 
     if (serverData.apiToken) {
@@ -178,20 +181,26 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
   }
 
   protected buildLocalCommand(serverData: GleanServerConfig): string | null {
-    const supportedClients = ['claude-desktop', 'windsurf', 'goose', 'claude-code'];
+    const supportedClients = [
+      'claude-desktop',
+      'windsurf',
+      'goose',
+      'claude-code',
+      'claude-teams-enterprise',
+      'chatgpt',
+    ];
+
     if (!supportedClients.includes(this.config.id)) {
       return null;
     }
 
-    const packageName = serverData.configureMcpServerVersion
-      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
-      : '@gleanwork/configure-mcp-server';
+    const packageName = this.getConfigureMcpServerPackage(serverData);
 
     let command = `npx -y ${packageName} local`;
 
     // Handle instance URL vs instance name
     if (serverData.instance) {
-      if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {
+      if (this.isUrl(serverData.instance)) {
         // Full URL provided
         command += ` --url ${serverData.instance}`;
       } else {
@@ -199,7 +208,7 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
         command += ` --instance ${serverData.instance}`;
       }
     } else {
-      throw new Error('Local configuration requires instance');
+      command += ` --instance ${this.getInstanceOrPlaceholder(serverData)}`;
     }
 
     command += ` --client ${this.config.id}`;

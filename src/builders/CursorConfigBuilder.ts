@@ -57,17 +57,12 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
   }
 
   protected buildRemoteCommand(serverData: GleanServerConfig): string {
-    if (!serverData.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
-    }
-
-    const packageName = serverData.configureMcpServerVersion
-      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
-      : '@gleanwork/configure-mcp-server';
+    const serverUrl = this.getServerUrl(serverData);
+    const packageName = this.getConfigureMcpServerPackage(serverData);
 
     // Cursor doesn't have native CLI, use configure-mcp-server
     let command = `npx -y ${packageName} remote`;
-    command += ` --url ${serverData.serverUrl}`;
+    command += ` --url ${serverUrl}`;
     command += ` --client cursor`;
 
     if (serverData.apiToken) {
@@ -78,21 +73,19 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
   }
 
   protected buildLocalCommand(serverData: GleanServerConfig): string {
-    if (!serverData.instance) {
-      throw new Error('Local configuration requires instance');
-    }
-
-    const packageName = serverData.configureMcpServerVersion
-      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
-      : '@gleanwork/configure-mcp-server';
+    const packageName = this.getConfigureMcpServerPackage(serverData);
 
     let command = `npx -y ${packageName} local`;
 
-    // Handle instance URL vs instance name
-    if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {
-      command += ` --url ${serverData.instance}`;
+    if (serverData.instance) {
+      // Handle instance URL vs instance name
+      if (this.isUrl(serverData.instance)) {
+        command += ` --url ${serverData.instance}`;
+      } else {
+        command += ` --instance ${serverData.instance}`;
+      }
     } else {
-      command += ` --instance ${serverData.instance}`;
+      command += ` --instance ${this.getInstanceOrPlaceholder(serverData)}`;
     }
 
     command += ` --client cursor`;

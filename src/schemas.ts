@@ -74,7 +74,7 @@ export const BuildOptionsSchema = z.object({
 export const GleanServerConfigSchema = z
   .object({
     transport: TransportSchema,
-    serverUrl: z.string().url().optional(),
+    serverUrl: z.string().optional(), // Accept any string, not just valid URLs
     serverName: z.string().optional(),
     instance: z.string().optional(),
     apiToken: z.string().optional(),

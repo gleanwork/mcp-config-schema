@@ -1,6 +1,12 @@
 import { MCPClientConfig, GleanServerConfig, Platform, validateServerConfig } from '../types.js';
 import * as yaml from 'js-yaml';
 
+// Constants for repeated values
+const DEFAULT_PLACEHOLDER_URL = 'https://[instance]-be.glean.com/mcp/[endpoint]';
+const DEFAULT_PLACEHOLDER_INSTANCE = '[instance]';
+const CONFIGURE_MCP_SERVER_PACKAGE = '@gleanwork/configure-mcp-server';
+const LOCAL_MCP_SERVER_PACKAGE = '@gleanwork/local-mcp-server';
+
 function isNodeEnvironment(): boolean {
   return (
     typeof process !== 'undefined' &&
@@ -89,17 +95,59 @@ export abstract class BaseConfigBuilder {
   buildOneClickUrl?(serverData: GleanServerConfig): string;
 
   buildCommand(serverData: GleanServerConfig): string | null {
-    const validatedConfig = validateServerConfig(serverData);
+    try {
+      const validatedConfig = validateServerConfig(serverData);
 
-    if (validatedConfig.transport === 'http') {
-      return this.buildRemoteCommand(validatedConfig);
-    } else {
-      return this.buildLocalCommand(validatedConfig);
+      if (validatedConfig.transport === 'http') {
+        return this.buildRemoteCommand(validatedConfig);
+      } else {
+        return this.buildLocalCommand(validatedConfig);
+      }
+    } catch (error) {
+      // If validation fails, return null instead of throwing
+      return null;
     }
   }
 
   protected abstract buildRemoteCommand(serverData: GleanServerConfig): string | null;
   protected abstract buildLocalCommand(serverData: GleanServerConfig): string | null;
+
+  /**
+   * Helper to get the configure-mcp-server package name with optional version
+   */
+  protected getConfigureMcpServerPackage(serverData: GleanServerConfig): string {
+    return serverData.configureMcpServerVersion
+      ? `${CONFIGURE_MCP_SERVER_PACKAGE}@${serverData.configureMcpServerVersion}`
+      : CONFIGURE_MCP_SERVER_PACKAGE;
+  }
+
+  /**
+   * Helper to get the server URL with fallback to placeholder
+   */
+  protected getServerUrl(serverData: GleanServerConfig): string {
+    return serverData.serverUrl || DEFAULT_PLACEHOLDER_URL;
+  }
+
+  /**
+   * Helper to get the instance with fallback to placeholder
+   */
+  protected getInstanceOrPlaceholder(serverData: GleanServerConfig): string {
+    return serverData.instance || DEFAULT_PLACEHOLDER_INSTANCE;
+  }
+
+  /**
+   * Helper to determine if a string is a URL
+   */
+  protected isUrl(str: string): boolean {
+    return str.startsWith('http://') || str.startsWith('https://');
+  }
+
+  /**
+   * Get the local MCP server package name
+   */
+  protected getLocalMcpServerPackage(): string {
+    return LOCAL_MCP_SERVER_PACKAGE;
+  }
 
   abstract getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown>;
 

@@ -192,16 +192,18 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
 
   protected buildRemoteCommand(serverData: GleanServerConfig): string {
     // VS Code has native support for HTTP servers via --add-mcp
+    const serverUrl = this.getServerUrl(serverData);
+
     const serverName = buildMcpServerName({
       transport: serverData.transport,
-      serverUrl: serverData.serverUrl,
+      serverUrl: serverUrl,
       serverName: serverData.serverName,
     });
 
     const config: Record<string, unknown> = {
       name: serverName,
       type: 'http',
-      url: serverData.serverUrl,
+      url: serverUrl,
     };
 
     if (serverData.apiToken) {
@@ -228,24 +230,28 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
       name: serverName,
       type: 'stdio',
       command: 'npx',
-      args: ['-y', '@gleanwork/local-mcp-server'],
+      args: ['-y', this.getLocalMcpServerPackage()],
     };
 
-    if (serverData.instance || serverData.apiToken) {
-      const env: Record<string, string> = {};
-      if (serverData.instance) {
-        if (
-          serverData.instance.startsWith('http://') ||
-          serverData.instance.startsWith('https://')
-        ) {
-          env.GLEAN_URL = serverData.instance;
-        } else {
-          env.GLEAN_INSTANCE = serverData.instance;
-        }
+    const env: Record<string, string> = {};
+
+    if (serverData.instance) {
+      if (this.isUrl(serverData.instance)) {
+        env.GLEAN_URL = serverData.instance;
+      } else {
+        env.GLEAN_INSTANCE = serverData.instance;
       }
-      if (serverData.apiToken) {
-        env.GLEAN_API_TOKEN = serverData.apiToken;
-      }
+    } else {
+      // Use placeholder if no instance
+      env.GLEAN_INSTANCE = this.getInstanceOrPlaceholder(serverData);
+    }
+
+    if (serverData.apiToken) {
+      env.GLEAN_API_TOKEN = serverData.apiToken;
+    }
+
+    // Only add env to config if it has properties
+    if (Object.keys(env).length > 0) {
       config.env = env;
     }
 

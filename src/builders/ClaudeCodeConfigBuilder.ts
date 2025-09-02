@@ -4,17 +4,15 @@ import { buildMcpServerName } from '../server-name.js';
 
 export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
   protected buildRemoteCommand(serverData: GleanServerConfig): string {
-    if (!serverData.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
-    }
+    const serverUrl = this.getServerUrl(serverData);
 
     const serverName = buildMcpServerName({
       transport: serverData.transport,
-      serverUrl: serverData.serverUrl,
+      serverUrl: serverUrl,
       serverName: serverData.serverName,
     });
 
-    let command = `claude mcp add ${serverName} ${serverData.serverUrl} --transport http`;
+    let command = `claude mcp add ${serverName} ${serverUrl} --transport http`;
 
     // Claude Code uses --header flag for auth
     if (serverData.apiToken) {
@@ -33,26 +31,23 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
     serverData: GleanServerConfig,
     mode: 'local' | 'remote'
   ): string {
-    const packageName = serverData.configureMcpServerVersion
-      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
-      : '@gleanwork/configure-mcp-server';
+    const packageName = this.getConfigureMcpServerPackage(serverData);
 
     let command = `npx -y ${packageName} ${mode}`;
 
     if (mode === 'remote') {
-      if (!serverData.serverUrl) {
-        throw new Error('Remote configuration requires serverUrl');
-      }
-      command += ` --url ${serverData.serverUrl}`;
+      const serverUrl = this.getServerUrl(serverData);
+      command += ` --url ${serverUrl}`;
     } else {
-      if (!serverData.instance) {
-        throw new Error('Local configuration requires instance');
-      }
-      // Handle instance URL vs instance name
-      if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {
-        command += ` --url ${serverData.instance}`;
+      if (serverData.instance) {
+        // Handle instance URL vs instance name
+        if (this.isUrl(serverData.instance)) {
+          command += ` --url ${serverData.instance}`;
+        } else {
+          command += ` --instance ${serverData.instance}`;
+        }
       } else {
-        command += ` --instance ${serverData.instance}`;
+        command += ` --instance ${this.getInstanceOrPlaceholder(serverData)}`;
       }
     }
 
