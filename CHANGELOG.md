@@ -9,6 +9,16 @@
 
 
 
+
+## v0.12.1 (2025-09-02)
+
+#### :bug: Bug Fix
+* [#20](https://github.com/gleanwork/mcp-config-schema/pull/20) fix: Exports server name utils as part of browser bundle ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.12.0 (2025-09-02)
 
 #### :rocket: Enhancement
