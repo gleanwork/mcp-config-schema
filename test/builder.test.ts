@@ -4,6 +4,7 @@ import {
   validateGeneratedConfig,
   validateMcpServersConfig,
   validateVsCodeConfig,
+  buildCommand,
   CLIENT,
 } from '../src/index';
 import * as fs from 'fs';
@@ -56,11 +57,11 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"claude mcp add glean_test-server https://example.com/mcp/default --transport http --header "Authorization: Bearer test-token""`
+        `"claude mcp add glean_test-server https://example.com/mcp/default --transport http --scope user --header "Authorization: Bearer test-token""`
       );
     });
 
-    it('generates Claude Code fallback command for local server', () => {
+    it('generates Claude Code native command for local server', () => {
       const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const command = claudeBuilder.buildCommand({
         transport: 'stdio',
@@ -70,7 +71,7 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server local --instance test-instance --client claude-code --token test-token"`
+        `"claude mcp add glean_local-test --scope user --env GLEAN_INSTANCE=test-instance --env GLEAN_API_TOKEN=test-token -- npx -y @gleanwork/local-mcp-server"`
       );
     });
 
@@ -135,6 +136,199 @@ describe('ConfigBuilder', () => {
       expect(command).toMatchInlineSnapshot(
         `"code --add-mcp '{"name":"glean_test'\\''s-server","type":"http","url":"https://example.com/mcp/default","headers":{"Authorization":"Bearer test-token"}}'"`
       );
+    });
+
+    it('uses configureMcpServerVersion when provided for Cursor', () => {
+      const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+      const command = cursorBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+        apiToken: 'test-token',
+        configureMcpServerVersion: 'beta',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server@beta remote --url https://example.com/mcp/default --client cursor --token test-token"`
+      );
+    });
+
+    it('uses configureMcpServerVersion for local commands', () => {
+      const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+      const command = cursorBuilder.buildCommand({
+        transport: 'stdio',
+        instance: 'test-instance',
+        serverName: 'local-test',
+        apiToken: 'test-token',
+        configureMcpServerVersion: '1.0.0-beta.3',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server@1.0.0-beta.3 local --instance test-instance --client cursor --token test-token"`
+      );
+    });
+
+    it('Claude Code native command ignores configureMcpServerVersion for local', () => {
+      const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_CODE);
+      const command = claudeBuilder.buildCommand({
+        transport: 'stdio',
+        instance: 'test-instance',
+        serverName: 'local-test',
+        configureMcpServerVersion: 'latest',
+      });
+
+      // Claude Code uses native command, so configureMcpServerVersion doesn't apply
+      expect(command).toMatchInlineSnapshot(
+        `"claude mcp add glean_local-test --scope user --env GLEAN_INSTANCE=test-instance -- npx -y @gleanwork/local-mcp-server"`
+      );
+    });
+
+    it('uses configureMcpServerVersion for Goose', () => {
+      const gooseBuilder = registry.createBuilder(CLIENT.GOOSE);
+      const command = gooseBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+        configureMcpServerVersion: '2.0.0',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server@2.0.0 remote --url https://example.com/mcp/default --client goose"`
+      );
+    });
+
+    describe('Edge cases and error handling', () => {
+      it('handles placeholder URLs', () => {
+        const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+        const command = cursorBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: 'https://[instance]-be.glean.com/mcp/[endpoint]',
+          serverName: 'glean',
+        });
+        expect(command).toMatchInlineSnapshot(
+          `"npx -y @gleanwork/configure-mcp-server remote --url https://[instance]-be.glean.com/mcp/[endpoint] --client cursor"`
+        );
+      });
+
+      it('handles invalid URLs', () => {
+        const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+        const command = vscodeBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: 'not-a-valid-url',
+          serverName: 'test',
+        });
+        expect(command).toMatchInlineSnapshot(
+          `"code --add-mcp '{"name":"glean_test","type":"http","url":"not-a-valid-url"}'"`
+        );
+      });
+
+      it('handles missing serverUrl for remote', () => {
+        const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+        const command = cursorBuilder.buildCommand({
+          transport: 'http',
+          serverName: 'test',
+        });
+        expect(command).toMatchInlineSnapshot(
+          `"npx -y @gleanwork/configure-mcp-server remote --url https://[instance]-be.glean.com/mcp/[endpoint] --client cursor"`
+        );
+      });
+
+      it('handles missing instance for local', () => {
+        const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+        const command = vscodeBuilder.buildCommand({
+          transport: 'stdio',
+          serverName: 'test',
+        });
+        expect(command).toMatchInlineSnapshot(
+          `"code --add-mcp '{"name":"glean_test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"[instance]"}}'"`
+        );
+      });
+
+      it('handles empty string serverUrl', () => {
+        const gooseBuilder = registry.createBuilder(CLIENT.GOOSE);
+        const command = gooseBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: '',
+          serverName: 'test',
+        });
+        expect(command).toMatchInlineSnapshot(
+          `"npx -y @gleanwork/configure-mcp-server remote --url https://[instance]-be.glean.com/mcp/[endpoint] --client goose"`
+        );
+      });
+
+      it('handles claude-teams-enterprise client', () => {
+        // Claude Teams doesn't support local config, but buildCommand should handle it gracefully
+        const command = buildCommand(CLIENT.CLAUDE_TEAMS_ENTERPRISE, {
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp',
+          serverName: 'test',
+          apiToken: 'token123',
+        });
+        // Should return null since Claude Teams doesn't support local config
+        expect(command).toBe(null);
+      });
+
+      it('handles chatgpt client', () => {
+        // ChatGPT doesn't support local config, but buildCommand should not throw
+        const command = buildCommand(CLIENT.CHATGPT, {
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp',
+          serverName: 'test',
+        });
+        // ChatGPT requires web UI, so command should be null
+        expect(command).toBe(null);
+      });
+
+      it('buildCommand wrapper handles errors gracefully', () => {
+        // Test with an invalid client ID
+        const command = buildCommand('invalid-client' as ClientId, {
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp',
+        });
+        expect(command).toBe(null);
+      });
+
+      it('handles all supported clients for remote', () => {
+        const clients = [
+          CLIENT.CLAUDE_CODE,
+          CLIENT.CURSOR,
+          CLIENT.VSCODE,
+          CLIENT.WINDSURF,
+          CLIENT.GOOSE,
+          CLIENT.CLAUDE_DESKTOP,
+        ];
+
+        clients.forEach((clientId) => {
+          const command = buildCommand(clientId, {
+            transport: 'http',
+            serverUrl: 'https://example.com/mcp',
+            serverName: 'test',
+          });
+          expect(command).not.toBe(null);
+          expect(command).toContain('example.com/mcp');
+        });
+      });
+
+      it('handles all supported clients for local', () => {
+        const clients = [
+          CLIENT.CLAUDE_CODE,
+          CLIENT.CURSOR,
+          CLIENT.VSCODE,
+          CLIENT.WINDSURF,
+          CLIENT.GOOSE,
+          CLIENT.CLAUDE_DESKTOP,
+        ];
+
+        clients.forEach((clientId) => {
+          const command = buildCommand(clientId, {
+            transport: 'stdio',
+            instance: 'my-instance',
+            serverName: 'test',
+          });
+          expect(command).not.toBe(null);
+          expect(command).toContain('my-instance');
+        });
+      });
     });
   });
 

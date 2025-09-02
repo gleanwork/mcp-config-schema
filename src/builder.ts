@@ -95,6 +95,11 @@ export function clientSupportsStdio(clientId: ClientId): boolean {
  * @returns The CLI command string, or null if the client doesn't support CLI installation
  */
 export function buildCommand(clientId: ClientId, serverData: GleanServerConfig): string | null {
-  const builder = registry.createBuilder(clientId);
-  return builder.buildCommand(serverData);
+  try {
+    const builder = registry.createBuilder(clientId);
+    return builder.buildCommand(serverData);
+  } catch (error) {
+    // Return null for any errors (unsupported clients, validation errors, etc.)
+    return null;
+  }
 }

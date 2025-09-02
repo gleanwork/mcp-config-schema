@@ -170,17 +170,23 @@ describe('Zod Validation', () => {
       }
     });
 
-    it('should reject invalid URL in server config', () => {
+    it('should accept any string as serverUrl including invalid URLs', () => {
       const config = {
         transport: 'http',
-        serverUrl: 'not-a-url', // Invalid
+        serverUrl: 'not-a-url', // Now accepted as placeholder
       };
 
       const result = safeValidateServerConfig(config);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].path).toEqual(['serverUrl']);
-      }
+      expect(result.success).toBe(true);
+
+      // Also test with placeholder URL
+      const placeholderConfig = {
+        transport: 'http',
+        serverUrl: 'https://[instance]-be.glean.com/mcp/[endpoint]',
+      };
+
+      const placeholderResult = safeValidateServerConfig(placeholderConfig);
+      expect(placeholderResult.success).toBe(true);
     });
 
     it('should throw on invalid config when using validateServerConfig', () => {

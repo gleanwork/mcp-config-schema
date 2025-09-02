@@ -14,7 +14,6 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       serverName: serverData.serverName,
     });
 
-    // Build the appropriate config based on the client's capabilities
     let config: Record<string, unknown>;
 
     if (serverData.transport === 'http') {
@@ -23,7 +22,6 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
         url: serverData.serverUrl,
       };
 
-      // Add headers for authentication if API token is provided
       if (serverData.apiToken) {
         config['headers'] = {
           Authorization: `Bearer ${serverData.apiToken}`,
@@ -47,23 +45,19 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       }
     }
 
-    // Cursor uses base64-json format
     const encodedConfig = Buffer.from(JSON.stringify(config)).toString('base64');
 
-    // Replace placeholders in the template
     return this.config.oneClick.urlTemplate
       .replace('{{name}}', encodeURIComponent(serverName))
       .replace('{{config}}', encodedConfig);
   }
 
   protected buildRemoteCommand(serverData: GleanServerConfig): string {
-    if (!serverData.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
-    }
+    const serverUrl = this.getServerUrl(serverData);
+    const packageName = this.getConfigureMcpServerPackage(serverData);
 
-    // Cursor doesn't have native CLI, use configure-mcp-server
-    let command = `npx -y @gleanwork/configure-mcp-server remote`;
-    command += ` --url ${serverData.serverUrl}`;
+    let command = `npx -y ${packageName} remote`;
+    command += ` --url ${serverUrl}`;
     command += ` --client cursor`;
 
     if (serverData.apiToken) {
@@ -74,17 +68,18 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
   }
 
   protected buildLocalCommand(serverData: GleanServerConfig): string {
-    if (!serverData.instance) {
-      throw new Error('Local configuration requires instance');
-    }
+    const packageName = this.getConfigureMcpServerPackage(serverData);
 
-    let command = `npx -y @gleanwork/configure-mcp-server local`;
+    let command = `npx -y ${packageName} local`;
 
-    // Handle instance URL vs instance name
-    if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {
-      command += ` --url ${serverData.instance}`;
+    if (serverData.instance) {
+      if (this.isUrl(serverData.instance)) {
+        command += ` --url ${serverData.instance}`;
+      } else {
+        command += ` --instance ${serverData.instance}`;
+      }
     } else {
-      command += ` --instance ${serverData.instance}`;
+      command += ` --instance ${this.getInstanceOrPlaceholder(serverData)}`;
     }
 
     command += ` --client cursor`;
@@ -99,12 +94,10 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
   getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
     const { serverKey } = this.config.configStructure;
 
-    // Cursor uses mcpServers wrapper
     if (config[serverKey]) {
       return config[serverKey] as Record<string, unknown>;
     }
 
-    // Check if it's already flat (no wrapper)
     const firstKey = Object.keys(config)[0];
     if (firstKey && typeof config[firstKey] === 'object') {
       return config;

@@ -4,19 +4,16 @@ import { buildMcpServerName } from '../server-name.js';
 
 export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
   protected buildRemoteCommand(serverData: GleanServerConfig): string {
-    if (!serverData.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
-    }
+    const serverUrl = this.getServerUrl(serverData);
 
     const serverName = buildMcpServerName({
       transport: serverData.transport,
-      serverUrl: serverData.serverUrl,
+      serverUrl: serverUrl,
       serverName: serverData.serverName,
     });
 
-    let command = `claude mcp add ${serverName} ${serverData.serverUrl} --transport http`;
+    let command = `claude mcp add ${serverName} ${serverUrl} --transport http --scope user`;
 
-    // Claude Code uses --header flag for auth
     if (serverData.apiToken) {
       command += ` --header "Authorization: Bearer ${serverData.apiToken}"`;
     }
@@ -25,38 +22,25 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
   }
 
   protected buildLocalCommand(serverData: GleanServerConfig): string {
-    // Claude Code doesn't have a native local command, fall back to configure-mcp-server
-    return this.buildConfigureMcpServerCommand(serverData, 'local');
-  }
+    const serverName = buildMcpServerName({
+      transport: 'stdio',
+      serverName: serverData.serverName,
+    });
 
-  private buildConfigureMcpServerCommand(
-    serverData: GleanServerConfig,
-    mode: 'local' | 'remote'
-  ): string {
-    let command = `npx -y @gleanwork/configure-mcp-server ${mode}`;
+    let command = `claude mcp add ${serverName} --scope user`;
 
-    if (mode === 'remote') {
-      if (!serverData.serverUrl) {
-        throw new Error('Remote configuration requires serverUrl');
-      }
-      command += ` --url ${serverData.serverUrl}`;
-    } else {
-      if (!serverData.instance) {
-        throw new Error('Local configuration requires instance');
-      }
-      // Handle instance URL vs instance name
-      if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {
-        command += ` --url ${serverData.instance}`;
+    if (serverData.instance) {
+      if (this.isUrl(serverData.instance)) {
+        command += ` --env GLEAN_URL=${serverData.instance}`;
       } else {
-        command += ` --instance ${serverData.instance}`;
+        command += ` --env GLEAN_INSTANCE=${serverData.instance}`;
       }
     }
-
-    command += ` --client ${this.config.id}`;
-
     if (serverData.apiToken) {
-      command += ` --token ${serverData.apiToken}`;
+      command += ` --env GLEAN_API_TOKEN=${serverData.apiToken}`;
     }
+
+    command += ` -- npx -y ${this.getLocalMcpServerPackage()}`;
 
     return command;
   }
