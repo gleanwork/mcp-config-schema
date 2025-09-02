@@ -8,6 +8,20 @@
 
 
 
+
+## v0.12.0 (2025-09-02)
+
+#### :rocket: Enhancement
+* [#19](https://github.com/gleanwork/mcp-config-schema/pull/19) feat: Adds optional version param to buildCommand (for pre-release packages) ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#18](https://github.com/gleanwork/mcp-config-schema/pull/18) feat: Adds buildCommand function to centralize CLI configuration command building ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :bug: Bug Fix
+* [#17](https://github.com/gleanwork/mcp-config-schema/pull/17) fix: Fixes vscode protocol to exclude double slashes (as per their docs) ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.11.0 (2025-08-29)
 
 #### :rocket: Enhancement
