@@ -19,6 +19,127 @@ const __dirname = dirname(__filename);
 describe('ConfigBuilder', () => {
   const registry = new MCPConfigRegistry();
 
+  describe('buildCommand', () => {
+    it('generates VS Code command with remote server', () => {
+      const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+      const command = vscodeBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"code --add-mcp '{"name":"glean_test-server","type":"http","url":"https://example.com/mcp/default","headers":{"Authorization":"Bearer test-token"}}'"`
+      );
+    });
+
+    it('generates VS Code command with local server', () => {
+      const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+      const command = vscodeBuilder.buildCommand({
+        transport: 'stdio',
+        serverName: 'local-test',
+        instance: 'test-instance',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"code --add-mcp '{"name":"glean_local-test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"test-instance","GLEAN_API_TOKEN":"test-token"}}'"`
+      );
+    });
+
+    it('generates Claude Code command with remote server', () => {
+      const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_CODE);
+      const command = claudeBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"claude mcp add glean_test-server https://example.com/mcp/default --transport http --header "Authorization: Bearer test-token""`
+      );
+    });
+
+    it('generates Claude Code fallback command for local server', () => {
+      const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_CODE);
+      const command = claudeBuilder.buildCommand({
+        transport: 'stdio',
+        instance: 'test-instance',
+        serverName: 'local-test',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server local --instance test-instance --client claude-code --token test-token"`
+      );
+    });
+
+    it('generates Cursor command with remote server', () => {
+      const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+      const command = cursorBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client cursor --token test-token"`
+      );
+    });
+
+    it('generates Cursor command with local server', () => {
+      const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+      const command = cursorBuilder.buildCommand({
+        transport: 'stdio',
+        instance: 'test-instance',
+        serverName: 'local-test',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server local --instance test-instance --client cursor --token test-token"`
+      );
+    });
+
+    it('handles URL-style instance for local config', () => {
+      const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+      const command = cursorBuilder.buildCommand({
+        transport: 'stdio',
+        instance: 'https://test-instance.glean.com',
+        serverName: 'local-test',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server local --url https://test-instance.glean.com --client cursor --token test-token"`
+      );
+    });
+
+    it('throws for clients without local config support', () => {
+      // ChatGPT doesn't support local configuration, so we can't create a builder
+      expect(() => registry.createBuilder(CLIENT.CHATGPT)).toThrow(
+        'Cannot create builder for ChatGPT'
+      );
+    });
+
+    it('escapes single quotes in VS Code commands', () => {
+      const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+      const command = vscodeBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: "test's-server",
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"code --add-mcp '{"name":"glean_test'\\''s-server","type":"http","url":"https://example.com/mcp/default","headers":{"Authorization":"Bearer test-token"}}'"`
+      );
+    });
+  });
+
   describe('buildOneClickUrl', () => {
     it('generates one-click URL for Cursor with HTTP native', () => {
       const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);

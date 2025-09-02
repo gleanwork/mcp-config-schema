@@ -88,6 +88,19 @@ export abstract class BaseConfigBuilder {
 
   buildOneClickUrl?(serverData: GleanServerConfig): string;
 
+  buildCommand(serverData: GleanServerConfig): string | null {
+    const validatedConfig = validateServerConfig(serverData);
+
+    if (validatedConfig.transport === 'http') {
+      return this.buildRemoteCommand(validatedConfig);
+    } else {
+      return this.buildLocalCommand(validatedConfig);
+    }
+  }
+
+  protected abstract buildRemoteCommand(serverData: GleanServerConfig): string | null;
+  protected abstract buildLocalCommand(serverData: GleanServerConfig): string | null;
+
   abstract getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown>;
 
   getConfigPath(): string {

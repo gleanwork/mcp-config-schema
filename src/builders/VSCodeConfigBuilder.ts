@@ -190,6 +190,70 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     return this.config.oneClick.urlTemplate.replace('{{config}}', encodedConfig);
   }
 
+  protected buildRemoteCommand(serverData: GleanServerConfig): string {
+    // VS Code has native support for HTTP servers via --add-mcp
+    const serverName = buildMcpServerName({
+      transport: serverData.transport,
+      serverUrl: serverData.serverUrl,
+      serverName: serverData.serverName,
+    });
+
+    const config: Record<string, unknown> = {
+      name: serverName,
+      type: 'http',
+      url: serverData.serverUrl,
+    };
+
+    if (serverData.apiToken) {
+      config.headers = {
+        Authorization: `Bearer ${serverData.apiToken}`,
+      };
+    }
+
+    // VS Code expects a JSON object as a single argument
+    const jsonConfig = JSON.stringify(config);
+    // Escape single quotes for shell
+    const escapedConfig = jsonConfig.replace(/'/g, "'\\''");
+    return `code --add-mcp '${escapedConfig}'`;
+  }
+
+  protected buildLocalCommand(serverData: GleanServerConfig): string {
+    // VS Code also supports stdio servers via --add-mcp
+    const serverName = buildMcpServerName({
+      transport: 'stdio',
+      serverName: serverData.serverName,
+    });
+
+    const config: Record<string, unknown> = {
+      name: serverName,
+      type: 'stdio',
+      command: 'npx',
+      args: ['-y', '@gleanwork/local-mcp-server'],
+    };
+
+    if (serverData.instance || serverData.apiToken) {
+      const env: Record<string, string> = {};
+      if (serverData.instance) {
+        if (
+          serverData.instance.startsWith('http://') ||
+          serverData.instance.startsWith('https://')
+        ) {
+          env.GLEAN_URL = serverData.instance;
+        } else {
+          env.GLEAN_INSTANCE = serverData.instance;
+        }
+      }
+      if (serverData.apiToken) {
+        env.GLEAN_API_TOKEN = serverData.apiToken;
+      }
+      config.env = env;
+    }
+
+    const jsonConfig = JSON.stringify(config);
+    const escapedConfig = jsonConfig.replace(/'/g, "'\\''");
+    return `code --add-mcp '${escapedConfig}'`;
+  }
+
   getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
     const { serverKey } = this.config.configStructure;
 

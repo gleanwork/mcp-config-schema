@@ -56,6 +56,46 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       .replace('{{config}}', encodedConfig);
   }
 
+  protected buildRemoteCommand(serverData: GleanServerConfig): string {
+    if (!serverData.serverUrl) {
+      throw new Error('Remote configuration requires serverUrl');
+    }
+
+    // Cursor doesn't have native CLI, use configure-mcp-server
+    let command = `npx -y @gleanwork/configure-mcp-server remote`;
+    command += ` --url ${serverData.serverUrl}`;
+    command += ` --client cursor`;
+
+    if (serverData.apiToken) {
+      command += ` --token ${serverData.apiToken}`;
+    }
+
+    return command;
+  }
+
+  protected buildLocalCommand(serverData: GleanServerConfig): string {
+    if (!serverData.instance) {
+      throw new Error('Local configuration requires instance');
+    }
+
+    let command = `npx -y @gleanwork/configure-mcp-server local`;
+
+    // Handle instance URL vs instance name
+    if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {
+      command += ` --url ${serverData.instance}`;
+    } else {
+      command += ` --instance ${serverData.instance}`;
+    }
+
+    command += ` --client cursor`;
+
+    if (serverData.apiToken) {
+      command += ` --token ${serverData.apiToken}`;
+    }
+
+    return command;
+  }
+
   getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
     const { serverKey } = this.config.configStructure;
 

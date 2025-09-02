@@ -159,6 +159,46 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
     }
   }
 
+  protected buildRemoteCommand(serverData: GleanServerConfig): string {
+    if (!serverData.serverUrl) {
+      throw new Error('Remote configuration requires serverUrl');
+    }
+
+    // Goose is supported by configure-mcp-server
+    let command = `npx -y @gleanwork/configure-mcp-server remote`;
+    command += ` --url ${serverData.serverUrl}`;
+    command += ` --client goose`;
+
+    if (serverData.apiToken) {
+      command += ` --token ${serverData.apiToken}`;
+    }
+
+    return command;
+  }
+
+  protected buildLocalCommand(serverData: GleanServerConfig): string {
+    if (!serverData.instance) {
+      throw new Error('Local configuration requires instance');
+    }
+
+    let command = `npx -y @gleanwork/configure-mcp-server local`;
+
+    // Handle instance URL vs instance name
+    if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {
+      command += ` --url ${serverData.instance}`;
+    } else {
+      command += ` --instance ${serverData.instance}`;
+    }
+
+    command += ` --client goose`;
+
+    if (serverData.apiToken) {
+      command += ` --token ${serverData.apiToken}`;
+    }
+
+    return command;
+  }
+
   getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
     // Goose uses extensions wrapper
     if (config['extensions']) {
