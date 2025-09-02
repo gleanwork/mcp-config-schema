@@ -57,11 +57,11 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"claude mcp add glean_test-server https://example.com/mcp/default --transport http --header "Authorization: Bearer test-token""`
+        `"claude mcp add glean_test-server https://example.com/mcp/default --transport http --scope user --header "Authorization: Bearer test-token""`
       );
     });
 
-    it('generates Claude Code fallback command for local server', () => {
+    it('generates Claude Code native command for local server', () => {
       const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const command = claudeBuilder.buildCommand({
         transport: 'stdio',
@@ -71,7 +71,7 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server local --instance test-instance --client claude-code --token test-token"`
+        `"claude mcp add glean_local-test --scope user --env GLEAN_INSTANCE=test-instance --env GLEAN_API_TOKEN=test-token -- npx -y @gleanwork/local-mcp-server"`
       );
     });
 
@@ -168,7 +168,7 @@ describe('ConfigBuilder', () => {
       );
     });
 
-    it('uses configureMcpServerVersion for Claude Code fallback', () => {
+    it('Claude Code native command ignores configureMcpServerVersion for local', () => {
       const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const command = claudeBuilder.buildCommand({
         transport: 'stdio',
@@ -177,8 +177,9 @@ describe('ConfigBuilder', () => {
         configureMcpServerVersion: 'latest',
       });
 
+      // Claude Code uses native command, so configureMcpServerVersion doesn't apply
       expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server@latest local --instance test-instance --client claude-code"`
+        `"claude mcp add glean_local-test --scope user --env GLEAN_INSTANCE=test-instance -- npx -y @gleanwork/local-mcp-server"`
       );
     });
 
