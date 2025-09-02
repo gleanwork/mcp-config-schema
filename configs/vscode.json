@@ -14,8 +14,8 @@
     "win32": "%APPDATA%\\Code\\User\\mcp.json"
   },
   "oneClick": {
-    "protocol": "vscode://",
-    "urlTemplate": "vscode://mcp/install?{{config}}",
+    "protocol": "vscode:",
+    "urlTemplate": "vscode:mcp/install?{{config}}",
     "configFormat": "url-encoded-json"
   },
   "configStructure": {

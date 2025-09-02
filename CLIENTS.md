@@ -4,16 +4,16 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 ## Quick Reference
 
-| Client | Compatibility | Connection Type | Requires mcp-remote? | Platforms |
-|--------|--------------|-----------------|---------------------|-----------|
-| **ChatGPT** | None | HTTP only | Yes (for HTTP) | Web only |
-| **Claude Code** | Full | HTTP native | No | macOS, Linux, Windows |
-| **Claude for Desktop** | Full | stdio only | Yes (for HTTP) | macOS, Windows, Linux |
-| **Claude for Teams/Enterprise** | None | stdio only | Yes (for HTTP) | Organization-managed |
-| **Cursor** | Full | HTTP native | No | macOS, Linux, Windows |
-| **Goose** | Full | HTTP native | No | macOS, Linux, Windows |
-| **Visual Studio Code** | Full | HTTP native | No | macOS, Linux, Windows |
-| **Windsurf** | Full | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
+| Client                          | Compatibility | Connection Type | Requires mcp-remote? | Platforms             |
+| ------------------------------- | ------------- | --------------- | -------------------- | --------------------- |
+| **ChatGPT**                     | None          | HTTP only       | Yes (for HTTP)       | Web only              |
+| **Claude Code**                 | Full          | HTTP native     | No                   | macOS, Linux, Windows |
+| **Claude for Desktop**          | Full          | stdio only      | Yes (for HTTP)       | macOS, Windows, Linux |
+| **Claude for Teams/Enterprise** | None          | stdio only      | Yes (for HTTP)       | Organization-managed  |
+| **Cursor**                      | Full          | HTTP native     | No                   | macOS, Linux, Windows |
+| **Goose**                       | Full          | HTTP native     | No                   | macOS, Linux, Windows |
+| **Visual Studio Code**          | Full          | HTTP native     | No                   | macOS, Linux, Windows |
+| **Windsurf**                    | Full          | stdio only      | Yes (for HTTP)       | macOS, Linux, Windows |
 
 ## Detailed Client Information
 
@@ -57,7 +57,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 - **Documentation**: [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.claude.json`
+  - \*\*macOS/Linux: `$HOME/.claude.json`
   - **Windows**: `%USERPROFILE%\.claude.json`
 
 <details>
@@ -274,7 +274,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 - **Supported Platforms**: macOS, Linux, Windows
 - **One-Click Protocol**: `cursor://`
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.cursor/mcp.json`
+  - \*\*macOS/Linux: `$HOME/.cursor/mcp.json`
   - **Windows**: `%USERPROFILE%\.cursor\mcp.json`
 
 <details>
@@ -370,7 +370,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Format**: YAML
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.config/goose/config.yaml`
+  - \*\*macOS/Linux: `$HOME/.config/goose/config.yaml`
   - **Windows**: `%USERPROFILE%\.config\goose\config.yaml`
 
 <details>
@@ -463,7 +463,7 @@ extensions:
 - **Connection Type**: Native HTTP support
 - **Documentation**: [Visual Studio Code Docs](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
 - **Supported Platforms**: macOS, Linux, Windows
-- **One-Click Protocol**: `vscode://`
+- **One-Click Protocol**: `vscode:`
 - **Configuration Paths**:
   - **macOS**: `$HOME/Library/Application Support/Code/User/mcp.json`
   - **Linux**: `$HOME/.config/Code/User/mcp.json`
@@ -489,8 +489,8 @@ extensions:
     "win32": "%APPDATA%\\Code\\User\\mcp.json"
   },
   "oneClick": {
-    "protocol": "vscode://",
-    "urlTemplate": "vscode://mcp/install?{{config}}",
+    "protocol": "vscode:",
+    "urlTemplate": "vscode:mcp/install?{{config}}",
     "configFormat": "url-encoded-json"
   },
   "configStructure": {
@@ -562,7 +562,7 @@ extensions:
 - **Supported Platforms**: macOS, Linux, Windows
 - **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.codeium/windsurf/mcp_config.json`
+  - \*\*macOS/Linux: `$HOME/.codeium/windsurf/mcp_config.json`
   - **Windows**: `%USERPROFILE%\.codeium\windsurf\mcp_config.json`
 
 <details>
@@ -646,49 +646,61 @@ extensions:
 ## Connection Types Explained
 
 ### Native HTTP Clients
+
 Clients that can connect directly to HTTP MCP servers without additional tooling:
+
 - Claude Code
 - Cursor
 - Goose
 - Visual Studio Code
 
 ### stdio-only Clients
+
 Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP servers:
+
 - Claude for Desktop
 - Windsurf
 
 ### Web-based/Managed Clients
+
 Clients that don't support local configuration files:
+
 - ChatGPT (chatgpt is web-based and requires creating custom gpts through their web ui. no local configuration file support.)
 - Claude for Teams/Enterprise (mcp servers are centrally managed by admins. no local configuration support - servers must be configured at the organization level.)
 
 ## Configuration File Formats
 
 ### JSON Format
+
 Used by: Claude Code, VS Code, Claude Desktop, Cursor, Windsurf
 
 ### YAML Format
+
 Used by: Goose
 
 ## Platform Support
 
 ### Full Cross-Platform Support
+
 - Visual Studio Code
 - Cursor
 - Goose
 - Windsurf
 
 ### macOS and Windows Only
+
 - Claude for Desktop
 
 ### macOS, Linux, and Windows
+
 - Claude Code
 
 ## One-Click Protocol Support
 
 Some clients support one-click installation via custom protocols:
+
 - **Cursor**: `cursor://`
-- **Visual Studio Code**: `vscode://`
+- **Visual Studio Code**: `vscode:`
 
 ## Additional Resources
 
@@ -698,4 +710,4 @@ Some clients support one-click installation via custom protocols:
 
 ---
 
-*This document is automatically generated from the configuration files in the `configs/` directory. To update, run `npm run generate:docs`.*
+_This document is automatically generated from the configuration files in the `configs/` directory. To update, run `npm run generate:docs`._

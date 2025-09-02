@@ -61,7 +61,7 @@ function formatPlatforms(platforms: string[]): string {
 function generateQuickReference(): string {
   const rows = clients.map((client) => {
     const compatibility = client.localConfigSupport === 'full' ? 'Full' : 'None';
-    
+
     // Determine connection type based on transports array
     let connectionType = 'Unknown';
     if (client.transports?.includes('http') && client.transports?.includes('stdio')) {
@@ -73,14 +73,17 @@ function generateQuickReference(): string {
     } else if (client.localConfigSupport === 'none') {
       connectionType = 'stdio only';
     }
-    
+
     // Determine if mcp-remote is needed
-    const requiresRemote = !client.transports?.includes('http') && client.localConfigSupport === 'full'
-      ? 'Yes (for HTTP)'
-      : client.localConfigSupport === 'none'
-        ? client.id === 'chatgpt' ? 'Yes (for HTTP)' : 'Yes (for HTTP)'
-        : 'No';
-        
+    const requiresRemote =
+      !client.transports?.includes('http') && client.localConfigSupport === 'full'
+        ? 'Yes (for HTTP)'
+        : client.localConfigSupport === 'none'
+          ? client.id === 'chatgpt'
+            ? 'Yes (for HTTP)'
+            : 'Yes (for HTTP)'
+          : 'No';
+
     const platforms =
       client.supportedPlatforms.length > 0
         ? formatPlatforms(client.supportedPlatforms)
@@ -309,7 +312,10 @@ function generateDocument(): string {
     (c) => c.transports?.includes('http') && c.localConfigSupport === 'full'
   );
   const stdioOnlyClients = clients.filter(
-    (c) => c.transports?.includes('stdio') && !c.transports?.includes('http') && c.localConfigSupport === 'full'
+    (c) =>
+      c.transports?.includes('stdio') &&
+      !c.transports?.includes('http') &&
+      c.localConfigSupport === 'full'
   );
   const managedClients = clients.filter((c) => c.localConfigSupport === 'none');
 
