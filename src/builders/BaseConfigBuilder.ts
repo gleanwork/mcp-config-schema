@@ -1,7 +1,6 @@
 import { MCPClientConfig, GleanServerConfig, Platform, validateServerConfig } from '../types.js';
 import * as yaml from 'js-yaml';
 
-// Constants for repeated values
 const DEFAULT_PLACEHOLDER_URL = 'https://[instance]-be.glean.com/mcp/[endpoint]';
 const DEFAULT_PLACEHOLDER_INSTANCE = '[instance]';
 const CONFIGURE_MCP_SERVER_PACKAGE = '@gleanwork/configure-mcp-server';
