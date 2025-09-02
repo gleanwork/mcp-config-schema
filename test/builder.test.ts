@@ -136,6 +136,64 @@ describe('ConfigBuilder', () => {
         `"code --add-mcp '{"name":"glean_test'\\''s-server","type":"http","url":"https://example.com/mcp/default","headers":{"Authorization":"Bearer test-token"}}'"`
       );
     });
+
+    it('uses configureMcpServerVersion when provided for Cursor', () => {
+      const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+      const command = cursorBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+        apiToken: 'test-token',
+        configureMcpServerVersion: 'beta',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server@beta remote --url https://example.com/mcp/default --client cursor --token test-token"`
+      );
+    });
+
+    it('uses configureMcpServerVersion for local commands', () => {
+      const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+      const command = cursorBuilder.buildCommand({
+        transport: 'stdio',
+        instance: 'test-instance',
+        serverName: 'local-test',
+        apiToken: 'test-token',
+        configureMcpServerVersion: '1.0.0-beta.3',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server@1.0.0-beta.3 local --instance test-instance --client cursor --token test-token"`
+      );
+    });
+
+    it('uses configureMcpServerVersion for Claude Code fallback', () => {
+      const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_CODE);
+      const command = claudeBuilder.buildCommand({
+        transport: 'stdio',
+        instance: 'test-instance',
+        serverName: 'local-test',
+        configureMcpServerVersion: 'latest',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server@latest local --instance test-instance --client claude-code"`
+      );
+    });
+
+    it('uses configureMcpServerVersion for Goose', () => {
+      const gooseBuilder = registry.createBuilder(CLIENT.GOOSE);
+      const command = gooseBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+        configureMcpServerVersion: '2.0.0',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server@2.0.0 remote --url https://example.com/mcp/default --client goose"`
+      );
+    });
   });
 
   describe('buildOneClickUrl', () => {

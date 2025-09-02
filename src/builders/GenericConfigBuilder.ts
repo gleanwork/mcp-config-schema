@@ -162,7 +162,11 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
       throw new Error('Remote configuration requires serverUrl');
     }
 
-    let command = `npx -y @gleanwork/configure-mcp-server remote`;
+    const packageName = serverData.configureMcpServerVersion
+      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
+      : '@gleanwork/configure-mcp-server';
+
+    let command = `npx -y ${packageName} remote`;
     command += ` --url ${serverData.serverUrl}`;
     command += ` --client ${this.config.id}`;
 
@@ -179,7 +183,11 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
       return null;
     }
 
-    let command = `npx -y @gleanwork/configure-mcp-server local`;
+    const packageName = serverData.configureMcpServerVersion
+      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
+      : '@gleanwork/configure-mcp-server';
+
+    let command = `npx -y ${packageName} local`;
 
     // Handle instance URL vs instance name
     if (serverData.instance) {

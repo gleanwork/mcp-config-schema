@@ -61,8 +61,12 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       throw new Error('Remote configuration requires serverUrl');
     }
 
+    const packageName = serverData.configureMcpServerVersion
+      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
+      : '@gleanwork/configure-mcp-server';
+
     // Cursor doesn't have native CLI, use configure-mcp-server
-    let command = `npx -y @gleanwork/configure-mcp-server remote`;
+    let command = `npx -y ${packageName} remote`;
     command += ` --url ${serverData.serverUrl}`;
     command += ` --client cursor`;
 
@@ -78,7 +82,11 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       throw new Error('Local configuration requires instance');
     }
 
-    let command = `npx -y @gleanwork/configure-mcp-server local`;
+    const packageName = serverData.configureMcpServerVersion
+      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
+      : '@gleanwork/configure-mcp-server';
+
+    let command = `npx -y ${packageName} local`;
 
     // Handle instance URL vs instance name
     if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {

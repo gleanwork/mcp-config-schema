@@ -68,6 +68,7 @@ export const MCPClientConfigSchema = z.object({
 export const BuildOptionsSchema = z.object({
   includeWrapper: z.boolean().optional(),
   mcpRemoteVersion: z.string().optional(),
+  configureMcpServerVersion: z.string().optional(),
 });
 
 export const GleanServerConfigSchema = z

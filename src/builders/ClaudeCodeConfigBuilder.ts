@@ -33,7 +33,11 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
     serverData: GleanServerConfig,
     mode: 'local' | 'remote'
   ): string {
-    let command = `npx -y @gleanwork/configure-mcp-server ${mode}`;
+    const packageName = serverData.configureMcpServerVersion
+      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
+      : '@gleanwork/configure-mcp-server';
+
+    let command = `npx -y ${packageName} ${mode}`;
 
     if (mode === 'remote') {
       if (!serverData.serverUrl) {

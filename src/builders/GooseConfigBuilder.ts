@@ -164,8 +164,12 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
       throw new Error('Remote configuration requires serverUrl');
     }
 
+    const packageName = serverData.configureMcpServerVersion
+      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
+      : '@gleanwork/configure-mcp-server';
+
     // Goose is supported by configure-mcp-server
-    let command = `npx -y @gleanwork/configure-mcp-server remote`;
+    let command = `npx -y ${packageName} remote`;
     command += ` --url ${serverData.serverUrl}`;
     command += ` --client goose`;
 
@@ -181,7 +185,11 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
       throw new Error('Local configuration requires instance');
     }
 
-    let command = `npx -y @gleanwork/configure-mcp-server local`;
+    const packageName = serverData.configureMcpServerVersion
+      ? `@gleanwork/configure-mcp-server@${serverData.configureMcpServerVersion}`
+      : '@gleanwork/configure-mcp-server';
+
+    let command = `npx -y ${packageName} local`;
 
     // Handle instance URL vs instance name
     if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {
