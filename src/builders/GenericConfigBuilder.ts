@@ -150,6 +150,59 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     throw new Error(`One-click URL generation not implemented for ${this.config.displayName}`);
   }
 
+  protected buildRemoteCommand(serverData: GleanServerConfig): string | null {
+    // Check if this client is supported by configure-mcp-server
+    const supportedClients = ['claude-desktop', 'windsurf', 'goose', 'claude-code'];
+    if (!supportedClients.includes(this.config.id)) {
+      // No CLI support for this client
+      return null;
+    }
+
+    if (!serverData.serverUrl) {
+      throw new Error('Remote configuration requires serverUrl');
+    }
+
+    let command = `npx -y @gleanwork/configure-mcp-server remote`;
+    command += ` --url ${serverData.serverUrl}`;
+    command += ` --client ${this.config.id}`;
+
+    if (serverData.apiToken) {
+      command += ` --token ${serverData.apiToken}`;
+    }
+
+    return command;
+  }
+
+  protected buildLocalCommand(serverData: GleanServerConfig): string | null {
+    const supportedClients = ['claude-desktop', 'windsurf', 'goose', 'claude-code'];
+    if (!supportedClients.includes(this.config.id)) {
+      return null;
+    }
+
+    let command = `npx -y @gleanwork/configure-mcp-server local`;
+
+    // Handle instance URL vs instance name
+    if (serverData.instance) {
+      if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {
+        // Full URL provided
+        command += ` --url ${serverData.instance}`;
+      } else {
+        // Instance name provided
+        command += ` --instance ${serverData.instance}`;
+      }
+    } else {
+      throw new Error('Local configuration requires instance');
+    }
+
+    command += ` --client ${this.config.id}`;
+
+    if (serverData.apiToken) {
+      command += ` --token ${serverData.apiToken}`;
+    }
+
+    return command;
+  }
+
   getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
     const { serverKey } = this.config.configStructure;
 

@@ -5,6 +5,7 @@ import { GenericConfigBuilder } from './builders/GenericConfigBuilder.js';
 import { GooseConfigBuilder } from './builders/GooseConfigBuilder.js';
 import { VSCodeConfigBuilder } from './builders/VSCodeConfigBuilder.js';
 import { CursorConfigBuilder } from './builders/CursorConfigBuilder.js';
+import { ClaudeCodeConfigBuilder } from './builders/ClaudeCodeConfigBuilder.js';
 import chatgptConfig from '../configs/chatgpt.json';
 import claudeCodeConfig from '../configs/claude-code.json';
 import claudeDesktopConfig from '../configs/claude-desktop.json';
@@ -47,6 +48,10 @@ export class MCPConfigRegistry {
     this.builderFactories.set(
       'cursor' as ClientId,
       CursorConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
+    );
+    this.builderFactories.set(
+      'claude-code' as ClientId,
+      ClaudeCodeConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
     );
     // Other clients will use GenericConfigBuilder by default
   }

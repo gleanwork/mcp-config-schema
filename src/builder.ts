@@ -85,3 +85,16 @@ export function clientSupportsHttpNatively(clientId: ClientId): boolean {
 export function clientSupportsStdio(clientId: ClientId): boolean {
   return registry.clientSupportsStdio(clientId);
 }
+
+/**
+ * Convenience function to build a CLI command for installing an MCP server
+ * without needing to instantiate the registry directly.
+ *
+ * @param clientId - The client to build the command for
+ * @param serverData - The server configuration data
+ * @returns The CLI command string, or null if the client doesn't support CLI installation
+ */
+export function buildCommand(clientId: ClientId, serverData: GleanServerConfig): string | null {
+  const builder = registry.createBuilder(clientId);
+  return builder.buildCommand(serverData);
+}
