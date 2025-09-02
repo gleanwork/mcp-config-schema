@@ -1,6 +1,17 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { GleanServerConfig } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
+import { CLIENT } from '../constants.js';
+
+// Clients that can use configure-mcp-server
+const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
+  CLIENT.CLAUDE_DESKTOP,
+  CLIENT.WINDSURF,
+  CLIENT.GOOSE,
+  CLIENT.CLAUDE_CODE,
+  CLIENT.CLAUDE_TEAMS_ENTERPRISE,
+  CLIENT.CHATGPT,
+];
 
 export class GenericConfigBuilder extends BaseConfigBuilder {
   protected buildLocalConfig(
@@ -118,7 +129,6 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
         : 'mcp-remote';
       const args = ['-y', mcpRemotePackage, serverData.serverUrl];
 
-      // Add bearer token as header for mcp-remote
       if (serverData.apiToken) {
         args.push('--header', `Authorization: Bearer ${serverData.apiToken}`);
       }
@@ -146,23 +156,11 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
       throw new Error(`${this.config.displayName} does not support one-click installation`);
     }
 
-    // This shouldn't be reached for clients without oneClick support
     throw new Error(`One-click URL generation not implemented for ${this.config.displayName}`);
   }
 
   protected buildRemoteCommand(serverData: GleanServerConfig): string | null {
-    // All clients that can use configure-mcp-server
-    const supportedClients = [
-      'claude-desktop',
-      'windsurf',
-      'goose',
-      'claude-code',
-      'claude-teams-enterprise',
-      'chatgpt',
-    ];
-
-    if (!supportedClients.includes(this.config.id)) {
-      // No CLI support for this client
+    if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
       return null;
     }
 
@@ -181,16 +179,7 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
   }
 
   protected buildLocalCommand(serverData: GleanServerConfig): string | null {
-    const supportedClients = [
-      'claude-desktop',
-      'windsurf',
-      'goose',
-      'claude-code',
-      'claude-teams-enterprise',
-      'chatgpt',
-    ];
-
-    if (!supportedClients.includes(this.config.id)) {
+    if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
       return null;
     }
 
@@ -198,13 +187,10 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
 
     let command = `npx -y ${packageName} local`;
 
-    // Handle instance URL vs instance name
     if (serverData.instance) {
       if (this.isUrl(serverData.instance)) {
-        // Full URL provided
         command += ` --url ${serverData.instance}`;
       } else {
-        // Instance name provided
         command += ` --instance ${serverData.instance}`;
       }
     } else {
@@ -223,15 +209,12 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
   getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
     const { serverKey } = this.config.configStructure;
 
-    // Check for different wrapper structures
     if (config[serverKey]) {
       return config[serverKey] as Record<string, unknown>;
     }
 
-    // Check if it's already flat (no wrapper)
     const firstKey = Object.keys(config)[0];
     if (firstKey && typeof config[firstKey] === 'object') {
-      // Assume it's a flat server config
       return config;
     }
 

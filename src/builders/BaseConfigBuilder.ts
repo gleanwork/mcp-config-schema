@@ -104,7 +104,6 @@ export abstract class BaseConfigBuilder {
         return this.buildLocalCommand(validatedConfig);
       }
     } catch (error) {
-      // If validation fails, return null instead of throwing
       return null;
     }
   }
