@@ -147,6 +147,23 @@ export abstract class BaseConfigBuilder {
     return LOCAL_MCP_SERVER_PACKAGE;
   }
 
+  /**
+   * Encodes a string to base64 in a way that works in both Node.js and browsers.
+   * Handles Unicode characters properly.
+   */
+  protected toBase64(str: string): string {
+    if (typeof Buffer !== 'undefined') {
+      return Buffer.from(str).toString('base64');
+    } else if (typeof btoa !== 'undefined') {
+      const bytes = new TextEncoder().encode(str);
+      const binary = String.fromCharCode(...bytes);
+
+      return btoa(binary);
+    } else {
+      throw new Error('No base64 encoding method available');
+    }
+  }
+
   abstract getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown>;
 
   getConfigPath(): string {

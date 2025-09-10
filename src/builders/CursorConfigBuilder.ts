@@ -45,7 +45,7 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       }
     }
 
-    const encodedConfig = Buffer.from(JSON.stringify(config)).toString('base64');
+    const encodedConfig = this.toBase64(JSON.stringify(config));
 
     return this.config.oneClick.urlTemplate
       .replace('{{name}}', encodeURIComponent(serverName))
