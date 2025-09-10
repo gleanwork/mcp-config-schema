@@ -10,6 +10,16 @@
 
 
 
+
+## v0.12.2 (2025-09-10)
+
+#### :bug: Bug Fix
+* [#21](https://github.com/gleanwork/mcp-config-schema/pull/21) fix: Updates our one click url generator to not rely on Buffer for browser envs ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.12.1 (2025-09-02)
 
 #### :bug: Bug Fix
