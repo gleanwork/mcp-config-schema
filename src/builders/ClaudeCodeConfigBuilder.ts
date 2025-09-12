@@ -10,6 +10,7 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
       transport: serverData.transport,
       serverUrl: serverUrl,
       serverName: serverData.serverName,
+      productName: serverData.productName,
     });
 
     let command = `claude mcp add ${serverName} ${serverUrl} --transport http --scope user`;
@@ -25,6 +26,7 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
     const serverName = buildMcpServerName({
       transport: 'stdio',
       serverName: serverData.serverName,
+      productName: serverData.productName,
     });
 
     let command = `claude mcp add ${serverName} --scope user`;

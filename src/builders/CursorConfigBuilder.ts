@@ -12,6 +12,7 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       transport: serverData.transport,
       serverUrl: serverData.serverUrl,
       serverName: serverData.serverName,
+      productName: serverData.productName,
     });
 
     let config: Record<string, unknown>;

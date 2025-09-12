@@ -78,6 +78,7 @@ export const GleanServerConfigSchema = z
     serverName: z.string().optional(),
     instance: z.string().optional(),
     apiToken: z.string().optional(),
+    productName: z.string().optional(), // For white-label support, defaults to 'glean'
   })
   .merge(BuildOptionsSchema);
 

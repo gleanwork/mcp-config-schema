@@ -27,6 +27,7 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     const serverName = buildMcpServerName({
       transport: 'stdio',
       serverName: serverData.serverName,
+      productName: serverData.productName,
     });
     const serverConfig: Record<string, unknown> = {};
 
@@ -87,6 +88,7 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
       transport: 'http',
       serverUrl: serverData.serverUrl,
       serverName: serverData.serverName,
+      productName: serverData.productName,
     });
 
     if (httpConfig && this.config.transports.includes('http')) {
