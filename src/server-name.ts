@@ -11,8 +11,7 @@
  *
  * Examples:
  * - "Glean" -> "glean"
- * - "uSearch" -> "usearch"
- * - "Dell Saleschat" -> "dell_saleschat"
+ * - "Acme Saleschat" -> "acme_saleschat"
  * - "My Product Name" -> "my_product_name"
  */
 export function normalizeProductName(productName: string): string {
