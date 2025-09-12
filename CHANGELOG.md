@@ -11,6 +11,16 @@
 
 
 
+
+## v0.13.0 (2025-09-12)
+
+#### :rocket: Enhancement
+* [#22](https://github.com/gleanwork/mcp-config-schema/pull/22) feat: Support white labeling for product names ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.12.2 (2025-09-10)
 
 #### :bug: Bug Fix
