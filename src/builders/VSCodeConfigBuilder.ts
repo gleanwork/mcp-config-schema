@@ -16,6 +16,7 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     const serverName = buildMcpServerName({
       transport: 'stdio',
       serverName: serverData.serverName,
+      productName: serverData.productName,
     });
     const serverConfig: Record<string, unknown> = {};
 
@@ -76,6 +77,7 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
       transport: 'http',
       serverUrl: serverData.serverUrl,
       serverName: serverData.serverName,
+      productName: serverData.productName,
     });
 
     if (httpConfig && this.config.transports.includes('http')) {
@@ -150,6 +152,7 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
       transport: serverData.transport,
       serverUrl: serverData.serverUrl,
       serverName: serverData.serverName,
+      productName: serverData.productName,
     });
 
     // Build the appropriate config based on the client's capabilities
@@ -198,6 +201,7 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
       transport: serverData.transport,
       serverUrl: serverUrl,
       serverName: serverData.serverName,
+      productName: serverData.productName,
     });
 
     const config: Record<string, unknown> = {
@@ -224,6 +228,7 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     const serverName = buildMcpServerName({
       transport: 'stdio',
       serverName: serverData.serverName,
+      productName: serverData.productName,
     });
 
     const config: Record<string, unknown> = {

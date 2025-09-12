@@ -197,6 +197,61 @@ describe('ConfigBuilder', () => {
       );
     });
 
+    describe('White-label support', () => {
+      it('uses custom productName in server names for HTTP transport', () => {
+        const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+        const command = vscodeBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test-server',
+          apiToken: 'test-token',
+          productName: 'acme',
+        });
+        expect(command).toMatchInlineSnapshot(
+          `"code --add-mcp '{"name":"acme_test-server","type":"http","url":"https://example.com/mcp/default","headers":{"Authorization":"Bearer test-token"}}'"`
+        );
+      });
+
+      it('uses custom productName in server names for stdio transport', () => {
+        const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+        const command = vscodeBuilder.buildCommand({
+          transport: 'stdio',
+          serverName: 'local-test',
+          instance: 'test-instance',
+          apiToken: 'test-token',
+          productName: 'corp',
+        });
+        expect(command).toMatchInlineSnapshot(
+          `"code --add-mcp '{"name":"corp_local-test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"test-instance","GLEAN_API_TOKEN":"test-token"}}'"`
+        );
+      });
+
+      it('uses custom productName for extracted server names', () => {
+        const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+        const config = cursorBuilder.buildConfiguration({
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp/analytics',
+          apiToken: 'test-token',
+          productName: 'mycompany',
+        });
+        expect(Object.keys(config.mcpServers as Record<string, unknown>)[0]).toBe(
+          'mycompany_analytics'
+        );
+      });
+
+      it('defaults to glean when productName is not provided', () => {
+        const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+        const command = vscodeBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test-server',
+        });
+        expect(command).toMatchInlineSnapshot(
+          `"code --add-mcp '{"name":"glean_test-server","type":"http","url":"https://example.com/mcp/default"}'"`
+        );
+      });
+    });
+
     describe('Edge cases and error handling', () => {
       it('handles placeholder URLs', () => {
         const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
