@@ -6,10 +6,10 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 | Client | Compatibility | Connection Type | Requires mcp-remote? | Platforms |
 |--------|--------------|-----------------|---------------------|-----------|
-| **ChatGPT** | None | HTTP only | Yes (for HTTP) | Web only |
+| **ChatGPT** | None | HTTP only | No | Web only |
 | **Claude Code** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Claude for Desktop** | Full | stdio only | Yes (for HTTP) | macOS, Windows, Linux |
-| **Claude for Teams/Enterprise** | None | HTTP only | Yes (for HTTP) | Organization-managed |
+| **Claude for Teams/Enterprise** | None | HTTP only | No | Organization-managed |
 | **Cursor** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Goose** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Visual Studio Code** | Full | HTTP native | No | macOS, Linux, Windows |
@@ -20,7 +20,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ### ChatGPT
 
 - **Compatibility**: No local configuration support
-- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
+- **Connection Type**: HTTP only (managed)
 - **Documentation**: [OpenAI Platform Docs](https://platform.openai.com/docs)
 - **Notes**: ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.
 
@@ -34,6 +34,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "displayName": "ChatGPT",
   "description": "ChatGPT web interface - requires GPT configuration through web UI",
   "localConfigSupport": "none",
+  "remoteConfigSupport": "web",
   "localConfigNotes": "ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.",
   "transports": ["http"],
   "supportedPlatforms": [],
@@ -70,6 +71,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "displayName": "Claude Code",
   "description": "Claude Code with native HTTP support",
   "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -162,6 +164,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "displayName": "Claude for Desktop",
   "description": "Claude Desktop only supports stdio, requires mcp-remote for HTTP servers",
   "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
   "localConfigNotes": "Requires mcp-remote for remote servers",
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
   "transports": ["stdio"],
@@ -236,7 +239,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ### Claude for Teams/Enterprise
 
 - **Compatibility**: No local configuration support
-- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
+- **Connection Type**: HTTP only (managed)
 - **Documentation**: [Documentation](https://docs.anthropic.com/en/docs/claude-desktop)
 - **Notes**: MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.
 
@@ -250,6 +253,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "displayName": "Claude for Teams/Enterprise",
   "description": "Claude for Teams and Enterprise",
   "localConfigSupport": "none",
+  "remoteConfigSupport": "managed",
   "localConfigNotes": "MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.",
   "transports": ["http"],
   "supportedPlatforms": [],
@@ -287,6 +291,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "displayName": "Cursor",
   "description": "Cursor with native HTTP support",
   "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
   "documentationUrl": "https://docs.cursor.com/context/model-context-protocol",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -383,6 +388,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "displayName": "Goose",
   "description": "Goose with native HTTP support",
   "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
   "documentationUrl": "https://github.com/block/goose",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -479,6 +485,7 @@ extensions:
   "displayName": "Visual Studio Code",
   "description": "VS Code with native HTTP support",
   "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
   "documentationUrl": "https://code.visualstudio.com/docs/copilot/customization/mcp-servers",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -575,6 +582,7 @@ extensions:
   "displayName": "Windsurf",
   "description": "Windsurf only supports stdio, requires mcp-remote for HTTP servers",
   "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
   "localConfigNotes": "Requires mcp-remote for remote servers",
   "documentationUrl": "https://docs.codeium.com/windsurf",
   "transports": ["stdio"],

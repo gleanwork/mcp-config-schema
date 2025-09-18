@@ -5,6 +5,7 @@ import {
   SupportedTransportsSchema,
   ServerTypeSchema,
   LocalConfigSupportSchema,
+  RemoteConfigSupportSchema,
   TransportSchema,
   HttpConfigStructureSchema,
   StdioConfigStructureSchema,
@@ -28,6 +29,7 @@ export type ClientId = z.infer<typeof ClientIdSchema>;
 export type SupportedTransports = z.infer<typeof SupportedTransportsSchema>;
 export type ServerType = z.infer<typeof ServerTypeSchema>;
 export type LocalConfigSupport = z.infer<typeof LocalConfigSupportSchema>;
+export type RemoteConfigSupport = z.infer<typeof RemoteConfigSupportSchema>;
 export type Transport = z.infer<typeof TransportSchema>;
 export type HttpConfigStructure = z.infer<typeof HttpConfigStructureSchema>;
 export type StdioConfigStructure = z.infer<typeof StdioConfigStructureSchema>;
@@ -56,6 +58,7 @@ export {
   SupportedTransportsSchema,
   ServerTypeSchema,
   LocalConfigSupportSchema,
+  RemoteConfigSupportSchema,
   TransportSchema,
   MCPClientConfigSchema,
   PlatformPathsSchema,

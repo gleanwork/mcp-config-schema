@@ -4,6 +4,7 @@
   "displayName": "Cursor",
   "description": "Cursor with native HTTP support",
   "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
   "documentationUrl": "https://docs.cursor.com/context/model-context-protocol",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],

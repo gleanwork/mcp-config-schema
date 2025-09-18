@@ -4,6 +4,7 @@
   "displayName": "Claude Code",
   "description": "Claude Code with native HTTP support",
   "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],

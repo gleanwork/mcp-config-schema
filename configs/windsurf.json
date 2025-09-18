@@ -4,6 +4,7 @@
   "displayName": "Windsurf",
   "description": "Windsurf only supports stdio, requires mcp-remote for HTTP servers",
   "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
   "localConfigNotes": "Requires mcp-remote for remote servers",
   "documentationUrl": "https://docs.codeium.com/windsurf",
   "transports": ["stdio"],
