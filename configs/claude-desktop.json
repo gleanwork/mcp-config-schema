@@ -4,6 +4,7 @@
   "displayName": "Claude for Desktop",
   "description": "Claude Desktop only supports stdio, requires mcp-remote for HTTP servers",
   "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
   "localConfigNotes": "Requires mcp-remote for remote servers",
   "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
   "transports": ["stdio"],

@@ -4,6 +4,7 @@
   "displayName": "Claude for Teams/Enterprise",
   "description": "Claude for Teams and Enterprise",
   "localConfigSupport": "none",
+  "remoteConfigSupport": "managed",
   "localConfigNotes": "MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.",
   "transports": ["http"],
   "supportedPlatforms": [],

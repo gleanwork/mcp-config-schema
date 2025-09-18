@@ -70,26 +70,24 @@ function generateQuickReference(): string {
       connectionType = 'stdio only';
     } else if (client.transports?.includes('http') && !client.transports?.includes('stdio')) {
       connectionType = 'HTTP only';
-    } else if (client.localConfigSupport === 'none') {
-      connectionType = 'stdio only';
     }
 
     // Determine if mcp-remote is needed
     const requiresRemote =
-      !client.transports?.includes('http') && client.localConfigSupport === 'full'
-        ? 'Yes (for HTTP)'
-        : client.localConfigSupport === 'none'
-          ? client.id === 'chatgpt'
-            ? 'Yes (for HTTP)'
-            : 'Yes (for HTTP)'
-          : 'No';
+      client.localConfigSupport === 'full'
+        ? !client.transports?.includes('http')
+          ? 'Yes (for HTTP)'
+          : 'No'
+        : 'No';
 
     const platforms =
       client.supportedPlatforms.length > 0
         ? formatPlatforms(client.supportedPlatforms)
-        : client.id === 'chatgpt'
+        : client.remoteConfigSupport === 'web'
           ? 'Web only'
-          : 'Organization-managed';
+          : client.remoteConfigSupport === 'managed'
+            ? 'Organization-managed'
+            : 'Unknown';
 
     return `| **${client.displayName}** | ${compatibility} | ${connectionType} | ${requiresRemote} | ${platforms} |`;
   });
@@ -122,10 +120,12 @@ function generateClientSection(client: any): string {
       `- **Connection Type**: stdio only${needsRemote ? ' (requires mcp-remote for HTTP servers)' : ''}`
     );
   } else if (client.localConfigSupport === 'none') {
-    if (client.id === 'chatgpt') {
-      info.push('- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)');
-    } else {
-      info.push('- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)');
+    if (client.transports?.includes('http') && !client.transports?.includes('stdio')) {
+      info.push('- **Connection Type**: HTTP only (managed)');
+    } else if (client.transports?.includes('stdio') && !client.transports?.includes('http')) {
+      info.push('- **Connection Type**: stdio only (managed)');
+    } else if (client.transports?.includes('http') && client.transports?.includes('stdio')) {
+      info.push('- **Connection Type**: HTTP and stdio (managed)');
     }
   }
 

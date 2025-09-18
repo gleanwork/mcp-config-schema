@@ -14,6 +14,7 @@ describe('Zod Validation', () => {
         displayName: 'Claude Code',
         description: 'Test client',
         localConfigSupport: 'full',
+        remoteConfigSupport: 'none',
         transports: ['http'],
 
         supportedPlatforms: ['darwin'],
@@ -40,6 +41,7 @@ describe('Zod Validation', () => {
         displayName: 'Invalid',
         description: 'Test',
         localConfigSupport: 'full',
+        remoteConfigSupport: 'none',
         transports: ['http'],
 
         supportedPlatforms: ['darwin'],
@@ -65,6 +67,7 @@ describe('Zod Validation', () => {
         displayName: 'Claude Code',
         description: 'Test',
         localConfigSupport: 'partial', // Invalid
+        remoteConfigSupport: 'none',
         transports: ['http'],
 
         supportedPlatforms: ['darwin'],
@@ -91,6 +94,7 @@ describe('Zod Validation', () => {
         displayName: 'Claude Code',
         description: 'Test',
         localConfigSupport: 'full',
+        remoteConfigSupport: 'none',
         documentationUrl: 'https://docs.example.com',
         transports: ['http'],
 
@@ -114,6 +118,7 @@ describe('Zod Validation', () => {
         displayName: 'Claude Code',
         description: 'Test',
         localConfigSupport: 'full',
+        remoteConfigSupport: 'none',
         documentationUrl: 'not-a-url', // Invalid URL
         transports: ['http'],
 

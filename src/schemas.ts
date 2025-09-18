@@ -15,6 +15,9 @@ export const ServerTypeSchema = z.enum(['http', 'stdio']);
 
 export const LocalConfigSupportSchema = z.enum(['full', 'none']);
 
+// Indicates whether remote configuration is user/organization managed, web-only, or unsupported
+export const RemoteConfigSupportSchema = z.enum(['none', 'managed', 'web']);
+
 export const TransportSchema = z.enum(['stdio', 'http']);
 export const SupportedTransportsSchema = z.array(TransportSchema).min(1);
 export const HttpConfigStructureSchema = z.object({
@@ -48,6 +51,8 @@ export const MCPClientConfigSchema = z.object({
   displayName: z.string(),
   description: z.string(),
   localConfigSupport: LocalConfigSupportSchema,
+  // Whether remote configuration is handled externally (e.g., web/organization managed)
+  remoteConfigSupport: RemoteConfigSupportSchema,
   localConfigNotes: z.string().optional(),
   documentationUrl: z.string().url().optional(),
   transports: SupportedTransportsSchema,
