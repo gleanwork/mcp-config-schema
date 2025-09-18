@@ -12,6 +12,19 @@
 
 
 
+
+## v0.13.1 (2025-09-18)
+
+#### :bug: Bug Fix
+* [#26](https://github.com/gleanwork/mcp-config-schema/pull/26) Fix ChatGPT/Claude Enterprise "requires mcp-remote" ([@david-hamilton-glean](https://github.com/david-hamilton-glean))
+
+#### :house: Internal
+* [#23](https://github.com/gleanwork/mcp-config-schema/pull/23) chore: upgrade to ESLint 9 with flat config ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 2
+- David J. Hamilton ([@david-hamilton-glean](https://github.com/david-hamilton-glean))
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
 ## v0.13.0 (2025-09-12)
 
 #### :rocket: Enhancement
