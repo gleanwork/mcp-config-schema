@@ -1,12 +1,15 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: /
+    directory: "/"
     schedule:
-      interval: daily
+      interval: "monthly"
     # see https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/optimizing-pr-creation-version-updates#setting-up-a-cooldown-period-for-dependency-updates
     cooldown:
       default-days: 5
       semver-major-days: 30
       semver-minor-days: 7
       semver-patch-days: 3
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
