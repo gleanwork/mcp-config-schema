@@ -6,7 +6,7 @@
   "localConfigSupport": "full",
   "remoteConfigSupport": "none",
   "localConfigNotes": "Requires mcp-remote for remote servers",
-  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
+  "documentationUrl": "https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp",
   "transports": ["stdio"],
   "supportedPlatforms": ["darwin", "win32", "linux"],
   "configFormat": "json",

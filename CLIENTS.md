@@ -21,7 +21,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Compatibility**: No local configuration support
 - **Connection Type**: HTTP only (managed)
-- **Documentation**: [OpenAI Platform Docs](https://platform.openai.com/docs)
+- **Documentation**: [OpenAI Platform Docs](https://platform.openai.com/docs/mcp#test-and-connect-your-mcp-server)
 - **Notes**: ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.
 
 <details>
@@ -40,7 +40,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "supportedPlatforms": [],
   "configFormat": "json",
   "configPath": {},
-  "documentationUrl": "https://platform.openai.com/docs",
+  "documentationUrl": "https://platform.openai.com/docs/mcp#test-and-connect-your-mcp-server",
   "configStructure": {
     "serverKey": ""
   }
@@ -55,7 +55,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Compatibility**: Full local configuration support
 - **Connection Type**: Native HTTP support
-- **Documentation**: [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code)
+- **Documentation**: [Claude Code Docs](https://docs.claude.com/en/docs/claude-code/mcp)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Paths**:
   - **macOS/Linux: `$HOME/.claude.json`
@@ -72,7 +72,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "description": "Claude Code with native HTTP support",
   "localConfigSupport": "full",
   "remoteConfigSupport": "none",
-  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/mcp",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
@@ -146,7 +146,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Compatibility**: Full local configuration support
 - **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
-- **Documentation**: [Documentation](https://docs.anthropic.com/en/docs/claude-desktop)
+- **Documentation**: [Documentation](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp)
 - **Supported Platforms**: macOS, Windows, Linux
 - **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
@@ -166,7 +166,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "localConfigSupport": "full",
   "remoteConfigSupport": "none",
   "localConfigNotes": "Requires mcp-remote for remote servers",
-  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
+  "documentationUrl": "https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp",
   "transports": ["stdio"],
   "supportedPlatforms": ["darwin", "win32", "linux"],
   "configFormat": "json",
@@ -240,7 +240,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Compatibility**: No local configuration support
 - **Connection Type**: HTTP only (managed)
-- **Documentation**: [Documentation](https://docs.anthropic.com/en/docs/claude-desktop)
+- **Documentation**: [Documentation](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp)
 - **Notes**: MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.
 
 <details>
@@ -259,7 +259,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "supportedPlatforms": [],
   "configFormat": "json",
   "configPath": {},
-  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
+  "documentationUrl": "https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp",
   "configStructure": {
     "serverKey": ""
   }
@@ -565,7 +565,7 @@ extensions:
 
 - **Compatibility**: Full local configuration support
 - **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
-- **Documentation**: [Windsurf Docs](https://docs.codeium.com/windsurf)
+- **Documentation**: [Windsurf Docs](https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
@@ -584,7 +584,7 @@ extensions:
   "localConfigSupport": "full",
   "remoteConfigSupport": "none",
   "localConfigNotes": "Requires mcp-remote for remote servers",
-  "documentationUrl": "https://docs.codeium.com/windsurf",
+  "documentationUrl": "https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp",
   "transports": ["stdio"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",

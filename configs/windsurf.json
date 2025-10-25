@@ -6,7 +6,7 @@
   "localConfigSupport": "full",
   "remoteConfigSupport": "none",
   "localConfigNotes": "Requires mcp-remote for remote servers",
-  "documentationUrl": "https://docs.codeium.com/windsurf",
+  "documentationUrl": "https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp",
   "transports": ["stdio"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
