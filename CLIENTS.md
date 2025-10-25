@@ -21,7 +21,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Compatibility**: No local configuration support
 - **Connection Type**: HTTP only (managed)
-- **Documentation**: [OpenAI Platform Docs](https://platform.openai.com/docs/mcp#test-and-connect-your-mcp-server)
+- **Documentation**: [Link](https://platform.openai.com/docs/mcp#test-and-connect-your-mcp-server)
 - **Notes**: ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.
 
 <details>
@@ -55,7 +55,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Compatibility**: Full local configuration support
 - **Connection Type**: Native HTTP support
-- **Documentation**: [Claude Code Docs](https://docs.claude.com/en/docs/claude-code/mcp)
+- **Documentation**: [Link](https://docs.claude.com/en/docs/claude-code/mcp)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Paths**:
   - **macOS/Linux: `$HOME/.claude.json`
@@ -146,7 +146,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Compatibility**: Full local configuration support
 - **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
-- **Documentation**: [Documentation](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp)
+- **Documentation**: [Link](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp)
 - **Supported Platforms**: macOS, Windows, Linux
 - **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
@@ -240,7 +240,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Compatibility**: No local configuration support
 - **Connection Type**: HTTP only (managed)
-- **Documentation**: [Documentation](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp)
+- **Documentation**: [Link](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp)
 - **Notes**: MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.
 
 <details>
@@ -274,7 +274,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Compatibility**: Full local configuration support
 - **Connection Type**: Native HTTP support
-- **Documentation**: [Cursor MCP Docs](https://docs.cursor.com/context/model-context-protocol)
+- **Documentation**: [Link](https://docs.cursor.com/context/model-context-protocol)
 - **Supported Platforms**: macOS, Linux, Windows
 - **One-Click Protocol**: `cursor://`
 - **Configuration Paths**:
@@ -371,7 +371,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Compatibility**: Full local configuration support
 - **Connection Type**: Native HTTP support
-- **Documentation**: [Goose GitHub](https://github.com/block/goose)
+- **Documentation**: [Link](https://github.com/block/goose)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Format**: YAML
 - **Configuration Paths**:
@@ -467,7 +467,7 @@ extensions:
 
 - **Compatibility**: Full local configuration support
 - **Connection Type**: Native HTTP support
-- **Documentation**: [Visual Studio Code Docs](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
+- **Documentation**: [Link](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
 - **Supported Platforms**: macOS, Linux, Windows
 - **One-Click Protocol**: `vscode:`
 - **Configuration Paths**:
@@ -565,7 +565,7 @@ extensions:
 
 - **Compatibility**: Full local configuration support
 - **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
-- **Documentation**: [Windsurf Docs](https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp)
+- **Documentation**: [Link](https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
