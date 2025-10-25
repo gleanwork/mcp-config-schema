@@ -10,7 +10,7 @@
   "supportedPlatforms": [],
   "configFormat": "json",
   "configPath": {},
-  "documentationUrl": "https://platform.openai.com/docs",
+  "documentationUrl": "https://platform.openai.com/docs/mcp#test-and-connect-your-mcp-server",
   "configStructure": {
     "serverKey": ""
   }

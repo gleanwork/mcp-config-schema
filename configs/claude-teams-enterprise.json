@@ -10,7 +10,7 @@
   "supportedPlatforms": [],
   "configFormat": "json",
   "configPath": {},
-  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-desktop",
+  "documentationUrl": "https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp",
   "configStructure": {
     "serverKey": ""
   }

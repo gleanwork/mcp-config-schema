@@ -131,20 +131,7 @@ function generateClientSection(client: any): string {
 
   // Documentation
   if (client.documentationUrl) {
-    const docName = client.displayName.includes('Code')
-      ? `${client.displayName} Docs`
-      : client.displayName.includes('VS')
-        ? 'VS Code Docs'
-        : client.id === 'cursor'
-          ? 'Cursor MCP Docs'
-          : client.id === 'goose'
-            ? 'Goose GitHub'
-            : client.id === 'windsurf'
-              ? 'Windsurf Docs'
-              : client.id === 'chatgpt'
-                ? 'OpenAI Platform Docs'
-                : 'Documentation';
-    info.push(`- **Documentation**: [${docName}](${client.documentationUrl})`);
+    info.push(`- **Documentation**: [Link](${client.documentationUrl})`);
   }
 
   // Platforms

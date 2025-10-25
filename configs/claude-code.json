@@ -5,7 +5,7 @@
   "description": "Claude Code with native HTTP support",
   "localConfigSupport": "full",
   "remoteConfigSupport": "none",
-  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/mcp",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
