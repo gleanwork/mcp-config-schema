@@ -811,6 +811,31 @@ describe('ConfigBuilder', () => {
       `);
     });
 
+    it('should generate HTTP config for Windsurf', () => {
+      const builder = registry.createBuilder(CLIENT.WINDSURF);
+      const config = builder.buildConfiguration({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test',
+      });
+
+      const parsed = config;
+
+      const validation = validateGeneratedConfig(parsed, 'windsurf');
+      expect(validation.success).toBe(true);
+
+      // Windsurf uses serverUrl instead of url and has no type field
+      expect(parsed).toMatchInlineSnapshot(`
+        {
+          "mcpServers": {
+            "glean_test": {
+              "serverUrl": "https://example.com/mcp/default",
+            },
+          },
+        }
+      `);
+    });
+
     it('should default server name to "glean" when not provided', () => {
       const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const config = builder.buildConfiguration({
@@ -929,9 +954,10 @@ describe('ConfigBuilder', () => {
         serverName: 'test',
       });
 
+      // Windsurf now supports native HTTP with serverUrl field
       expect(generatedConfig.mcpServers.glean_test).not.toHaveProperty('type');
-      expect(generatedConfig.mcpServers.glean_test).toHaveProperty('command');
-      expect(generatedConfig.mcpServers.glean_test).toHaveProperty('args');
+      expect(generatedConfig.mcpServers.glean_test).toHaveProperty('serverUrl');
+      expect(generatedConfig.mcpServers.glean_test.serverUrl).toBe('https://example.com/mcp/default');
     });
 
     it('should use platform-specific paths from JSON config', () => {
@@ -1041,10 +1067,10 @@ describe('ConfigBuilder', () => {
         const builder = registry.createBuilder(CLIENT.WINDSURF);
         const result = builder.buildConfiguration(remoteConfig);
 
+        // Windsurf now supports native HTTP with serverUrl field
         expect(result).toEqual({
           glean_default: {
-            command: 'npx',
-            args: ['-y', 'mcp-remote', 'https://glean-dev-be.glean.com/mcp/default'],
+            serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
           },
         });
 

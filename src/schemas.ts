@@ -108,6 +108,10 @@ export const HttpServerConfigSchema = z.object({
   url: z.string().url(),
 });
 
+export const HttpServerConfigAltSchema = z.object({
+  serverUrl: z.string().url(), // Windsurf uses 'serverUrl' instead of 'url'
+});
+
 export const StdioServerConfigSchema = z.object({
   type: z.literal('stdio').optional(), // Some clients don't include type field
   command: z.string(),
@@ -124,6 +128,7 @@ export const StdioServerConfigAltSchema = z.object({
 
 export const ServerConfigSchema = z.union([
   HttpServerConfigSchema,
+  HttpServerConfigAltSchema,
   StdioServerConfigSchema,
   StdioServerConfigAltSchema,
 ]);

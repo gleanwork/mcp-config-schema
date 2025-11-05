@@ -15,6 +15,7 @@ import {
   GleanServerConfigSchema,
   BuildOptionsSchema,
   HttpServerConfigSchema,
+  HttpServerConfigAltSchema,
   StdioServerConfigSchema,
   StdioServerConfigAltSchema,
   ServerConfigSchema,
@@ -39,6 +40,7 @@ export type MCPClientConfig = z.infer<typeof MCPClientConfigSchema>;
 export type GleanServerConfig = z.infer<typeof GleanServerConfigSchema>;
 export type BuildOptions = z.infer<typeof BuildOptionsSchema>;
 export type HttpServerConfig = z.infer<typeof HttpServerConfigSchema>;
+export type HttpServerConfigAlt = z.infer<typeof HttpServerConfigAltSchema>;
 export type StdioServerConfig = z.infer<typeof StdioServerConfigSchema>;
 export type StdioServerConfigAlt = z.infer<typeof StdioServerConfigAltSchema>;
 export type ServerConfig = z.infer<typeof ServerConfigSchema>;
@@ -68,6 +70,7 @@ export {
   GleanServerConfigSchema,
   BuildOptionsSchema,
   HttpServerConfigSchema,
+  HttpServerConfigAltSchema,
   StdioServerConfigSchema,
   StdioServerConfigAltSchema,
   ServerConfigSchema,
