@@ -114,12 +114,12 @@ describe('MCPConfigRegistry', () => {
     it('should correctly identify clients that need mcp-remote', () => {
       // Stdio-only clients need mcp-remote for HTTP
       expect(registry.clientNeedsMcpRemote('claude-desktop')).toBe(true);
-      expect(registry.clientNeedsMcpRemote('windsurf')).toBe(true);
 
       // Clients with HTTP support don't need mcp-remote
       expect(registry.clientNeedsMcpRemote('vscode')).toBe(false);
       expect(registry.clientNeedsMcpRemote('cursor')).toBe(false);
       expect(registry.clientNeedsMcpRemote('goose')).toBe(false);
+      expect(registry.clientNeedsMcpRemote('windsurf')).toBe(false);
     });
 
     it('should correctly identify clients that support HTTP natively', () => {
@@ -127,10 +127,10 @@ describe('MCPConfigRegistry', () => {
       expect(registry.clientSupportsHttpNatively('vscode')).toBe(true);
       expect(registry.clientSupportsHttpNatively('cursor')).toBe(true);
       expect(registry.clientSupportsHttpNatively('goose')).toBe(true);
+      expect(registry.clientSupportsHttpNatively('windsurf')).toBe(true);
 
       // Stdio-only clients don't support HTTP natively
       expect(registry.clientSupportsHttpNatively('claude-desktop')).toBe(false);
-      expect(registry.clientSupportsHttpNatively('windsurf')).toBe(false);
     });
 
     it('should correctly identify clients that support stdio', () => {

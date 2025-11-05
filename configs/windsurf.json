@@ -2,12 +2,12 @@
   "id": "windsurf",
   "name": "windsurf",
   "displayName": "Windsurf",
-  "description": "Windsurf only supports stdio, requires mcp-remote for HTTP servers",
+  "description": "Windsurf supports both stdio and native HTTP connections",
   "localConfigSupport": "full",
   "remoteConfigSupport": "none",
-  "localConfigNotes": "Requires mcp-remote for remote servers",
+  "localConfigNotes": "Supports both stdio and native HTTP connections",
   "documentationUrl": "https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp",
-  "transports": ["stdio"],
+  "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {
@@ -17,6 +17,9 @@
   },
   "configStructure": {
     "serverKey": "mcpServers",
+    "httpConfig": {
+      "urlField": "serverUrl"
+    },
     "stdioConfig": {
       "commandField": "command",
       "argsField": "args",
