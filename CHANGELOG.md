@@ -14,6 +14,19 @@
 
 
 
+
+## v1.0.0 (2025-11-05)
+
+#### :boom: Breaking Change
+* [#54](https://github.com/gleanwork/mcp-config-schema/pull/54) chore: Updates Windsurf configuration to support native HTTP ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :rocket: Enhancement
+* [#54](https://github.com/gleanwork/mcp-config-schema/pull/54) chore: Updates Windsurf configuration to support native HTTP ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v0.14.0 (2025-10-25)
 
 #### :boom: Breaking Change
