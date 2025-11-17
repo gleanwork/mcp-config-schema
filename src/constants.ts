@@ -11,6 +11,8 @@ export const CLIENT = {
   WINDSURF: 'windsurf',
   GOOSE: 'goose',
   CHATGPT: 'chatgpt',
+  JUNIE: 'junie',
+  JETBRAINS: 'jetbrains',
 } as const;
 
 /**
@@ -26,6 +28,8 @@ export const CLIENT_DISPLAY_NAME = {
   WINDSURF: 'Windsurf',
   GOOSE: 'Goose',
   CHATGPT: 'ChatGPT',
+  JUNIE: 'Junie (JetBrains)',
+  JETBRAINS: 'JetBrains AI Assistant',
 } as const;
 
 /**
@@ -52,6 +56,8 @@ export function getDisplayName(clientId: ClientIdConstant): ClientDisplayName {
     [CLIENT.WINDSURF]: CLIENT_DISPLAY_NAME.WINDSURF,
     [CLIENT.GOOSE]: CLIENT_DISPLAY_NAME.GOOSE,
     [CLIENT.CHATGPT]: CLIENT_DISPLAY_NAME.CHATGPT,
+    [CLIENT.JUNIE]: CLIENT_DISPLAY_NAME.JUNIE,
+    [CLIENT.JETBRAINS]: CLIENT_DISPLAY_NAME.JETBRAINS,
   };
   return mapping[clientId];
 }

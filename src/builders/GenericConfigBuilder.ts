@@ -11,6 +11,8 @@ const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
   CLIENT.CLAUDE_CODE,
   CLIENT.CLAUDE_TEAMS_ENTERPRISE,
   CLIENT.CHATGPT,
+  CLIENT.JUNIE,
+  CLIENT.JETBRAINS,
 ];
 
 export class GenericConfigBuilder extends BaseConfigBuilder {
