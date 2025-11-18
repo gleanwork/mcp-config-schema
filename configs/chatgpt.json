@@ -3,8 +3,7 @@
   "name": "chatgpt",
   "displayName": "ChatGPT",
   "description": "ChatGPT web interface - requires GPT configuration through web UI",
-  "localConfigSupport": "none",
-  "remoteConfigSupport": "web",
+  "userConfigurable": false,
   "localConfigNotes": "ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.",
   "transports": ["http"],
   "supportedPlatforms": [],
@@ -12,6 +11,6 @@
   "configPath": {},
   "documentationUrl": "https://platform.openai.com/docs/mcp#test-and-connect-your-mcp-server",
   "configStructure": {
-    "serverKey": ""
+    "serversPropertyName": ""
   }
 }

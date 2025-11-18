@@ -3,8 +3,7 @@
   "name": "claude-code",
   "displayName": "Claude Code",
   "description": "Claude Code with native HTTP support",
-  "localConfigSupport": "full",
-  "remoteConfigSupport": "none",
+  "userConfigurable": true,
   "documentationUrl": "https://docs.claude.com/en/docs/claude-code/mcp",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -15,17 +14,17 @@
     "win32": "%USERPROFILE%\\.claude.json"
   },
   "configStructure": {
-    "serverKey": "mcpServers",
-    "httpConfig": {
-      "typeField": "type",
-      "urlField": "url",
-      "headersField": "headers"
+    "serversPropertyName": "mcpServers",
+    "httpPropertyMapping": {
+      "typeProperty": "type",
+      "urlProperty": "url",
+      "headersProperty": "headers"
     },
-    "stdioConfig": {
-      "typeField": "type",
-      "commandField": "command",
-      "argsField": "args",
-      "envField": "env"
+    "stdioPropertyMapping": {
+      "typeProperty": "type",
+      "commandProperty": "command",
+      "argsProperty": "args",
+      "envProperty": "env"
     }
   }
 }

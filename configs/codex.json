@@ -3,8 +3,7 @@
   "name": "codex",
   "displayName": "Codex",
   "description": "OpenAI Codex with native HTTP and stdio support",
-  "localConfigSupport": "full",
-  "remoteConfigSupport": "none",
+  "userConfigurable": true,
   "documentationUrl": "https://developers.openai.com/codex/mcp",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -15,15 +14,15 @@
     "win32": "%USERPROFILE%\\.codex\\config.toml"
   },
   "configStructure": {
-    "serverKey": "mcp_servers",
-    "httpConfig": {
-      "urlField": "url",
-      "headersField": "http_headers"
+    "serversPropertyName": "mcp_servers",
+    "httpPropertyMapping": {
+      "urlProperty": "url",
+      "headersProperty": "http_headers"
     },
-    "stdioConfig": {
-      "commandField": "command",
-      "argsField": "args",
-      "envField": "env"
+    "stdioPropertyMapping": {
+      "commandProperty": "command",
+      "argsProperty": "args",
+      "envProperty": "env"
     }
   }
 }

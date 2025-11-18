@@ -1,15 +1,15 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { GleanServerConfig } from '../types.js';
+import { MCPServerConfig } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class CodexConfigBuilder extends BaseConfigBuilder {
   protected buildLocalConfig(
-    serverData: GleanServerConfig,
-    includeWrapper: boolean = true
+    serverData: MCPServerConfig,
+    includeRootObject: boolean = true
   ): Record<string, unknown> {
-    const { stdioConfig } = this.config.configStructure;
+    const { stdioPropertyMapping } = this.config.configStructure;
 
-    if (!stdioConfig) {
+    if (!stdioPropertyMapping) {
       throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
     }
 
@@ -21,11 +21,11 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
 
     const serverConfig: Record<string, unknown> = {};
 
-    serverConfig[stdioConfig.commandField] = 'npx';
-    serverConfig[stdioConfig.argsField] = ['-y', '@gleanwork/local-mcp-server'];
+    serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
+    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', '@gleanwork/local-mcp-server'];
 
     // Add environment variables if present
-    if (stdioConfig.envField) {
+    if (stdioPropertyMapping.envProperty) {
       const env: Record<string, string> = {};
 
       if (serverData.instance) {
@@ -44,11 +44,11 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
       }
 
       if (Object.keys(env).length > 0) {
-        serverConfig[stdioConfig.envField] = env;
+        serverConfig[stdioPropertyMapping.envProperty] = env;
       }
     }
 
-    if (!includeWrapper) {
+    if (!includeRootObject) {
       return {
         [serverName]: serverConfig,
       };
@@ -63,14 +63,14 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
   }
 
   protected buildRemoteConfig(
-    serverData: GleanServerConfig,
-    includeWrapper: boolean = true
+    serverData: MCPServerConfig,
+    includeRootObject: boolean = true
   ): Record<string, unknown> {
     if (!serverData.serverUrl) {
       throw new Error('Remote configuration requires serverUrl');
     }
 
-    const { httpConfig } = this.config.configStructure;
+    const { httpPropertyMapping } = this.config.configStructure;
 
     const serverName = buildMcpServerName({
       transport: 'http',
@@ -79,19 +79,19 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
       productName: serverData.productName,
     });
 
-    if (httpConfig && this.config.transports.includes('http')) {
+    if (httpPropertyMapping && this.config.transports.includes('http')) {
       const serverConfig: Record<string, unknown> = {};
 
-      serverConfig[httpConfig.urlField] = serverData.serverUrl;
+      serverConfig[httpPropertyMapping.urlProperty] = serverData.serverUrl;
 
       // Add bearer token via http_headers if apiToken is provided
-      if (serverData.apiToken && httpConfig.headersField) {
-        serverConfig[httpConfig.headersField] = {
+      if (serverData.apiToken && httpPropertyMapping.headersProperty) {
+        serverConfig[httpPropertyMapping.headersProperty] = {
           Authorization: `Bearer ${serverData.apiToken}`,
         };
       }
 
-      if (!includeWrapper) {
+      if (!includeRootObject) {
         return {
           [serverName]: serverConfig,
         };
@@ -108,7 +108,7 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
     }
   }
 
-  protected buildRemoteCommand(serverData: GleanServerConfig): string {
+  protected buildRemoteCommand(serverData: MCPServerConfig): string {
     const serverUrl = this.getServerUrl(serverData);
     const serverName = buildMcpServerName({
       transport: 'http',
@@ -131,7 +131,7 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
     return command;
   }
 
-  protected buildLocalCommand(serverData: GleanServerConfig): string {
+  protected buildLocalCommand(serverData: MCPServerConfig): string {
     const serverName = buildMcpServerName({
       transport: 'stdio',
       serverName: serverData.serverName,

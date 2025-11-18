@@ -33,7 +33,7 @@ describe('MCPConfigRegistry', () => {
       const config = registry.getConfig(CLIENT.VSCODE);
       expect(config).toBeDefined();
       expect(config?.displayName).toBe('Visual Studio Code');
-      expect(config?.configStructure.serverKey).toBe('servers');
+      expect(config?.configStructure.serversPropertyName).toBe('servers');
     });
 
     it('should load Cursor config with HTTP support', () => {
@@ -73,7 +73,7 @@ describe('MCPConfigRegistry', () => {
     it('should get supported clients', () => {
       const clients = registry.getSupportedClients();
       expect(clients.length).toBeGreaterThan(0);
-      expect(clients.every((c) => c.localConfigSupport === 'full')).toBe(true);
+      expect(clients.every((c) => c.userConfigurable === true)).toBe(true);
     });
 
     it('should get unsupported clients', () => {
@@ -82,8 +82,8 @@ describe('MCPConfigRegistry', () => {
       const claudeTeamsEnterprise = clients.find((c) => c.id === CLIENT.CLAUDE_TEAMS_ENTERPRISE);
       expect(chatgpt).toBeDefined();
       expect(claudeTeamsEnterprise).toBeDefined();
-      expect(chatgpt?.localConfigSupport).toBe('none');
-      expect(claudeTeamsEnterprise?.localConfigSupport).toBe('none');
+      expect(chatgpt?.userConfigurable).toBe(false);
+      expect(claudeTeamsEnterprise?.userConfigurable).toBe(false);
     });
 
     it('should get clients with one-click support', () => {
@@ -91,7 +91,7 @@ describe('MCPConfigRegistry', () => {
       expect(clients.length).toBeGreaterThan(0);
       const cursor = clients.find((c) => c.id === CLIENT.CURSOR);
       expect(cursor).toBeDefined();
-      expect(cursor?.oneClick?.protocol).toBe('cursor://');
+      expect(cursor?.protocolHandler?.protocol).toBe('cursor://');
     });
 
     it('should get clients by platform', () => {

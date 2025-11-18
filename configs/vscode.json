@@ -3,8 +3,7 @@
   "name": "vscode",
   "displayName": "Visual Studio Code",
   "description": "VS Code with native HTTP support",
-  "localConfigSupport": "full",
-  "remoteConfigSupport": "none",
+  "userConfigurable": true,
   "documentationUrl": "https://code.visualstudio.com/docs/copilot/customization/mcp-servers",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -14,23 +13,23 @@
     "linux": "$HOME/.config/Code/User/mcp.json",
     "win32": "%APPDATA%\\Code\\User\\mcp.json"
   },
-  "oneClick": {
+  "protocolHandler": {
     "protocol": "vscode:",
     "urlTemplate": "vscode:mcp/install?{{config}}",
     "configFormat": "url-encoded-json"
   },
   "configStructure": {
-    "serverKey": "servers",
-    "httpConfig": {
-      "typeField": "type",
-      "urlField": "url",
-      "headersField": "headers"
+    "serversPropertyName": "servers",
+    "httpPropertyMapping": {
+      "typeProperty": "type",
+      "urlProperty": "url",
+      "headersProperty": "headers"
     },
-    "stdioConfig": {
-      "typeField": "type",
-      "commandField": "command",
-      "argsField": "args",
-      "envField": "env"
+    "stdioPropertyMapping": {
+      "typeProperty": "type",
+      "commandProperty": "command",
+      "argsProperty": "args",
+      "envProperty": "env"
     }
   }
 }

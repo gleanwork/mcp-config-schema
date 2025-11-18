@@ -1,10 +1,10 @@
 import { GenericConfigBuilder } from './GenericConfigBuilder.js';
-import { GleanServerConfig } from '../types.js';
+import { MCPServerConfig } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class CursorConfigBuilder extends GenericConfigBuilder {
-  buildOneClickUrl(serverData: GleanServerConfig): string {
-    if (!this.config.oneClick) {
+  buildOneClickUrl(serverData: MCPServerConfig): string {
+    if (!this.config.protocolHandler) {
       throw new Error(`${this.config.displayName} does not support one-click installation`);
     }
 
@@ -48,12 +48,12 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
 
     const encodedConfig = this.toBase64(JSON.stringify(config));
 
-    return this.config.oneClick.urlTemplate
+    return this.config.protocolHandler.urlTemplate
       .replace('{{name}}', encodeURIComponent(serverName))
       .replace('{{config}}', encodedConfig);
   }
 
-  protected buildRemoteCommand(serverData: GleanServerConfig): string {
+  protected buildRemoteCommand(serverData: MCPServerConfig): string {
     const serverUrl = this.getServerUrl(serverData);
     const packageName = this.getConfigureMcpServerPackage(serverData);
 
@@ -68,7 +68,7 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
     return command;
   }
 
-  protected buildLocalCommand(serverData: GleanServerConfig): string {
+  protected buildLocalCommand(serverData: MCPServerConfig): string {
     const packageName = this.getConfigureMcpServerPackage(serverData);
 
     let command = `npx -y ${packageName} local`;
@@ -93,10 +93,10 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
   }
 
   getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    const { serverKey } = this.config.configStructure;
+    const { serversPropertyName } = this.config.configStructure;
 
-    if (config[serverKey]) {
-      return config[serverKey] as Record<string, unknown>;
+    if (config[serversPropertyName]) {
+      return config[serversPropertyName] as Record<string, unknown>;
     }
 
     const firstKey = Object.keys(config)[0];
