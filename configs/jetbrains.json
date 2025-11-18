@@ -3,7 +3,7 @@
   "name": "jetbrains",
   "displayName": "JetBrains AI Assistant",
   "description": "JetBrains AI Assistant for all JetBrains IDEs - stdio only, configure via IDE UI",
-  "localConfigSupport": "full",
+  "localConfigSupport": "none",
   "remoteConfigSupport": "none",
   "localConfigNotes": "JetBrains AI Assistant is UI-managed. Use buildConfiguration() to generate JSON config, then paste into Settings → Tools → AI Assistant → Model Context Protocol → Add → As JSON. Direct file writing is not supported due to version-specific XML storage.",
   "documentationUrl": "https://www.jetbrains.com/help/ai-assistant/mcp.html",
