@@ -206,8 +206,9 @@ describe('ConfigBuilder', () => {
         apiToken: 'test-token',
       });
 
-      // Codex HTTP servers are configured directly in config.toml, not via CLI
-      expect(command).toBeNull();
+      expect(command).toMatchInlineSnapshot(
+        `"codex mcp add --url https://example.com/mcp/default --bearer-token-env-var GLEAN_API_TOKEN glean_test-server"`
+      );
     });
 
     it('generates Codex command with local server', () => {
@@ -220,7 +221,7 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"codex mcp add glean_local-test --env GLEAN_INSTANCE=test-instance --env GLEAN_API_TOKEN=test-token -- npx -y @gleanwork/local-mcp-server"`
+        `"codex mcp add --env GLEAN_INSTANCE=test-instance --env GLEAN_API_TOKEN=test-token npx -y @gleanwork/local-mcp-server glean_local-test"`
       );
     });
 
@@ -373,6 +374,7 @@ describe('ConfigBuilder', () => {
       it('handles all supported clients for remote', () => {
         const clients = [
           CLIENT.CLAUDE_CODE,
+          CLIENT.CODEX,
           CLIENT.CURSOR,
           CLIENT.VSCODE,
           CLIENT.WINDSURF,

@@ -108,10 +108,27 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
     }
   }
 
-  protected buildRemoteCommand(_serverData: GleanServerConfig): string | null {
-    // Codex HTTP servers are configured directly in config.toml, not via CLI
-    // Return null to indicate no CLI command is available
-    return null;
+  protected buildRemoteCommand(serverData: GleanServerConfig): string {
+    const serverUrl = this.getServerUrl(serverData);
+    const serverName = buildMcpServerName({
+      transport: 'http',
+      serverUrl: serverUrl,
+      serverName: serverData.serverName,
+      productName: serverData.productName,
+    });
+
+    let command = `codex mcp add --url ${serverUrl}`;
+
+    if (serverData.apiToken) {
+      // For Codex, we pass the bearer token via an environment variable
+      // The user would need to set this env var before running the command
+      // Using a standard name like GLEAN_API_TOKEN
+      command += ` --bearer-token-env-var GLEAN_API_TOKEN`;
+    }
+
+    command += ` ${serverName}`;
+
+    return command;
   }
 
   protected buildLocalCommand(serverData: GleanServerConfig): string {
@@ -121,7 +138,7 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
       productName: serverData.productName,
     });
 
-    let command = `codex mcp add ${serverName}`;
+    let command = `codex mcp add`;
 
     if (serverData.instance) {
       if (this.isUrl(serverData.instance)) {
@@ -135,7 +152,7 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
       command += ` --env GLEAN_API_TOKEN=${serverData.apiToken}`;
     }
 
-    command += ` -- npx -y ${this.getLocalMcpServerPackage()}`;
+    command += ` npx -y ${this.getLocalMcpServerPackage()} ${serverName}`;
 
     return command;
   }
