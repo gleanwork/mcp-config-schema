@@ -103,6 +103,34 @@ describe('ConfigBuilder', () => {
       );
     });
 
+    it('generates Junie command with remote server', () => {
+      const junieBuilder = registry.createBuilder(CLIENT.JUNIE);
+      const command = junieBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client junie --token test-token"`
+      );
+    });
+
+    it('generates Junie command with local server', () => {
+      const junieBuilder = registry.createBuilder(CLIENT.JUNIE);
+      const command = junieBuilder.buildCommand({
+        transport: 'stdio',
+        instance: 'test-instance',
+        serverName: 'local-test',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server local --instance test-instance --client junie --token test-token"`
+      );
+    });
+
     it('handles URL-style instance for local config', () => {
       const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
       const command = cursorBuilder.buildCommand({
@@ -362,6 +390,17 @@ describe('ConfigBuilder', () => {
         expect(command).toBe(null);
       });
 
+      it('handles jetbrains client', () => {
+        // JetBrains AI Assistant doesn't support local config, but buildCommand should not throw
+        const command = buildCommand(CLIENT.JETBRAINS, {
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp',
+          serverName: 'test',
+        });
+        // JetBrains requires UI configuration, so command should be null
+        expect(command).toBe(null);
+      });
+
       it('buildCommand wrapper handles errors gracefully', () => {
         // Test with an invalid client ID
         const command = buildCommand('invalid-client' as ClientId, {
@@ -578,6 +617,55 @@ describe('ConfigBuilder', () => {
       `);
     });
 
+    it('should generate correct bridge config for Junie', () => {
+      const builder = registry.createBuilder(CLIENT.JUNIE);
+      const result = builder.buildConfiguration(remoteConfig);
+
+      const validation = validateGeneratedConfig(result, 'junie');
+      expect(validation.success).toBe(true);
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "mcpServers": {
+            "glean": {
+              "args": [
+                "-y",
+                "mcp-remote",
+                "https://glean-dev-be.glean.com/mcp/default",
+              ],
+              "command": "npx",
+              "type": "stdio",
+            },
+          },
+        }
+      `);
+    });
+
+    it('should generate correct bridge config for JetBrains', () => {
+      const builder = registry.createBuilder(CLIENT.JETBRAINS);
+      const result = builder.buildConfiguration(remoteConfig);
+
+      const validation = validateGeneratedConfig(result, 'jetbrains');
+      expect(validation.success).toBe(true);
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "mcpServers": {
+            "glean": {
+              "args": [
+                "-y",
+                "mcp-remote",
+                "https://glean-dev-be.glean.com/mcp/default",
+              ],
+              "command": "npx",
+              "type": "stdio",
+            },
+          },
+        }
+      `);
+    });
+
+
     it('should generate correct YAML config for Goose', () => {
       const builder = registry.createBuilder(CLIENT.GOOSE);
       const result = builder.buildConfiguration(remoteConfig);
@@ -760,6 +848,61 @@ describe('ConfigBuilder', () => {
         }
       `);
     });
+
+    it('should generate correct local config for Junie', () => {
+      const builder = registry.createBuilder(CLIENT.JUNIE);
+      const result = builder.buildConfiguration(localConfig);
+
+      const validation = validateGeneratedConfig(result, 'junie');
+      expect(validation.success).toBe(true);
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "mcpServers": {
+            "glean_local": {
+              "args": [
+                "-y",
+                "@gleanwork/local-mcp-server",
+              ],
+              "command": "npx",
+              "env": {
+                "GLEAN_API_TOKEN": "test-token",
+                "GLEAN_INSTANCE": "my-company",
+              },
+              "type": "stdio",
+            },
+          },
+        }
+      `);
+    });
+
+    it('should generate correct local config for JetBrains', () => {
+      const builder = registry.createBuilder(CLIENT.JETBRAINS);
+      const result = builder.buildConfiguration(localConfig);
+
+      const validation = validateGeneratedConfig(result, 'jetbrains');
+      expect(validation.success).toBe(true);
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "mcpServers": {
+            "glean_local": {
+              "args": [
+                "-y",
+                "@gleanwork/local-mcp-server",
+              ],
+              "command": "npx",
+              "env": {
+                "GLEAN_API_TOKEN": "test-token",
+                "GLEAN_INSTANCE": "my-company",
+              },
+              "type": "stdio",
+            },
+          },
+        }
+      `);
+    });
+
   });
 
   describe('path expansion', () => {
@@ -770,6 +913,15 @@ describe('ConfigBuilder', () => {
       expect(path).not.toContain('$HOME');
       expect(path).toContain('/.claude.json');
     });
+
+    it('should expand $HOME correctly for Junie', () => {
+      const builder = registry.createBuilder(CLIENT.JUNIE);
+      const path = builder.getConfigPath();
+
+      expect(path).not.toContain('$HOME');
+      expect(path).toContain('/.junie/mcp.json');
+    });
+
   });
 
   describe('Unsupported clients', () => {

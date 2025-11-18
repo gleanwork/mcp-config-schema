@@ -15,6 +15,8 @@ This document provides a comprehensive overview of all supported MCP clients, th
 | **Goose** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Visual Studio Code** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Windsurf** | Full | HTTP native | No | macOS, Linux, Windows |
+| **Junie (JetBrains)** | Full | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
+| **JetBrains AI Assistant** | Full | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
 
 ## Detailed Client Information
 
@@ -723,6 +725,184 @@ extensions:
 
 ---
 
+### Junie (JetBrains)
+
+- **Compatibility**: Full local configuration support
+- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
+- **Documentation**: [Link](https://www.jetbrains.com/help/junie/model-context-protocol-mcp.html)
+- **Supported Platforms**: macOS, Linux, Windows
+- **Notes**: Requires mcp-remote bridge for remote servers
+- **Configuration Paths**:
+  - **macOS/Linux: `$HOME/.junie/mcp.json`
+  - **Windows**: `%USERPROFILE%\.junie\mcp.json`
+
+<details>
+<summary><strong>Internal Configuration Schema</strong></summary>
+
+```json snippet=configs/junie.json
+{
+  "id": "junie",
+  "name": "junie",
+  "displayName": "Junie (JetBrains)",
+  "description": "JetBrains Junie AI agent - stdio only, requires mcp-remote for HTTP",
+  "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
+  "localConfigNotes": "Requires mcp-remote for remote servers",
+  "documentationUrl": "https://www.jetbrains.com/help/junie/model-context-protocol-mcp.html",
+  "transports": ["stdio"],
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/.junie/mcp.json",
+    "linux": "$HOME/.junie/mcp.json",
+    "win32": "%USERPROFILE%\\.junie\\mcp.json"
+  },
+  "configStructure": {
+    "serverKey": "mcpServers",
+    "stdioConfig": {
+      "typeField": "type",
+      "commandField": "command",
+      "argsField": "args",
+      "envField": "env"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>HTTP Configuration (via stdio with mcp-remote bridge)</strong></summary>
+
+```json snippet=examples/configs/remote/junie.json
+{
+  "mcpServers": {
+    "glean": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://glean-dev-be.glean.com/mcp/default"
+      ]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+
+```json snippet=examples/configs/local/junie.json
+{
+  "mcpServers": {
+    "glean": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@gleanwork/local-mcp-server"
+      ],
+      "type": "stdio",
+      "env": {
+        "GLEAN_INSTANCE": "your-instance",
+        "GLEAN_API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+---
+
+### JetBrains AI Assistant
+
+- **Compatibility**: Full local configuration support
+- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
+- **Documentation**: [Link](https://www.jetbrains.com/help/ai-assistant/mcp.html)
+- **Supported Platforms**: macOS, Linux, Windows
+
+<details>
+<summary><strong>Internal Configuration Schema</strong></summary>
+
+```json snippet=configs/jetbrains.json
+{
+  "id": "jetbrains",
+  "name": "jetbrains",
+  "displayName": "JetBrains AI Assistant",
+  "description": "JetBrains AI Assistant for all JetBrains IDEs - stdio only, configure via IDE UI",
+  "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
+  "localConfigNotes": "Configuration must be pasted into Settings → Tools → AI Assistant → Model Context Protocol → Add → As JSON. Direct file writing is not supported due to version-specific XML storage.",
+  "documentationUrl": "https://www.jetbrains.com/help/ai-assistant/mcp.html",
+  "transports": ["stdio"],
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {},
+  "configStructure": {
+    "serverKey": "mcpServers",
+    "stdioConfig": {
+      "typeField": "type",
+      "commandField": "command",
+      "argsField": "args",
+      "envField": "env"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>HTTP Configuration (via stdio with mcp-remote bridge)</strong></summary>
+
+```json snippet=examples/configs/remote/jetbrains.json
+{
+  "mcpServers": {
+    "glean": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://glean-dev-be.glean.com/mcp/default"
+      ]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+
+```json snippet=examples/configs/local/jetbrains.json
+{
+  "mcpServers": {
+    "glean": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@gleanwork/local-mcp-server"
+      ],
+      "type": "stdio",
+      "env": {
+        "GLEAN_INSTANCE": "your-instance",
+        "GLEAN_API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+---
+
 ## Connection Types Explained
 
 ### Native HTTP Clients
@@ -737,6 +917,8 @@ Clients that can connect directly to HTTP MCP servers without additional tooling
 ### stdio-only Clients
 Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP servers:
 - Claude for Desktop
+- Junie (JetBrains)
+- JetBrains AI Assistant
 
 ### Web-based/Managed Clients
 Clients that don't support local configuration files:

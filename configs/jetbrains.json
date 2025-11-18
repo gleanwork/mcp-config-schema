@@ -1,0 +1,23 @@
+{
+  "id": "jetbrains",
+  "name": "jetbrains",
+  "displayName": "JetBrains AI Assistant",
+  "description": "JetBrains AI Assistant for all JetBrains IDEs - stdio only, configure via IDE UI",
+  "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
+  "localConfigNotes": "Configuration must be pasted into Settings → Tools → AI Assistant → Model Context Protocol → Add → As JSON. Direct file writing is not supported due to version-specific XML storage.",
+  "documentationUrl": "https://www.jetbrains.com/help/ai-assistant/mcp.html",
+  "transports": ["stdio"],
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {},
+  "configStructure": {
+    "serverKey": "mcpServers",
+    "stdioConfig": {
+      "typeField": "type",
+      "commandField": "command",
+      "argsField": "args",
+      "envField": "env"
+    }
+  }
+}

@@ -16,6 +16,8 @@ import cursorConfig from '../configs/cursor.json';
 import gooseConfig from '../configs/goose.json';
 import vscodeConfig from '../configs/vscode.json';
 import windsurfConfig from '../configs/windsurf.json';
+import junieConfig from '../configs/junie.json';
+import jetbrainsConfig from '../configs/jetbrains.json';
 const allConfigs = [
   chatgptConfig,
   claudeCodeConfig,
@@ -26,6 +28,8 @@ const allConfigs = [
   gooseConfig,
   vscodeConfig,
   windsurfConfig,
+  junieConfig,
+  jetbrainsConfig,
 ];
 
 export class MCPConfigRegistry {
