@@ -6,10 +6,12 @@ import { GooseConfigBuilder } from './builders/GooseConfigBuilder.js';
 import { VSCodeConfigBuilder } from './builders/VSCodeConfigBuilder.js';
 import { CursorConfigBuilder } from './builders/CursorConfigBuilder.js';
 import { ClaudeCodeConfigBuilder } from './builders/ClaudeCodeConfigBuilder.js';
+import { CodexConfigBuilder } from './builders/CodexConfigBuilder.js';
 import chatgptConfig from '../configs/chatgpt.json';
 import claudeCodeConfig from '../configs/claude-code.json';
 import claudeDesktopConfig from '../configs/claude-desktop.json';
 import claudeTeamsEnterpriseConfig from '../configs/claude-teams-enterprise.json';
+import codexConfig from '../configs/codex.json';
 import cursorConfig from '../configs/cursor.json';
 import gooseConfig from '../configs/goose.json';
 import vscodeConfig from '../configs/vscode.json';
@@ -19,6 +21,7 @@ const allConfigs = [
   claudeCodeConfig,
   claudeDesktopConfig,
   claudeTeamsEnterpriseConfig,
+  codexConfig,
   cursorConfig,
   gooseConfig,
   vscodeConfig,
@@ -52,6 +55,10 @@ export class MCPConfigRegistry {
     this.builderFactories.set(
       'claude-code' as ClientId,
       ClaudeCodeConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
+    );
+    this.builderFactories.set(
+      'codex' as ClientId,
+      CodexConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
     );
     // Other clients will use GenericConfigBuilder by default
   }

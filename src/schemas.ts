@@ -9,6 +9,7 @@ export const ClientIdSchema = z.enum([
   'goose',
   'windsurf',
   'chatgpt',
+  'codex',
 ]);
 
 export const ServerTypeSchema = z.enum(['http', 'stdio']);
@@ -57,7 +58,7 @@ export const MCPClientConfigSchema = z.object({
   documentationUrl: z.string().url().optional(),
   transports: SupportedTransportsSchema,
   supportedPlatforms: z.array(PlatformSchema),
-  configFormat: z.enum(['json', 'yaml']),
+  configFormat: z.enum(['json', 'yaml', 'toml']),
   configPath: PlatformPathsSchema,
   oneClick: z
     .object({
@@ -177,6 +178,26 @@ export const GooseConfigSchema = z.object({
   extensions: z.record(z.string(), GooseServerConfigSchema),
 });
 
+const CodexStdioServerConfigSchema = z.object({
+  command: z.string(),
+  args: z.array(z.string()),
+  env: z.record(z.string(), z.string()).optional(),
+});
+
+const CodexHttpServerConfigSchema = z.object({
+  url: z.string(),
+  http_headers: z.record(z.string(), z.string()).optional(),
+});
+
+export const CodexServerConfigSchema = z.union([
+  CodexStdioServerConfigSchema,
+  CodexHttpServerConfigSchema,
+]);
+
+export const CodexConfigSchema = z.object({
+  mcp_servers: z.record(z.string(), CodexServerConfigSchema),
+});
+
 export function validateGeneratedConfig(
   config: unknown,
   clientId: string
@@ -189,6 +210,9 @@ export function validateGeneratedConfig(
       break;
     case 'goose':
       schema = GooseConfigSchema;
+      break;
+    case 'codex':
+      schema = CodexConfigSchema;
       break;
     case 'claude-code':
     case 'claude-desktop':
@@ -220,6 +244,8 @@ export function validateGeneratedConfig(
 export const validateMcpServersConfig = McpServersConfigSchema.parse;
 export const validateVsCodeConfig = VsCodeConfigSchema.parse;
 export const validateGooseConfig = GooseConfigSchema.parse;
+export const validateCodexConfig = CodexConfigSchema.parse;
 export const safeValidateMcpServersConfig = McpServersConfigSchema.safeParse;
 export const safeValidateVsCodeConfig = VsCodeConfigSchema.safeParse;
 export const safeValidateGooseConfig = GooseConfigSchema.safeParse;
+export const safeValidateCodexConfig = CodexConfigSchema.safeParse;
