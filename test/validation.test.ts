@@ -13,19 +13,17 @@ describe('Zod Validation', () => {
         name: 'claude-code',
         displayName: 'Claude Code',
         description: 'Test client',
-        localConfigSupport: 'full',
-        remoteConfigSupport: 'none',
+        userConfigurable: true,
         transports: ['http'],
-
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
         configPath: {
           darwin: '/test/path',
         },
         configStructure: {
-          serverKey: 'mcpServers',
-          httpConfig: {
-            urlField: 'url',
+          serversPropertyName: 'mcpServers',
+          httpPropertyMapping: {
+            urlProperty: 'url',
           },
         },
       };
@@ -40,16 +38,16 @@ describe('Zod Validation', () => {
         name: 'invalid',
         displayName: 'Invalid',
         description: 'Test',
-        localConfigSupport: 'full',
-        remoteConfigSupport: 'none',
+        userConfigurable: true,
+        
         transports: ['http'],
 
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
         configPath: { darwin: '/test' },
         configStructure: {
-          serverKey: 'servers',
-          httpConfig: { urlField: 'url' },
+          serversPropertyName: 'servers',
+          httpPropertyMapping: { urlProperty: 'url' },
         },
       };
 
@@ -66,24 +64,24 @@ describe('Zod Validation', () => {
         name: 'claude-code',
         displayName: 'Claude Code',
         description: 'Test',
-        localConfigSupport: 'partial', // Invalid
-        remoteConfigSupport: 'none',
+        userConfigurable: 1234, // Invalid
+        
         transports: ['http'],
 
         supportedPlatforms: ['darwin'],
         configFormat: 'json',
         configPath: { darwin: '/test' },
         configStructure: {
-          serverKey: 'servers',
-          httpConfig: { urlField: 'url' },
+          serversPropertyName: 'servers',
+          httpPropertyMapping: { urlProperty: 'url' },
         },
       };
 
       const result = safeValidateClientConfig(invalidConfig);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].path).toEqual(['localConfigSupport']);
-        expect(result.error.issues[0].message).toContain('"full"|"none"');
+        expect(result.error.issues[0].path).toEqual(['userConfigurable']);
+        expect(result.error.issues[0].message).toContain('boolean');
       }
     });
 
@@ -93,8 +91,8 @@ describe('Zod Validation', () => {
         name: 'claude-code',
         displayName: 'Claude Code',
         description: 'Test',
-        localConfigSupport: 'full',
-        remoteConfigSupport: 'none',
+        userConfigurable: true,
+        
         documentationUrl: 'https://docs.example.com',
         transports: ['http'],
 
@@ -102,8 +100,8 @@ describe('Zod Validation', () => {
         configFormat: 'json',
         configPath: { darwin: '/test' },
         configStructure: {
-          serverKey: 'servers',
-          httpConfig: { urlField: 'url' },
+          serversPropertyName: 'servers',
+          httpPropertyMapping: { urlProperty: 'url' },
         },
       };
 
@@ -117,8 +115,8 @@ describe('Zod Validation', () => {
         name: 'claude-code',
         displayName: 'Claude Code',
         description: 'Test',
-        localConfigSupport: 'full',
-        remoteConfigSupport: 'none',
+        userConfigurable: true,
+        
         documentationUrl: 'not-a-url', // Invalid URL
         transports: ['http'],
 
@@ -126,8 +124,8 @@ describe('Zod Validation', () => {
         configFormat: 'json',
         configPath: { darwin: '/test' },
         configStructure: {
-          serverKey: 'servers',
-          httpConfig: { urlField: 'url' },
+          serversPropertyName: 'servers',
+          httpPropertyMapping: { urlProperty: 'url' },
         },
       };
 

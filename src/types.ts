@@ -4,15 +4,13 @@ import {
   ClientIdSchema,
   SupportedTransportsSchema,
   ServerTypeSchema,
-  LocalConfigSupportSchema,
-  RemoteConfigSupportSchema,
   TransportSchema,
   HttpConfigStructureSchema,
   StdioConfigStructureSchema,
   ConfigStructureSchema,
   PlatformPathsSchema,
   MCPClientConfigSchema,
-  GleanServerConfigSchema,
+  MCPServerConfigSchema,
   BuildOptionsSchema,
   HttpServerConfigSchema,
   HttpServerConfigAltSchema,
@@ -29,15 +27,13 @@ export type Platform = z.infer<typeof PlatformSchema>;
 export type ClientId = z.infer<typeof ClientIdSchema>;
 export type SupportedTransports = z.infer<typeof SupportedTransportsSchema>;
 export type ServerType = z.infer<typeof ServerTypeSchema>;
-export type LocalConfigSupport = z.infer<typeof LocalConfigSupportSchema>;
-export type RemoteConfigSupport = z.infer<typeof RemoteConfigSupportSchema>;
 export type Transport = z.infer<typeof TransportSchema>;
 export type HttpConfigStructure = z.infer<typeof HttpConfigStructureSchema>;
 export type StdioConfigStructure = z.infer<typeof StdioConfigStructureSchema>;
 export type ConfigStructure = z.infer<typeof ConfigStructureSchema>;
 export type PlatformPaths = z.infer<typeof PlatformPathsSchema>;
 export type MCPClientConfig = z.infer<typeof MCPClientConfigSchema>;
-export type GleanServerConfig = z.infer<typeof GleanServerConfigSchema>;
+export type MCPServerConfig = z.infer<typeof MCPServerConfigSchema>;
 export type BuildOptions = z.infer<typeof BuildOptionsSchema>;
 export type HttpServerConfig = z.infer<typeof HttpServerConfigSchema>;
 export type HttpServerConfigAlt = z.infer<typeof HttpServerConfigAltSchema>;
@@ -59,15 +55,13 @@ export {
   PlatformSchema,
   SupportedTransportsSchema,
   ServerTypeSchema,
-  LocalConfigSupportSchema,
-  RemoteConfigSupportSchema,
   TransportSchema,
   MCPClientConfigSchema,
   PlatformPathsSchema,
   ConfigStructureSchema,
   HttpConfigStructureSchema,
   StdioConfigStructureSchema,
-  GleanServerConfigSchema,
+  MCPServerConfigSchema,
   BuildOptionsSchema,
   HttpServerConfigSchema,
   HttpServerConfigAltSchema,

@@ -24,7 +24,7 @@ const clients = registry.getAllConfigs();
 
 for (const client of clients) {
   // Skip clients that don't support local configuration
-  if (client.localConfigSupport !== 'full') {
+  if (!client.userConfigurable) {
     console.log(`Skipping ${client.displayName} - no local config support`);
     continue;
   }

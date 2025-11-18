@@ -3,8 +3,7 @@
   "name": "claude-teams-enterprise",
   "displayName": "Claude for Teams/Enterprise",
   "description": "Claude for Teams and Enterprise",
-  "localConfigSupport": "none",
-  "remoteConfigSupport": "managed",
+  "userConfigurable": false,
   "localConfigNotes": "MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.",
   "transports": ["http"],
   "supportedPlatforms": [],
@@ -12,6 +11,6 @@
   "configPath": {},
   "documentationUrl": "https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp",
   "configStructure": {
-    "serverKey": ""
+    "serversPropertyName": ""
   }
 }

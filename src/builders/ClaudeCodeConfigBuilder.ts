@@ -1,9 +1,9 @@
 import { GenericConfigBuilder } from './GenericConfigBuilder.js';
-import { GleanServerConfig } from '../types.js';
+import { MCPServerConfig } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
-  protected buildRemoteCommand(serverData: GleanServerConfig): string {
+  protected buildRemoteCommand(serverData: MCPServerConfig): string {
     const serverUrl = this.getServerUrl(serverData);
 
     const serverName = buildMcpServerName({
@@ -22,7 +22,7 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
     return command;
   }
 
-  protected buildLocalCommand(serverData: GleanServerConfig): string {
+  protected buildLocalCommand(serverData: MCPServerConfig): string {
     const serverName = buildMcpServerName({
       transport: 'stdio',
       serverName: serverData.serverName,

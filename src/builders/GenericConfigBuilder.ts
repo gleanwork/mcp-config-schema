@@ -1,5 +1,5 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { GleanServerConfig } from '../types.js';
+import { MCPServerConfig } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 import { CLIENT } from '../constants.js';
 
@@ -16,12 +16,12 @@ const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
 
 export class GenericConfigBuilder extends BaseConfigBuilder {
   protected buildLocalConfig(
-    serverData: GleanServerConfig,
-    includeWrapper: boolean = true
+    serverData: MCPServerConfig,
+    includeRootObject: boolean = true
   ): Record<string, unknown> {
-    const { serverKey, stdioConfig } = this.config.configStructure;
+    const { serversPropertyName, stdioPropertyMapping } = this.config.configStructure;
 
-    if (!stdioConfig) {
+    if (!stdioPropertyMapping) {
       throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
     }
 
@@ -32,14 +32,14 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     });
     const serverConfig: Record<string, unknown> = {};
 
-    serverConfig[stdioConfig.commandField] = 'npx';
-    serverConfig[stdioConfig.argsField] = ['-y', '@gleanwork/local-mcp-server'];
+    serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
+    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', '@gleanwork/local-mcp-server'];
 
-    if (stdioConfig.typeField) {
-      serverConfig[stdioConfig.typeField] = 'stdio';
+    if (stdioPropertyMapping.typeProperty) {
+      serverConfig[stdioPropertyMapping.typeProperty] = 'stdio';
     }
 
-    if (stdioConfig.envField) {
+    if (stdioPropertyMapping.envProperty) {
       const env: Record<string, string> = {};
 
       if (serverData.instance) {
@@ -58,32 +58,33 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
       }
 
       if (Object.keys(env).length > 0) {
-        serverConfig[stdioConfig.envField] = env;
+        serverConfig[stdioPropertyMapping.envProperty] = env;
       }
     }
 
-    if (!includeWrapper) {
+    if (!includeRootObject) {
       return {
         [serverName]: serverConfig,
       };
     }
 
     return {
-      [serverKey]: {
+      [serversPropertyName]: {
         [serverName]: serverConfig,
       },
     };
   }
 
   protected buildRemoteConfig(
-    serverData: GleanServerConfig,
-    includeWrapper: boolean = true
+    serverData: MCPServerConfig,
+    includeRootObject: boolean = true
   ): Record<string, unknown> {
     if (!serverData.serverUrl) {
       throw new Error('Remote configuration requires serverUrl');
     }
 
-    const { serverKey, httpConfig, stdioConfig } = this.config.configStructure;
+    const { serversPropertyName, httpPropertyMapping, stdioPropertyMapping } =
+      this.config.configStructure;
 
     const serverName = buildMcpServerName({
       transport: 'http',
@@ -92,41 +93,41 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
       productName: serverData.productName,
     });
 
-    if (httpConfig && this.config.transports.includes('http')) {
+    if (httpPropertyMapping && this.config.transports.includes('http')) {
       const serverConfig: Record<string, unknown> = {};
 
-      if (httpConfig.typeField) {
-        serverConfig[httpConfig.typeField] = 'http';
+      if (httpPropertyMapping.typeProperty) {
+        serverConfig[httpPropertyMapping.typeProperty] = 'http';
       }
 
-      serverConfig[httpConfig.urlField] = serverData.serverUrl;
+      serverConfig[httpPropertyMapping.urlProperty] = serverData.serverUrl;
 
       // Add headers for authentication if API token is provided
-      if (httpConfig.headersField && serverData.apiToken) {
-        serverConfig[httpConfig.headersField] = {
+      if (httpPropertyMapping.headersProperty && serverData.apiToken) {
+        serverConfig[httpPropertyMapping.headersProperty] = {
           Authorization: `Bearer ${serverData.apiToken}`,
         };
       }
 
-      if (!includeWrapper) {
+      if (!includeRootObject) {
         return {
           [serverName]: serverConfig,
         };
       }
 
       return {
-        [serverKey]: {
+        [serversPropertyName]: {
           [serverName]: serverConfig,
         },
       };
-    } else if (stdioConfig) {
+    } else if (stdioPropertyMapping) {
       const serverConfig: Record<string, unknown> = {};
 
-      if (stdioConfig.typeField) {
-        serverConfig[stdioConfig.typeField] = 'stdio';
+      if (stdioPropertyMapping.typeProperty) {
+        serverConfig[stdioPropertyMapping.typeProperty] = 'stdio';
       }
 
-      serverConfig[stdioConfig.commandField] = 'npx';
+      serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
       const mcpRemotePackage = serverData.mcpRemoteVersion
         ? `mcp-remote@${serverData.mcpRemoteVersion}`
         : 'mcp-remote';
@@ -136,16 +137,16 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
         args.push('--header', `Authorization: Bearer ${serverData.apiToken}`);
       }
 
-      serverConfig[stdioConfig.argsField] = args;
+      serverConfig[stdioPropertyMapping.argsProperty] = args;
 
-      if (!includeWrapper) {
+      if (!includeRootObject) {
         return {
           [serverName]: serverConfig,
         };
       }
 
       return {
-        [serverKey]: {
+        [serversPropertyName]: {
           [serverName]: serverConfig,
         },
       };
@@ -154,15 +155,15 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     }
   }
 
-  buildOneClickUrl?(_serverData: GleanServerConfig): string {
-    if (!this.config.oneClick) {
+  buildOneClickUrl?(_serverData: MCPServerConfig): string {
+    if (!this.config.protocolHandler) {
       throw new Error(`${this.config.displayName} does not support one-click installation`);
     }
 
     throw new Error(`One-click URL generation not implemented for ${this.config.displayName}`);
   }
 
-  protected buildRemoteCommand(serverData: GleanServerConfig): string | null {
+  protected buildRemoteCommand(serverData: MCPServerConfig): string | null {
     if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
       return null;
     }
@@ -181,7 +182,7 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     return command;
   }
 
-  protected buildLocalCommand(serverData: GleanServerConfig): string | null {
+  protected buildLocalCommand(serverData: MCPServerConfig): string | null {
     if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
       return null;
     }
@@ -210,10 +211,10 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
   }
 
   getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    const { serverKey } = this.config.configStructure;
+    const { serversPropertyName } = this.config.configStructure;
 
-    if (config[serverKey]) {
-      return config[serverKey] as Record<string, unknown>;
+    if (config[serversPropertyName]) {
+      return config[serversPropertyName] as Record<string, unknown>;
     }
 
     const firstKey = Object.keys(config)[0];

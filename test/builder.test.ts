@@ -941,22 +941,22 @@ describe('ConfigBuilder', () => {
   describe('Client-specific configurations', () => {
     it('should use correct server key for VS Code', () => {
       const config = registry.getConfig(CLIENT.VSCODE);
-      expect(config?.configStructure.serverKey).toBe('servers');
+      expect(config?.configStructure.serversPropertyName).toBe('servers');
     });
 
     it('should use correct server key for Goose', () => {
       const config = registry.getConfig(CLIENT.GOOSE);
-      expect(config?.configStructure.serverKey).toBe('extensions');
+      expect(config?.configStructure.serversPropertyName).toBe('extensions');
     });
 
     it('should use correct command field for Goose', () => {
       const config = registry.getConfig(CLIENT.GOOSE);
-      expect(config?.configStructure.stdioConfig?.commandField).toBe('cmd');
+      expect(config?.configStructure.stdioPropertyMapping?.commandProperty).toBe('cmd');
     });
 
     it('should not have type field for Windsurf', () => {
       const config = registry.getConfig(CLIENT.WINDSURF);
-      expect(config?.configStructure.stdioConfig?.typeField).toBeUndefined();
+      expect(config?.configStructure.stdioPropertyMapping?.typeProperty).toBeUndefined();
     });
 
     it('should handle Claude Desktop with Linux support', () => {
@@ -1160,12 +1160,12 @@ describe('ConfigBuilder', () => {
         serverName: 'test',
       });
 
-      expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serverKey);
+      expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serversPropertyName);
       expect(generatedConfig).toHaveProperty('servers'); // VS Code uses 'servers'
 
       const serverConfig = generatedConfig.servers.glean_test;
-      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpConfig.typeField);
-      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpConfig.urlField);
+      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpPropertyMapping.typeProperty);
+      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpPropertyMapping.urlProperty);
     });
 
     it('should use Goose YAML structure from JSON config', () => {
@@ -1179,18 +1179,18 @@ describe('ConfigBuilder', () => {
         serverName: 'test',
       });
 
-      expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serverKey);
+      expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serversPropertyName);
       expect(generatedConfig).toHaveProperty('extensions');
 
       const serverConfig = generatedConfig.extensions.glean_test;
-      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpConfig.urlField);
+      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpPropertyMapping.urlProperty);
       expect(serverConfig.uri).toBe('https://example.com/mcp/default');
       expect(serverConfig.type).toBe('streamable_http');
     });
 
     it('should respect client-specific field presence from JSON', () => {
       const windsurfConfig = registry.getConfig(CLIENT.WINDSURF);
-      expect(windsurfConfig?.configStructure.stdioConfig?.typeField).toBeUndefined();
+      expect(windsurfConfig?.configStructure.stdioPropertyMapping?.typeProperty).toBeUndefined();
 
       const builder = registry.createBuilder(CLIENT.WINDSURF);
       const generatedConfig = builder.buildConfiguration({
@@ -1219,7 +1219,7 @@ describe('ConfigBuilder', () => {
 
     it('should fail for unsupported clients defined in JSON', () => {
       const chatgptConfig = registry.getConfig(CLIENT.CHATGPT);
-      expect(chatgptConfig?.localConfigSupport).toBe('none');
+      expect(chatgptConfig?.userConfigurable).toBe(false);
 
       expect(() => registry.createBuilder(CLIENT.CHATGPT)).toThrow();
     });
@@ -1233,7 +1233,7 @@ describe('ConfigBuilder', () => {
 
         expect(config).toEqual(jsonConfig);
 
-        if (config.localConfigSupport === 'full') {
+        if (config.userConfigurable === true) {
           expect(() => registry.createBuilder(config.id)).not.toThrow();
         } else {
           expect(() => registry.createBuilder(config.id)).toThrow();
@@ -1242,13 +1242,13 @@ describe('ConfigBuilder', () => {
     });
   });
 
-  describe('Partial Configuration (includeWrapper: false)', () => {
+  describe('Partial Configuration (includeRootObject: false)', () => {
     describe('Remote configurations', () => {
       const remoteConfig = {
         transport: 'http' as const,
         serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
         serverName: 'glean_default',
-        includeWrapper: false,
+        includeRootObject: false,
       };
 
       it('should generate partial HTTP config for Claude Code', () => {
@@ -1353,7 +1353,7 @@ describe('ConfigBuilder', () => {
         instance: 'my-company',
         apiToken: 'test-token',
         serverName: 'glean_local',
-        includeWrapper: false,
+        includeRootObject: false,
       };
 
       it('should generate partial local config for Claude Code', () => {
@@ -1401,7 +1401,7 @@ describe('ConfigBuilder', () => {
           instance: 'https://my-company.glean.com',
           apiToken: 'test-token',
           serverName: 'glean_custom',
-          includeWrapper: false,
+          includeRootObject: false,
         });
 
         expect(result).toEqual({
@@ -1446,7 +1446,7 @@ describe('ConfigBuilder', () => {
     });
 
     describe('Backward compatibility', () => {
-      it('should default to including wrapper when includeWrapper is not specified', () => {
+      it('should default to including wrapper when includeRootObject is not specified', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
           transport: 'http' as const,
@@ -1460,13 +1460,13 @@ describe('ConfigBuilder', () => {
         expect(result.mcpServers).toHaveProperty('glean_test');
       });
 
-      it('should include wrapper when includeWrapper is explicitly true', () => {
+      it('should include wrapper when includeRootObject is explicitly true', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
           transport: 'http' as const,
           serverUrl: 'https://example.com/mcp/default',
           serverName: 'test',
-          includeWrapper: true,
+          includeRootObject: true,
         };
 
         const result = builder.buildConfiguration(config);
@@ -1510,7 +1510,7 @@ describe('ConfigBuilder', () => {
         const config = {
           transport: 'http' as const,
           serverUrl: 'https://example.com/mcp/default',
-          includeWrapper: false,
+          includeRootObject: false,
         };
 
         const result = builder.buildConfiguration(config);
@@ -1523,7 +1523,7 @@ describe('ConfigBuilder', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
           transport: 'stdio' as const,
-          includeWrapper: false,
+          includeRootObject: false,
         };
 
         const result = builder.buildConfiguration(config);

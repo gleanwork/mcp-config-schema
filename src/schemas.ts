@@ -16,30 +16,25 @@ export const ClientIdSchema = z.enum([
 
 export const ServerTypeSchema = z.enum(['http', 'stdio']);
 
-export const LocalConfigSupportSchema = z.enum(['full', 'none']);
-
-// Indicates whether remote configuration is user/organization managed, web-only, or unsupported
-export const RemoteConfigSupportSchema = z.enum(['none', 'managed', 'web']);
-
 export const TransportSchema = z.enum(['stdio', 'http']);
 export const SupportedTransportsSchema = z.array(TransportSchema).min(1);
 export const HttpConfigStructureSchema = z.object({
-  typeField: z.string().optional(),
-  urlField: z.string(),
-  headersField: z.string().optional(),
+  typeProperty: z.string().optional(),
+  urlProperty: z.string(),
+  headersProperty: z.string().optional(),
 });
 
 export const StdioConfigStructureSchema = z.object({
-  typeField: z.string().optional(),
-  commandField: z.string(),
-  argsField: z.string(),
-  envField: z.string().optional(),
+  typeProperty: z.string().optional(),
+  commandProperty: z.string(),
+  argsProperty: z.string(),
+  envProperty: z.string().optional(),
 });
 
 export const ConfigStructureSchema = z.object({
-  serverKey: z.string(),
-  httpConfig: HttpConfigStructureSchema.optional(),
-  stdioConfig: StdioConfigStructureSchema.optional(),
+  serversPropertyName: z.string(),
+  httpPropertyMapping: HttpConfigStructureSchema.optional(),
+  stdioPropertyMapping: StdioConfigStructureSchema.optional(),
 });
 
 export const PlatformPathsSchema = z.object({
@@ -53,16 +48,14 @@ export const MCPClientConfigSchema = z.object({
   name: z.string(),
   displayName: z.string(),
   description: z.string(),
-  localConfigSupport: LocalConfigSupportSchema,
-  // Whether remote configuration is handled externally (e.g., web/organization managed)
-  remoteConfigSupport: RemoteConfigSupportSchema,
+  userConfigurable: z.boolean(),
   localConfigNotes: z.string().optional(),
   documentationUrl: z.string().url().optional(),
   transports: SupportedTransportsSchema,
   supportedPlatforms: z.array(PlatformSchema),
   configFormat: z.enum(['json', 'yaml', 'toml']),
   configPath: PlatformPathsSchema,
-  oneClick: z
+  protocolHandler: z
     .object({
       protocol: z.string(),
       urlTemplate: z.string(),
@@ -74,12 +67,12 @@ export const MCPClientConfigSchema = z.object({
 });
 
 export const BuildOptionsSchema = z.object({
-  includeWrapper: z.boolean().optional(),
+  includeRootObject: z.boolean().optional(),
   mcpRemoteVersion: z.string().optional(),
   configureMcpServerVersion: z.string().optional(),
 });
 
-export const GleanServerConfigSchema = z
+export const MCPServerConfigSchema = z
   .object({
     transport: TransportSchema,
     serverUrl: z.string().optional(), // Accept any string, not just valid URLs
@@ -95,7 +88,7 @@ export function validateClientConfig(data: unknown) {
 }
 
 export function validateServerConfig(data: unknown) {
-  return GleanServerConfigSchema.parse(data);
+  return MCPServerConfigSchema.parse(data);
 }
 
 export function safeValidateClientConfig(data: unknown) {
@@ -103,7 +96,7 @@ export function safeValidateClientConfig(data: unknown) {
 }
 
 export function safeValidateServerConfig(data: unknown) {
-  return GleanServerConfigSchema.safeParse(data);
+  return MCPServerConfigSchema.safeParse(data);
 }
 
 export const HttpServerConfigSchema = z.object({
@@ -116,7 +109,7 @@ export const HttpServerConfigAltSchema = z.object({
 });
 
 export const StdioServerConfigSchema = z.object({
-  type: z.literal('stdio').optional(), // Some clients don't include type field
+  type: z.literal('stdio').optional(), // Some clients don't include type property
   command: z.string(),
   args: z.array(z.string()),
   env: z.record(z.string(), z.string()).optional(),

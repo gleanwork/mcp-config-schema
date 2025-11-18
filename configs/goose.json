@@ -3,8 +3,7 @@
   "name": "goose",
   "displayName": "Goose",
   "description": "Goose with native HTTP support",
-  "localConfigSupport": "full",
-  "remoteConfigSupport": "none",
+  "userConfigurable": true,
   "documentationUrl": "https://github.com/block/goose",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
@@ -15,16 +14,16 @@
     "win32": "%USERPROFILE%\\.config\\goose\\config.yaml"
   },
   "configStructure": {
-    "serverKey": "extensions",
-    "httpConfig": {
-      "typeField": "type",
-      "urlField": "uri"
+    "serversPropertyName": "extensions",
+    "httpPropertyMapping": {
+      "typeProperty": "type",
+      "urlProperty": "uri"
     },
-    "stdioConfig": {
-      "typeField": "type",
-      "commandField": "cmd",
-      "argsField": "args",
-      "envField": "envs"
+    "stdioPropertyMapping": {
+      "typeProperty": "type",
+      "commandProperty": "cmd",
+      "argsProperty": "args",
+      "envProperty": "envs"
     }
   }
 }

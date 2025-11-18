@@ -95,16 +95,19 @@ export class MCPConfigRegistry {
   }
 
   private validateBusinessRules(config: MCPClientConfig): void {
-    if (config.localConfigSupport === 'none') {
+    if (!config.userConfigurable) {
       return;
     }
-    if (!config.configStructure.httpConfig && !config.configStructure.stdioConfig) {
+    if (
+      !config.configStructure.httpPropertyMapping &&
+      !config.configStructure.stdioPropertyMapping
+    ) {
       throw new Error(`Client must support at least one configuration type (http or stdio)`);
     }
 
-    // Business rule: HTTP support requires httpConfig
-    if (config.transports.includes('http') && !config.configStructure.httpConfig) {
-      throw new Error(`Client with HTTP support must have httpConfig defined`);
+    // Business rule: HTTP support requires httpPropertyMapping
+    if (config.transports.includes('http') && !config.configStructure.httpPropertyMapping) {
+      throw new Error(`Client with HTTP support must have httpPropertyMapping defined`);
     }
   }
 
@@ -132,11 +135,11 @@ export class MCPConfigRegistry {
   }
 
   getClientsWithOneClick(): MCPClientConfig[] {
-    return this.getAllConfigs().filter((config) => config.oneClick !== undefined);
+    return this.getAllConfigs().filter((config) => config.protocolHandler !== undefined);
   }
 
   getSupportedClients(): MCPClientConfig[] {
-    return this.getAllConfigs().filter((config) => config.localConfigSupport === 'full');
+    return this.getAllConfigs().filter((config) => config.userConfigurable);
   }
 
   getClientsByPlatform(platform: Platform): MCPClientConfig[] {
@@ -144,7 +147,7 @@ export class MCPConfigRegistry {
   }
 
   getUnsupportedClients(): MCPClientConfig[] {
-    return this.getAllConfigs().filter((config) => config.localConfigSupport === 'none');
+    return this.getAllConfigs().filter((config) => !config.userConfigurable);
   }
 
   /**
@@ -191,7 +194,7 @@ export class MCPConfigRegistry {
     if (!config) {
       throw new Error(`Unknown client: ${clientId}`);
     }
-    if (config.localConfigSupport === 'none') {
+    if (!config.userConfigurable) {
       throw new Error(
         `Cannot create builder for ${config.displayName}: ${config.localConfigNotes || 'No local configuration support.'}`
       );

@@ -1,4 +1,4 @@
-import { MCPClientConfig, GleanServerConfig, Platform, validateServerConfig } from '../types.js';
+import { MCPClientConfig, MCPServerConfig, Platform, validateServerConfig } from '../types.js';
 import * as yaml from 'js-yaml';
 import * as TOML from 'smol-toml';
 
@@ -48,8 +48,8 @@ export abstract class BaseConfigBuilder {
     return 'darwin';
   }
 
-  buildConfiguration(serverData: GleanServerConfig): Record<string, unknown> {
-    if (this.config.localConfigSupport === 'none') {
+  buildConfiguration(serverData: MCPServerConfig): Record<string, unknown> {
+    if (!this.config.userConfigurable) {
       throw new Error(
         `${this.config.displayName} does not support local configuration. ` +
           `${this.config.localConfigNotes || 'Configuration must be done through other means.'}`
@@ -57,14 +57,14 @@ export abstract class BaseConfigBuilder {
     }
 
     const validatedConfig = validateServerConfig(serverData);
-    const includeWrapper = validatedConfig.includeWrapper !== false;
+    const includeRootObject = validatedConfig.includeRootObject !== false;
 
     let configObj: Record<string, unknown> = {};
 
     if (validatedConfig.transport === 'stdio') {
-      configObj = this.buildLocalConfig(validatedConfig, includeWrapper);
+      configObj = this.buildLocalConfig(validatedConfig, includeRootObject);
     } else if (validatedConfig.transport === 'http') {
-      configObj = this.buildRemoteConfig(validatedConfig, includeWrapper);
+      configObj = this.buildRemoteConfig(validatedConfig, includeRootObject);
     } else {
       throw new Error(`Invalid transport: ${validatedConfig.transport}`);
     }
@@ -85,18 +85,18 @@ export abstract class BaseConfigBuilder {
   }
 
   protected abstract buildLocalConfig(
-    serverData: GleanServerConfig,
-    includeWrapper: boolean
+    serverData: MCPServerConfig,
+    includeRootObject: boolean
   ): Record<string, unknown>;
 
   protected abstract buildRemoteConfig(
-    serverData: GleanServerConfig,
-    includeWrapper: boolean
+    serverData: MCPServerConfig,
+    includeRootObject: boolean
   ): Record<string, unknown>;
 
-  buildOneClickUrl?(serverData: GleanServerConfig): string;
+  buildOneClickUrl?(serverData: MCPServerConfig): string;
 
-  buildCommand(serverData: GleanServerConfig): string | null {
+  buildCommand(serverData: MCPServerConfig): string | null {
     try {
       const validatedConfig = validateServerConfig(serverData);
 
@@ -110,13 +110,13 @@ export abstract class BaseConfigBuilder {
     }
   }
 
-  protected abstract buildRemoteCommand(serverData: GleanServerConfig): string | null;
-  protected abstract buildLocalCommand(serverData: GleanServerConfig): string | null;
+  protected abstract buildRemoteCommand(serverData: MCPServerConfig): string | null;
+  protected abstract buildLocalCommand(serverData: MCPServerConfig): string | null;
 
   /**
    * Helper to get the configure-mcp-server package name with optional version
    */
-  protected getConfigureMcpServerPackage(serverData: GleanServerConfig): string {
+  protected getConfigureMcpServerPackage(serverData: MCPServerConfig): string {
     return serverData.configureMcpServerVersion
       ? `${CONFIGURE_MCP_SERVER_PACKAGE}@${serverData.configureMcpServerVersion}`
       : CONFIGURE_MCP_SERVER_PACKAGE;
@@ -125,14 +125,14 @@ export abstract class BaseConfigBuilder {
   /**
    * Helper to get the server URL with fallback to placeholder
    */
-  protected getServerUrl(serverData: GleanServerConfig): string {
+  protected getServerUrl(serverData: MCPServerConfig): string {
     return serverData.serverUrl || DEFAULT_PLACEHOLDER_URL;
   }
 
   /**
    * Helper to get the instance with fallback to placeholder
    */
-  protected getInstanceOrPlaceholder(serverData: GleanServerConfig): string {
+  protected getInstanceOrPlaceholder(serverData: MCPServerConfig): string {
     return serverData.instance || DEFAULT_PLACEHOLDER_INSTANCE;
   }
 
@@ -174,7 +174,7 @@ export abstract class BaseConfigBuilder {
       throw new Error('getConfigPath() is only available in Node.js environment');
     }
 
-    if (this.config.localConfigSupport === 'none') {
+    if (!this.config.userConfigurable) {
       throw new Error(
         `${this.config.displayName} does not support local configuration. ` +
           `${this.config.localConfigNotes || 'Configuration must be done through other means.'}`

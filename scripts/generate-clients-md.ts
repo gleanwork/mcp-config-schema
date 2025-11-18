@@ -60,7 +60,7 @@ function formatPlatforms(platforms: string[]): string {
 // Generate the quick reference table
 function generateQuickReference(): string {
   const rows = clients.map((client) => {
-    const compatibility = client.localConfigSupport === 'full' ? 'Full' : 'None';
+    const configuration = client.userConfigurable ? 'User-configurable' : 'Managed';
 
     // Determine connection type based on transports array
     let connectionType = 'Unknown';
@@ -74,26 +74,32 @@ function generateQuickReference(): string {
 
     // Determine if mcp-remote is needed
     const requiresRemote =
-      client.localConfigSupport === 'full'
+      client.userConfigurable
         ? !client.transports?.includes('http')
           ? 'Yes (for HTTP)'
           : 'No'
         : 'No';
 
-    const platforms =
-      client.supportedPlatforms.length > 0
-        ? formatPlatforms(client.supportedPlatforms)
-        : client.remoteConfigSupport === 'web'
-          ? 'Web only'
-          : client.remoteConfigSupport === 'managed'
-            ? 'Organization-managed'
-            : 'Unknown';
+    // Determine platforms display
+    let platforms = '';
+    if (client.supportedPlatforms.length > 0) {
+      platforms = formatPlatforms(client.supportedPlatforms);
+    } else if (client.localConfigNotes?.toLowerCase().includes('web')) {
+      platforms = 'Web-based';
+    } else if (
+      client.localConfigNotes?.toLowerCase().includes('organization') ||
+      client.localConfigNotes?.toLowerCase().includes('centrally managed')
+    ) {
+      platforms = 'Organization-managed';
+    } else {
+      platforms = 'All platforms';
+    }
 
-    return `| **${client.displayName}** | ${compatibility} | ${connectionType} | ${requiresRemote} | ${platforms} |`;
+    return `| **${client.displayName}** | ${configuration} | ${connectionType} | ${requiresRemote} | ${platforms} |`;
   });
 
-  return `| Client | Compatibility | Connection Type | Requires mcp-remote? | Platforms |
-|--------|--------------|-----------------|---------------------|-----------|
+  return `| Client | Configuration | Connection Type | Requires mcp-remote? | Platforms |
+|--------|---------------|-----------------|---------------------|-----------|
 ${rows.join('\n')}`;
 }
 
@@ -108,18 +114,18 @@ function generateClientSection(client: any): string {
   // Basic info
   const info: string[] = [];
   info.push(
-    `- **Compatibility**: ${client.localConfigSupport === 'full' ? 'Full local configuration support' : 'No local configuration support'}`
+    `- **Configuration**: ${client.userConfigurable ? 'User-configurable' : 'Centrally managed'}`
   );
 
   // Connection type based on transports array
   if (client.transports?.includes('http') && client.transports?.includes('stdio')) {
     info.push('- **Connection Type**: Native HTTP support');
   } else if (client.transports?.includes('stdio') && !client.transports?.includes('http')) {
-    const needsRemote = client.localConfigSupport === 'full';
+    const needsRemote = client.userConfigurable;
     info.push(
       `- **Connection Type**: stdio only${needsRemote ? ' (requires mcp-remote for HTTP servers)' : ''}`
     );
-  } else if (client.localConfigSupport === 'none') {
+  } else if (!client.userConfigurable) {
     if (client.transports?.includes('http') && !client.transports?.includes('stdio')) {
       info.push('- **Connection Type**: HTTP only (managed)');
     } else if (client.transports?.includes('stdio') && !client.transports?.includes('http')) {
@@ -140,8 +146,8 @@ function generateClientSection(client: any): string {
   }
 
   // Special properties
-  if (client.oneClick?.protocol) {
-    info.push(`- **One-Click Protocol**: \`${client.oneClick.protocol}\``);
+  if (client.protocolHandler?.protocol) {
+    info.push(`- **One-Click Protocol**: \`${client.protocolHandler.protocol}\``);
   }
 
   if (client.configFormat === 'yaml') {
@@ -154,16 +160,16 @@ function generateClientSection(client: any): string {
   }
 
   // Other notes
-  if (client.localConfigNotes && client.localConfigSupport === 'full') {
+  if (client.localConfigNotes && client.userConfigurable) {
     if (client.localConfigNotes.includes('mcp-remote')) {
       info.push('- **Notes**: Requires mcp-remote bridge for remote servers');
     }
-  } else if (client.localConfigNotes && client.localConfigSupport === 'none') {
+  } else if (client.localConfigNotes && !client.userConfigurable) {
     info.push(`- **Notes**: ${client.localConfigNotes}`);
   }
 
   // Configuration paths (only for clients with local config support)
-  if (client.localConfigSupport === 'full' && Object.keys(client.configPath).length > 0) {
+  if (client.userConfigurable && Object.keys(client.configPath).length > 0) {
     info.push('- **Configuration Paths**:');
     info.push(formatConfigPaths(client.configPath));
   }
@@ -171,7 +177,7 @@ function generateClientSection(client: any): string {
   sections.push(info.join('\n'));
 
   // Only add configuration examples for clients with full support
-  if (client.localConfigSupport === 'full') {
+  if (client.userConfigurable) {
     // Internal configuration schema
     sections.push('');
     sections.push('<details>');
@@ -296,15 +302,15 @@ function generateDocument(): string {
 
   // Generate dynamic client lists based on actual configuration
   const nativeHttpClients = clients.filter(
-    (c) => c.transports?.includes('http') && c.localConfigSupport === 'full'
+    (c) => c.transports?.includes('http') && c.userConfigurable
   );
   const stdioOnlyClients = clients.filter(
     (c) =>
       c.transports?.includes('stdio') &&
       !c.transports?.includes('http') &&
-      c.localConfigSupport === 'full'
+      c.userConfigurable
   );
-  const managedClients = clients.filter((c) => c.localConfigSupport === 'none');
+  const managedClients = clients.filter((c) => !c.userConfigurable);
 
   sections.push('### Native HTTP Clients');
   sections.push(
@@ -368,9 +374,9 @@ function generateDocument(): string {
   sections.push('## One-Click Protocol Support');
   sections.push('');
   sections.push('Some clients support one-click installation via custom protocols:');
-  const oneClickClients = clients.filter((c) => c.oneClick?.protocol);
+  const oneClickClients = clients.filter((c) => c.protocolHandler?.protocol);
   for (const client of oneClickClients) {
-    sections.push(`- **${client.displayName}**: \`${client.oneClick.protocol}\``);
+    sections.push(`- **${client.displayName}**: \`${client.protocolHandler.protocol}\``);
   }
   sections.push('');
 

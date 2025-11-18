@@ -3,8 +3,7 @@
   "name": "windsurf",
   "displayName": "Windsurf",
   "description": "Windsurf supports both stdio and native HTTP connections",
-  "localConfigSupport": "full",
-  "remoteConfigSupport": "none",
+  "userConfigurable": true,
   "localConfigNotes": "Supports both stdio and native HTTP connections",
   "documentationUrl": "https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp",
   "transports": ["stdio", "http"],
@@ -16,14 +15,14 @@
     "win32": "%USERPROFILE%\\.codeium\\windsurf\\mcp_config.json"
   },
   "configStructure": {
-    "serverKey": "mcpServers",
-    "httpConfig": {
-      "urlField": "serverUrl"
+    "serversPropertyName": "mcpServers",
+    "httpPropertyMapping": {
+      "urlProperty": "serverUrl"
     },
-    "stdioConfig": {
-      "commandField": "command",
-      "argsField": "args",
-      "envField": "env"
+    "stdioPropertyMapping": {
+      "commandProperty": "command",
+      "argsProperty": "args",
+      "envProperty": "env"
     }
   }
 }

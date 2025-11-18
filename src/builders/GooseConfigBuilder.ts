@@ -1,15 +1,15 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { GleanServerConfig } from '../types.js';
+import { MCPServerConfig } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class GooseConfigBuilder extends BaseConfigBuilder {
   protected buildLocalConfig(
-    serverData: GleanServerConfig,
-    includeWrapper: boolean = true
+    serverData: MCPServerConfig,
+    includeRootObject: boolean = true
   ): Record<string, unknown> {
-    const { stdioConfig } = this.config.configStructure;
+    const { stdioPropertyMapping } = this.config.configStructure;
 
-    if (!stdioConfig) {
+    if (!stdioPropertyMapping) {
       throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
     }
 
@@ -21,14 +21,14 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
 
     const serverConfig: Record<string, unknown> = {};
 
-    serverConfig[stdioConfig.commandField] = 'npx';
-    serverConfig[stdioConfig.argsField] = ['-y', '@gleanwork/local-mcp-server'];
+    serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
+    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', '@gleanwork/local-mcp-server'];
 
-    if (stdioConfig.typeField) {
-      serverConfig[stdioConfig.typeField] = 'stdio';
+    if (stdioPropertyMapping.typeProperty) {
+      serverConfig[stdioPropertyMapping.typeProperty] = 'stdio';
     }
 
-    // Goose uses 'envs' field directly, not through stdioConfig.envField
+    // Goose uses 'envs' property directly, not through stdioPropertyMapping.envProperty
     const envs: Record<string, string> = {};
 
     if (serverData.instance) {
@@ -55,7 +55,7 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
       envs: envs,
     };
 
-    if (!includeWrapper) {
+    if (!includeRootObject) {
       return {
         [serverName]: gooseServerConfig,
       };
@@ -69,14 +69,15 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
   }
 
   protected buildRemoteConfig(
-    serverData: GleanServerConfig,
-    includeWrapper: boolean = true
+    serverData: MCPServerConfig,
+    includeRootObject: boolean = true
   ): Record<string, unknown> {
     if (!serverData.serverUrl) {
       throw new Error('Remote configuration requires serverUrl');
     }
 
-    const { serverKey, httpConfig, stdioConfig } = this.config.configStructure;
+    const { serversPropertyName, httpPropertyMapping, stdioPropertyMapping } =
+      this.config.configStructure;
 
     const serverName = buildMcpServerName({
       transport: 'http',
@@ -85,17 +86,17 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
       productName: serverData.productName,
     });
 
-    if (httpConfig && this.config.transports.includes('http')) {
+    if (httpPropertyMapping && this.config.transports.includes('http')) {
       const serverConfig: Record<string, unknown> = {};
 
-      if (httpConfig.typeField) {
+      if (httpPropertyMapping.typeProperty) {
         // Goose uses 'streamable_http' instead of 'http'
-        serverConfig[httpConfig.typeField] = 'streamable_http';
+        serverConfig[httpPropertyMapping.typeProperty] = 'streamable_http';
       }
 
-      serverConfig[httpConfig.urlField] = serverData.serverUrl;
+      serverConfig[httpPropertyMapping.urlProperty] = serverData.serverUrl;
 
-      // Goose doesn't use httpConfig.headersField, it has its own headers field
+      // Goose doesn't use httpPropertyMapping.headersProperty, it has its own headers property
       const headers: Record<string, string> = {};
       if (serverData.apiToken) {
         headers['Authorization'] = `Bearer ${serverData.apiToken}`;
@@ -114,25 +115,25 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
         available_tools: [],
       };
 
-      if (!includeWrapper) {
+      if (!includeRootObject) {
         return {
           [serverName]: gooseServerConfig,
         };
       }
 
       return {
-        [serverKey]: {
+        [serversPropertyName]: {
           [serverName]: gooseServerConfig,
         },
       };
-    } else if (stdioConfig) {
+    } else if (stdioPropertyMapping) {
       const serverConfig: Record<string, unknown> = {};
 
-      if (stdioConfig.typeField) {
-        serverConfig[stdioConfig.typeField] = 'stdio';
+      if (stdioPropertyMapping.typeProperty) {
+        serverConfig[stdioPropertyMapping.typeProperty] = 'stdio';
       }
 
-      serverConfig[stdioConfig.commandField] = 'npx';
+      serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
       const mcpRemotePackage = serverData.mcpRemoteVersion
         ? `mcp-remote@${serverData.mcpRemoteVersion}`
         : 'mcp-remote';
@@ -143,16 +144,16 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
         args.push('--header', `Authorization: Bearer ${serverData.apiToken}`);
       }
 
-      serverConfig[stdioConfig.argsField] = args;
+      serverConfig[stdioPropertyMapping.argsProperty] = args;
 
-      if (!includeWrapper) {
+      if (!includeRootObject) {
         return {
           [serverName]: serverConfig,
         };
       }
 
       return {
-        [serverKey]: {
+        [serversPropertyName]: {
           [serverName]: serverConfig,
         },
       };
@@ -161,7 +162,7 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
     }
   }
 
-  protected buildRemoteCommand(serverData: GleanServerConfig): string {
+  protected buildRemoteCommand(serverData: MCPServerConfig): string {
     const serverUrl = this.getServerUrl(serverData);
     const packageName = this.getConfigureMcpServerPackage(serverData);
 
@@ -177,7 +178,7 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
     return command;
   }
 
-  protected buildLocalCommand(serverData: GleanServerConfig): string {
+  protected buildLocalCommand(serverData: MCPServerConfig): string {
     const packageName = this.getConfigureMcpServerPackage(serverData);
 
     let command = `npx -y ${packageName} local`;
