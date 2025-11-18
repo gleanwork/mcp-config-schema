@@ -332,11 +332,11 @@ url = "https://glean-dev-be.glean.com/mcp/default"
 <summary><strong>Standard I/O Configuration (local process)</strong></summary>
 
 ```toml snippet=examples/configs/local/codex.toml
-[mcp_servers.glean_local]
+[mcp_servers.glean]
 command = "npx"
 args = [ "-y", "@gleanwork/local-mcp-server" ]
 
-[mcp_servers.glean_local.env]
+[mcp_servers.glean.env]
 GLEAN_INSTANCE = "your-instance"
 GLEAN_API_TOKEN = "your-api-token"
 ```

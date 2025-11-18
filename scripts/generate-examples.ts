@@ -40,7 +40,7 @@ for (const client of clients) {
     serverName: 'glean',
   });
 
-  const remoteExtension = client.configFormat === 'yaml' ? 'yaml' : 'json';
+  const remoteExtension = client.configFormat === 'yaml' ? 'yaml' : client.configFormat === 'toml' ? 'toml' : 'json';
   const remoteFile = join(examplesDir, 'remote', `${client.id}.${remoteExtension}`);
   const remoteString = builder.toString(remoteConfig);
   writeFileSync(remoteFile, remoteString);
@@ -54,7 +54,7 @@ for (const client of clients) {
     serverName: 'glean',
   });
 
-  const localExtension = client.configFormat === 'yaml' ? 'yaml' : 'json';
+  const localExtension = client.configFormat === 'yaml' ? 'yaml' : client.configFormat === 'toml' ? 'toml' : 'json';
   const localFile = join(examplesDir, 'local', `${client.id}.${localExtension}`);
   const localString = builder.toString(localConfig);
   writeFileSync(localFile, localString);
