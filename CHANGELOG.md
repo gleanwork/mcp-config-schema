@@ -15,6 +15,24 @@
 
 
 
+
+## v2.0.0 (2025-11-18)
+
+#### :boom: Breaking Change
+* [#57](https://github.com/gleanwork/mcp-config-schema/pull/57) breaking: Renaming for better semantic meaning ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :rocket: Enhancement
+* [#55](https://github.com/gleanwork/mcp-config-schema/pull/55) feat: Adds support for Jetbrains IDEs (+Junie) ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#56](https://github.com/gleanwork/mcp-config-schema/pull/56) feat: Adds support for Codex ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :memo: Documentation
+* [#59](https://github.com/gleanwork/mcp-config-schema/pull/59) internal: Updates README.md and CLAUDE.md based on recent semantic changes ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 2
+- Nathaniel Furniss ([@nathaniel-furniss-glean](https://github.com/nathaniel-furniss-glean))
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v1.0.0 (2025-11-05)
 
 #### :boom: Breaking Change
