@@ -19,8 +19,8 @@ This is `@gleanwork/mcp-config-schema`, a TypeScript library that provides type-
 
 ### Client Types
 
-- **Native HTTP**: Can connect directly to HTTP servers (Claude Code, VS Code)
-- **stdio-only**: Require `mcp-remote` bridge for HTTP connections (Cursor, Claude Desktop, Windsurf)
+- **Native HTTP**: Can connect directly to HTTP servers (Claude Code, VS Code, Cursor, Goose, Windsurf, Codex)
+- **stdio-only**: Require `mcp-remote` bridge for HTTP connections (Claude Desktop, Junie, JetBrains AI Assistant)
 
 ## Architecture
 
@@ -54,8 +54,8 @@ Each client has a JSON config in `/configs/` defining:
 
 - **Capabilities**: HTTP support, stdio support, platform availability
 - **File locations**: Platform-specific config file paths
-- **Schema structure**: Field names for different connection types
-- **One-click support**: URL template and encoding format
+- **Schema structure**: Property names for different connection types
+- **Protocol handler**: URL template and encoding format for one-click installation
 
 Example client config structure (configs/cursor.json:1):
 
@@ -63,12 +63,18 @@ Example client config structure (configs/cursor.json:1):
 {
   "id": "cursor",
   "displayName": "Cursor",
-  "clientSupports": "http",
-  "requiresMcpRemoteForHttp": false,
+  "userConfigurable": true,
+  "transports": ["stdio", "http"],
+  "supportedPlatforms": ["darwin", "linux", "win32"],
   "configStructure": {
-    "serverKey": "mcpServers",
-    "httpConfig": { "typeField": "type", "urlField": "url" },
-    "stdioConfig": { "typeField": "type", "commandField": "command", "argsField": "args" }
+    "serversPropertyName": "mcpServers",
+    "httpPropertyMapping": { "typeProperty": "type", "urlProperty": "url", "headersProperty": "headers" },
+    "stdioPropertyMapping": { "typeProperty": "type", "commandProperty": "command", "argsProperty": "args", "envProperty": "env" }
+  },
+  "protocolHandler": {
+    "protocol": "cursor://",
+    "urlTemplate": "cursor://anysphere.cursor-deeplink/mcp/install?name={{name}}&config={{config}}",
+    "configFormat": "base64-json"
   }
 }
 ```
@@ -103,12 +109,15 @@ Tests are in `/test/` covering:
 
 Configuration files are written to client-specific locations:
 
-- **Claude Code**: `~/.claude.json` (macOS only)
-- **VS Code**: `~/Library/Application Support/Code/User/mcp.json` (macOS)
+- **Claude Code**: `~/.claude.json` (macOS, Linux, Windows)
+- **VS Code**: `~/Library/Application Support/Code/User/mcp.json` (macOS), `~/.config/Code/User/mcp.json` (Linux), `%APPDATA%\Code\User\mcp.json` (Windows)
 - **Cursor**: `~/.cursor/mcp.json` (all platforms)
-- **Claude Desktop**: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
-- **Goose**: `~/.config/goose/config.yaml` (macOS/Linux)
+- **Claude Desktop**: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS), `~/.config/Claude/claude_desktop_config.json` (Linux), `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+- **Goose**: `~/.config/goose/config.yaml` (macOS/Linux/Windows)
 - **Windsurf**: `~/.codeium/windsurf/mcp_config.json` (all platforms)
+- **Codex**: `~/.codex/config.toml` (all platforms)
+- **Junie**: `~/.junie/mcp.json` (all platforms)
+- **JetBrains AI Assistant**: Configure via IDE UI (Settings → Tools → AI Assistant → Model Context Protocol)
 
 ## Common Tasks
 
