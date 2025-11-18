@@ -390,6 +390,17 @@ describe('ConfigBuilder', () => {
         expect(command).toBe(null);
       });
 
+      it('handles jetbrains client', () => {
+        // JetBrains AI Assistant doesn't support local config, but buildCommand should not throw
+        const command = buildCommand(CLIENT.JETBRAINS, {
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp',
+          serverName: 'test',
+        });
+        // JetBrains requires UI configuration, so command should be null
+        expect(command).toBe(null);
+      });
+
       it('buildCommand wrapper handles errors gracefully', () => {
         // Test with an invalid client ID
         const command = buildCommand('invalid-client' as ClientId, {
@@ -630,29 +641,6 @@ describe('ConfigBuilder', () => {
       `);
     });
 
-    it('should generate correct bridge config for JetBrains AI Assistant', () => {
-      const builder = registry.createBuilder(CLIENT.JETBRAINS);
-      const result = builder.buildConfiguration(remoteConfig);
-
-      const validation = validateGeneratedConfig(result, 'jetbrains');
-      expect(validation.success).toBe(true);
-
-      expect(result).toMatchInlineSnapshot(`
-        {
-          "mcpServers": {
-            "glean": {
-              "args": [
-                "-y",
-                "mcp-remote",
-                "https://glean-dev-be.glean.com/mcp/default",
-              ],
-              "command": "npx",
-              "type": "stdio",
-            },
-          },
-        }
-      `);
-    });
 
     it('should generate correct YAML config for Goose', () => {
       const builder = registry.createBuilder(CLIENT.GOOSE);
@@ -864,32 +852,6 @@ describe('ConfigBuilder', () => {
       `);
     });
 
-    it('should generate correct local config for JetBrains AI Assistant', () => {
-      const builder = registry.createBuilder(CLIENT.JETBRAINS);
-      const result = builder.buildConfiguration(localConfig);
-
-      const validation = validateGeneratedConfig(result, 'jetbrains');
-      expect(validation.success).toBe(true);
-
-      expect(result).toMatchInlineSnapshot(`
-        {
-          "mcpServers": {
-            "glean_local": {
-              "args": [
-                "-y",
-                "@gleanwork/local-mcp-server",
-              ],
-              "command": "npx",
-              "env": {
-                "GLEAN_API_TOKEN": "test-token",
-                "GLEAN_INSTANCE": "my-company",
-              },
-              "type": "stdio",
-            },
-          },
-        }
-      `);
-    });
   });
 
   describe('path expansion', () => {
@@ -909,10 +871,6 @@ describe('ConfigBuilder', () => {
       expect(path).toContain('/.junie/mcp.json');
     });
 
-    it('should throw for JetBrains AI Assistant getConfigPath (no file path defined)', () => {
-      const builder = registry.createBuilder(CLIENT.JETBRAINS);
-      expect(() => builder.getConfigPath()).toThrow('not supported');
-    });
   });
 
   describe('Unsupported clients', () => {
@@ -925,6 +883,12 @@ describe('ConfigBuilder', () => {
     it('should throw when trying to create builder for Claude Teams/Enterprise', () => {
       expect(() => registry.createBuilder(CLIENT.CLAUDE_TEAMS_ENTERPRISE)).toThrow(
         'Cannot create builder for Claude for Teams/Enterprise: MCP servers are centrally managed by admins. No local configuration support - servers must be configured at the organization level.'
+      );
+    });
+
+    it('should throw when trying to create builder for JetBrains AI Assistant', () => {
+      expect(() => registry.createBuilder(CLIENT.JETBRAINS)).toThrow(
+        'Cannot create builder for JetBrains AI Assistant: JetBrains AI Assistant is UI-managed. Use buildConfiguration() to generate JSON config, then paste into Settings > Tools > AI Assistant > Model Context Protocol > Add > As JSON. Direct file writing is not supported due to version-specific XML storage.'
       );
     });
   });
