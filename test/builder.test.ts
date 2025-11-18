@@ -197,6 +197,34 @@ describe('ConfigBuilder', () => {
       );
     });
 
+    it('generates Codex command with remote server', () => {
+      const codexBuilder = registry.createBuilder(CLIENT.CODEX);
+      const command = codexBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client codex --token test-token"`
+      );
+    });
+
+    it('generates Codex command with local server', () => {
+      const codexBuilder = registry.createBuilder(CLIENT.CODEX);
+      const command = codexBuilder.buildCommand({
+        transport: 'stdio',
+        instance: 'test-instance',
+        serverName: 'local-test',
+        apiToken: 'test-token',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"npx -y @gleanwork/configure-mcp-server local --instance test-instance --client codex --token test-token"`
+      );
+    });
+
     describe('White-label support', () => {
       it('uses custom productName in server names for HTTP transport', () => {
         const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
@@ -602,6 +630,69 @@ describe('ConfigBuilder', () => {
             timeout: 300
             bundled: null
             available_tools: []
+        "
+      `);
+    });
+
+    it('should generate correct TOML config for Codex HTTP', () => {
+      const builder = registry.createBuilder(CLIENT.CODEX);
+      const result = builder.buildConfiguration(remoteConfig);
+
+      const validation = validateGeneratedConfig(result, 'codex');
+      expect(validation.success).toBe(true);
+
+      const tomlString = builder.toString(result);
+      expect(tomlString).toMatchInlineSnapshot(`
+        "[mcp_servers.glean]
+        url = "https://glean-dev-be.glean.com/mcp/default"
+        "
+      `);
+    });
+
+    it('should add bearer token to Codex HTTP config', () => {
+      const builder = registry.createBuilder(CLIENT.CODEX);
+      const result = builder.buildConfiguration({
+        transport: 'http',
+        serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
+        apiToken: 'test-token-123',
+      });
+
+      const validation = validateGeneratedConfig(result, 'codex');
+      expect(validation.success).toBe(true);
+
+      const tomlString = builder.toString(result);
+      expect(tomlString).toContain('Authorization');
+      expect(tomlString).toContain('Bearer test-token-123');
+      expect(tomlString).toMatchInlineSnapshot(`
+        "[mcp_servers.glean_default]
+        url = "https://glean-dev-be.glean.com/mcp/default"
+
+        [mcp_servers.glean_default.http_headers]
+        Authorization = "Bearer test-token-123"
+        "
+      `);
+    });
+
+    it('should generate correct TOML config for Codex stdio', () => {
+      const builder = registry.createBuilder(CLIENT.CODEX);
+      const result = builder.buildConfiguration({
+        transport: 'stdio',
+        instance: 'test-instance',
+        apiToken: 'test-token',
+      });
+
+      const validation = validateGeneratedConfig(result, 'codex');
+      expect(validation.success).toBe(true);
+
+      const tomlString = builder.toString(result);
+      expect(tomlString).toMatchInlineSnapshot(`
+        "[mcp_servers.glean_local]
+        command = "npx"
+        args = [ "-y", "@gleanwork/local-mcp-server" ]
+
+        [mcp_servers.glean_local.env]
+        GLEAN_INSTANCE = "test-instance"
+        GLEAN_API_TOKEN = "test-token"
         "
       `);
     });

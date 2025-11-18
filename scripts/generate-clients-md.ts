@@ -200,7 +200,7 @@ function generateClientSection(client: any): string {
     }
     sections.push('');
 
-    const remoteExt = client.configFormat === 'yaml' ? 'yaml' : 'json';
+    const remoteExt = client.configFormat === 'yaml' ? 'yaml' : client.configFormat === 'toml' ? 'toml' : 'json';
     sections.push(`\`\`\`${remoteExt} snippet=examples/configs/remote/${client.id}.${remoteExt}`);
 
     // Read and include remote config
@@ -224,7 +224,7 @@ function generateClientSection(client: any): string {
     sections.push('<summary><strong>Standard I/O Configuration (local process)</strong></summary>');
     sections.push('');
 
-    const localExt = client.configFormat === 'yaml' ? 'yaml' : 'json';
+    const localExt = client.configFormat === 'yaml' ? 'yaml' : client.configFormat === 'toml' ? 'toml' : 'json';
     sections.push(`\`\`\`${localExt} snippet=examples/configs/local/${client.id}.${localExt}`);
 
     // Read and include local config

@@ -10,6 +10,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 | **Claude Code** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Claude for Desktop** | Full | stdio only | Yes (for HTTP) | macOS, Windows, Linux |
 | **Claude for Teams/Enterprise** | None | HTTP only | No | Organization-managed |
+| **Codex** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Cursor** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Goose** | Full | HTTP native | No | macOS, Linux, Windows |
 | **Visual Studio Code** | Full | HTTP native | No | macOS, Linux, Windows |
@@ -264,6 +265,80 @@ This document provides a comprehensive overview of all supported MCP clients, th
     "serverKey": ""
   }
 }
+```
+
+</details>
+
+---
+
+### Codex
+
+- **Compatibility**: Full local configuration support
+- **Connection Type**: Native HTTP support
+- **Documentation**: [Link](https://developers.openai.com/codex/mcp)
+- **Supported Platforms**: macOS, Linux, Windows
+- **Configuration Paths**:
+  - **macOS/Linux: `$HOME/.codex/config.toml`
+  - **Windows**: `%USERPROFILE%\.codex\config.toml`
+
+<details>
+<summary><strong>Internal Configuration Schema</strong></summary>
+
+```json snippet=configs/codex.json
+{
+  "id": "codex",
+  "name": "codex",
+  "displayName": "Codex",
+  "description": "OpenAI Codex with native HTTP and stdio support",
+  "localConfigSupport": "full",
+  "remoteConfigSupport": "none",
+  "documentationUrl": "https://developers.openai.com/codex/mcp",
+  "transports": ["stdio", "http"],
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "toml",
+  "configPath": {
+    "darwin": "$HOME/.codex/config.toml",
+    "linux": "$HOME/.codex/config.toml",
+    "win32": "%USERPROFILE%\\.codex\\config.toml"
+  },
+  "configStructure": {
+    "serverKey": "mcp_servers",
+    "httpConfig": {
+      "urlField": "url",
+      "headersField": "http_headers"
+    },
+    "stdioConfig": {
+      "commandField": "command",
+      "argsField": "args",
+      "envField": "env"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>HTTP Configuration (native)</strong></summary>
+
+```toml snippet=examples/configs/remote/codex.toml
+[mcp_servers.glean]
+url = "https://glean-dev-be.glean.com/mcp/default"
+```
+
+</details>
+
+<details>
+<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+
+```toml snippet=examples/configs/local/codex.toml
+[mcp_servers.glean_local]
+command = "npx"
+args = [ "-y", "@gleanwork/local-mcp-server" ]
+
+[mcp_servers.glean_local.env]
+GLEAN_INSTANCE = "your-instance"
+GLEAN_API_TOKEN = "your-api-token"
 ```
 
 </details>
@@ -653,6 +728,7 @@ extensions:
 ### Native HTTP Clients
 Clients that can connect directly to HTTP MCP servers without additional tooling:
 - Claude Code
+- Codex
 - Cursor
 - Goose
 - Visual Studio Code

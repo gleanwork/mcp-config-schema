@@ -1,5 +1,6 @@
 import { MCPClientConfig, GleanServerConfig, Platform, validateServerConfig } from '../types.js';
 import * as yaml from 'js-yaml';
+import * as TOML from 'smol-toml';
 
 const DEFAULT_PLACEHOLDER_URL = 'https://[instance]-be.glean.com/mcp/[endpoint]';
 const DEFAULT_PLACEHOLDER_INSTANCE = '[instance]';
@@ -76,6 +77,8 @@ export abstract class BaseConfigBuilder {
       return JSON.stringify(config, null, 2);
     } else if (this.config.configFormat === 'yaml') {
       return yaml.dump(config);
+    } else if (this.config.configFormat === 'toml') {
+      return TOML.stringify(config);
     }
 
     throw new Error(`Unsupported config format: ${this.config.configFormat}`);
