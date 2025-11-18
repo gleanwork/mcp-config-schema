@@ -221,7 +221,7 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"codex mcp add --env GLEAN_INSTANCE=test-instance --env GLEAN_API_TOKEN=test-token npx -y @gleanwork/local-mcp-server glean_local-test"`
+        `"codex mcp add glean_local-test --env GLEAN_INSTANCE=test-instance --env GLEAN_API_TOKEN=test-token -- npx -y @gleanwork/local-mcp-server"`
       );
     });
 

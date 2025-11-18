@@ -138,7 +138,8 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
       productName: serverData.productName,
     });
 
-    let command = `codex mcp add`;
+    // Format: codex mcp add <server-name> --env VAR1=VALUE1 --env VAR2=VALUE2 -- <stdio server-command>
+    let command = `codex mcp add ${serverName}`;
 
     if (serverData.instance) {
       if (this.isUrl(serverData.instance)) {
@@ -152,7 +153,7 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
       command += ` --env GLEAN_API_TOKEN=${serverData.apiToken}`;
     }
 
-    command += ` npx -y ${this.getLocalMcpServerPackage()} ${serverName}`;
+    command += ` -- npx -y ${this.getLocalMcpServerPackage()}`;
 
     return command;
   }
