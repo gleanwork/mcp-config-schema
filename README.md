@@ -55,21 +55,24 @@ This package serves as the **Single Source of Truth** for MCP client configurati
 
 For detailed configuration examples and requirements for each client, see **[CLIENTS.md](CLIENTS.md)**.
 
-### Fully Supported (can generate local configs)
+### User-Configurable Clients
 
-| Client                 | Connection Type | Requires mcp-remote? | Platform              |
-| ---------------------- | --------------- | -------------------- | --------------------- |
-| **Claude Code**        | HTTP native     | No                   | macOS                 |
-| **Visual Studio Code** | HTTP native     | No                   | All                   |
-| **Claude Desktop**     | stdio only      | Yes (for HTTP)       | macOS                 |
-| **Cursor**             | stdio only      | Yes (for HTTP)       | All                   |
-| **Goose**              | HTTP native     | No                   | macOS, Linux, Windows |
-| **Windsurf**           | stdio only      | Yes (for HTTP)       | All                   |
+| Client                     | Connection Type | Requires mcp-remote? | Platform              |
+| -------------------------- | --------------- | -------------------- | --------------------- |
+| **Claude Code**            | HTTP native     | No                   | macOS, Linux, Windows |
+| **Visual Studio Code**     | HTTP native     | No                   | All                   |
+| **Claude Desktop**         | stdio only      | Yes (for HTTP)       | macOS, Windows, Linux |
+| **Cursor**                 | HTTP native     | No                   | All                   |
+| **Goose**                  | HTTP native     | No                   | macOS, Linux, Windows |
+| **Windsurf**               | HTTP native     | No                   | All                   |
+| **Codex**                  | HTTP native     | No                   | macOS, Linux, Windows |
+| **Junie (JetBrains)**      | stdio only      | Yes (for HTTP)       | macOS, Linux, Windows |
+| **JetBrains AI Assistant** | stdio only      | Yes (for HTTP)       | macOS, Linux, Windows |
 
-### Not Configurable via Local Files
+### Centrally Managed Clients
 
 - **ChatGPT** - Requires web UI configuration
-- **Claude Desktop (Organization)** - Managed by organization admins
+- **Claude for Teams/Enterprise** - Managed by organization admins
 
 ### One-Click Installation Support
 
@@ -92,7 +95,8 @@ const registry = new MCPConfigRegistry();
 // Get client configuration
 const cursorConfig = registry.getConfig('cursor');
 console.log(cursorConfig.displayName); // "Cursor"
-console.log(cursorConfig.requiresMcpRemoteForHttp); // true
+console.log(cursorConfig.userConfigurable); // true
+console.log(cursorConfig.transports); // ['stdio', 'http']
 
 // Query different client groups
 const httpClients = registry.getNativeHttpClients();
@@ -119,20 +123,20 @@ const localConfig = builder.buildConfiguration({
   apiToken: 'your-api-token',
 });
 
-// Generate partial configuration (without wrapper)
+// Generate partial configuration (without root object)
 const partialConfig = builder.buildConfiguration({
   mode: 'remote',
   serverUrl: 'https://api.example.com/mcp/default',
   serverName: 'my-server',
-  includeWrapper: false, // Returns just the server entry without mcpServers wrapper
+  includeRootObject: false, // Returns just the server entry without mcpServers wrapper
 });
 // Returns: { "my-server": { "type": "http", "url": "..." } }
 // Instead of: { "mcpServers": { "my-server": { "type": "http", "url": "..." } } }
 ```
 
-#### Partial Configuration (without wrapper)
+#### Partial Configuration (without root object)
 
-The `includeWrapper` option allows you to generate just the server configuration entry without the outer wrapper (`mcpServers`, `servers`, or `extensions` depending on the client). This is useful when you need to merge configurations into an existing setup:
+The `includeRootObject` option allows you to generate just the server configuration entry without the outer wrapper (`mcpServers`, `servers`, or `extensions` depending on the client). This is useful when you need to merge configurations into an existing setup:
 
 ```typescript
 // Generate partial config for merging into existing configuration
@@ -141,7 +145,7 @@ const partialConfig = JSON.parse(
     mode: 'remote',
     serverUrl: 'https://api.example.com/mcp/default',
     serverName: 'glean_custom',
-    includeWrapper: false,
+    includeRootObject: false,
   })
 );
 
@@ -247,7 +251,9 @@ function MCPConfigGenerator() {
 }
 ```
 
-### Bridge Client (Cursor, Claude Desktop, Windsurf)
+### stdio-only Clients (Claude Desktop, Junie, JetBrains AI)
+
+These clients require `mcp-remote` bridge for HTTP servers:
 
 ```json
 {
@@ -261,29 +267,37 @@ function MCPConfigGenerator() {
 }
 ```
 
-### Goose (YAML format)
+### Goose (YAML format with native HTTP)
 
 ```yaml
 extensions:
   my-server:
-    name: my-server
-    cmd: npx
-    args: ['-y', 'mcp-remote', 'https://your-server.com/mcp/default']
-    type: stdio
-    timeout: 300
     enabled: true
+    name: my-server
+    type: streamable_http
+    uri: https://your-server.com/mcp/default
+    envs: {}
+    env_keys: []
+    headers: {}
+    description: ''
+    timeout: 300
+    bundled: null
+    available_tools: []
 ```
 
 ## Configuration File Locations
 
-| Client         | macOS                                                             | Linux                                 | Windows                                           |
-| -------------- | ----------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------- |
-| Claude Code    | `~/.claude.json`                                                  | -                                     | -                                                 |
-| VS Code        | `~/Library/Application Support/Code/User/mcp.json`                | `~/.config/Code/User/mcp.json`        | `%APPDATA%\Code\User\mcp.json`                    |
-| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` | -                                     | -                                                 |
-| Cursor         | `~/.cursor/mcp.json`                                              | `~/.cursor/mcp.json`                  | `%USERPROFILE%\.cursor\mcp.json`                  |
-| Goose          | `~/.config/goose/config.yaml`                                     | `~/.config/goose/config.yaml`         | `%APPDATA%\Block\goose\config\config.yaml`        |
-| Windsurf       | `~/.codeium/windsurf/mcp_config.json`                             | `~/.codeium/windsurf/mcp_config.json` | `%USERPROFILE%\.codeium\windsurf\mcp_config.json` |
+| Client              | macOS                                                             | Linux                                 | Windows                                           |
+| ------------------- | ----------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------- |
+| Claude Code         | `~/.claude.json`                                                  | `~/.claude.json`                      | `%USERPROFILE%\.claude.json`                      |
+| VS Code             | `~/Library/Application Support/Code/User/mcp.json`                | `~/.config/Code/User/mcp.json`        | `%APPDATA%\Code\User\mcp.json`                    |
+| Claude Desktop      | `~/Library/Application Support/Claude/claude_desktop_config.json` | `~/.config/Claude/claude_desktop_config.json` | `%APPDATA%\Claude\claude_desktop_config.json` |
+| Cursor              | `~/.cursor/mcp.json`                                              | `~/.cursor/mcp.json`                  | `%USERPROFILE%\.cursor\mcp.json`                  |
+| Goose               | `~/.config/goose/config.yaml`                                     | `~/.config/goose/config.yaml`         | `%USERPROFILE%\.config\goose\config.yaml`         |
+| Windsurf            | `~/.codeium/windsurf/mcp_config.json`                             | `~/.codeium/windsurf/mcp_config.json` | `%USERPROFILE%\.codeium\windsurf\mcp_config.json` |
+| Codex               | `~/.codex/config.toml`                                            | `~/.codex/config.toml`                | `%USERPROFILE%\.codex\config.toml`                |
+| Junie               | `~/.junie/mcp.json`                                               | `~/.junie/mcp.json`                   | `%USERPROFILE%\.junie\mcp.json`                   |
+| JetBrains AI        | Configure via IDE UI                                              | Configure via IDE UI                  | Configure via IDE UI                              |
 
 ## API Reference
 
@@ -291,10 +305,9 @@ extensions:
 
 - `ClientId` - Union of all supported client identifiers
 - `MCPClientConfig` - Full client configuration schema
-- `GleanServerConfig` - Server connection configuration
+- `MCPServerConfig` - Server connection configuration
 - `Platform` - 'darwin' | 'linux' | 'win32'
-- `LocalConfigSupport` - 'full' | 'none'
-- `ClientConnectionSupport` - 'http' | 'stdio-only' | 'both'
+- `Transport` - 'http' | 'stdio'
 
 ### Registry Methods
 
