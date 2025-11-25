@@ -24,7 +24,7 @@ export default defineConfig([
     minify: process.env.NODE_ENV === 'production',
     target: 'es2020',
     platform: 'browser',
-    external: ['chalk', 'mkdirp', 'glob', 'fs', 'path'],
+    external: ['mkdirp', 'glob', 'fs', 'path'],
     esbuildOptions(options) {
       options.conditions = ['browser'];
       options.loader = {

@@ -144,7 +144,6 @@ Key dependencies:
 
 - **zod**: Schema validation and TypeScript types
 - **js-yaml**: YAML generation for Goose configs
-- **chalk**: Colored console output
 - **mkdirp**: Directory creation for config files
 
 Dev dependencies include TypeScript, ESLint, Prettier, Vitest for testing.
