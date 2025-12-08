@@ -663,7 +663,8 @@ extensions:
   "configStructure": {
     "serversPropertyName": "mcpServers",
     "httpPropertyMapping": {
-      "urlProperty": "serverUrl"
+      "urlProperty": "serverUrl",
+      "headersProperty": "headers"
     },
     "stdioPropertyMapping": {
       "commandProperty": "command",
