@@ -16,6 +16,16 @@
 
 
 
+
+## v2.0.1 (2025-12-09)
+
+#### :bug: Bug Fix
+* [#64](https://github.com/gleanwork/mcp-config-schema/pull/64) fix: windsurf manual configuration ([@david-hamilton-glean](https://github.com/david-hamilton-glean))
+
+#### Committers: 2
+- David J. Hamilton ([@david-hamilton-glean](https://github.com/david-hamilton-glean))
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
 ## v2.0.0 (2025-11-18)
 
 #### :boom: Breaking Change
