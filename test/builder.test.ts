@@ -1081,6 +1081,31 @@ describe('ConfigBuilder', () => {
       `);
     });
 
+    it('should add bearer token to Windsurf HTTP config', () => {
+      const builder = registry.createBuilder(CLIENT.WINDSURF);
+      const result = builder.buildConfiguration({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        apiToken: 'test-token-123',
+      });
+
+      const validation = validateGeneratedConfig(result, 'windsurf');
+      expect(validation.success).toBe(true);
+
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "mcpServers": {
+            "glean_default": {
+              "headers": {
+                "Authorization": "Bearer test-token-123",
+              },
+              "serverUrl": "https://example.com/mcp/default",
+            },
+          },
+        }
+      `);
+    });
+
     it('should default server name to "glean" when not provided', () => {
       const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const config = builder.buildConfiguration({
