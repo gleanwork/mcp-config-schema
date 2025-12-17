@@ -17,6 +17,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 | **Windsurf** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 | **Junie (JetBrains)** | User-configurable | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
 | **JetBrains AI Assistant** | User-configurable | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
+| **Gemini CLI** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 
 ## Detailed Client Information
 
@@ -893,6 +894,92 @@ extensions:
 
 ---
 
+### Gemini CLI
+
+- **Configuration**: User-configurable
+- **Connection Type**: Native HTTP support
+- **Documentation**: [Link](https://geminicli.com/docs/tools/mcp-server/)
+- **Supported Platforms**: macOS, Linux, Windows
+- **Configuration Paths**:
+  - **macOS/Linux: `$HOME/.gemini/settings.json`
+  - **Windows**: `%USERPROFILE%\.gemini\settings.json`
+
+<details>
+<summary><strong>Internal Configuration Schema</strong></summary>
+
+```json snippet=configs/gemini.json
+{
+  "id": "gemini",
+  "name": "gemini",
+  "displayName": "Gemini CLI",
+  "description": "Gemini CLI with native HTTP and stdio support",
+  "userConfigurable": true,
+  "documentationUrl": "https://geminicli.com/docs/tools/mcp-server/",
+  "transports": ["stdio", "http"],
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/.gemini/settings.json",
+    "linux": "$HOME/.gemini/settings.json",
+    "win32": "%USERPROFILE%\\.gemini\\settings.json"
+  },
+  "configStructure": {
+    "serversPropertyName": "mcpServers",
+    "httpPropertyMapping": {
+      "urlProperty": "httpUrl",
+      "headersProperty": "headers"
+    },
+    "stdioPropertyMapping": {
+      "commandProperty": "command",
+      "argsProperty": "args",
+      "envProperty": "env"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>HTTP Configuration (native)</strong></summary>
+
+```json snippet=examples/configs/remote/gemini.json
+{
+  "mcpServers": {
+    "glean": {
+      "httpUrl": "https://glean-dev-be.glean.com/mcp/default"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+
+```json snippet=examples/configs/local/gemini.json
+{
+  "mcpServers": {
+    "glean": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@gleanwork/local-mcp-server"
+      ],
+      "env": {
+        "GLEAN_INSTANCE": "your-instance",
+        "GLEAN_API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+---
+
 ## Connection Types Explained
 
 ### Native HTTP Clients
@@ -903,6 +990,7 @@ Clients that can connect directly to HTTP MCP servers without additional tooling
 - Goose
 - Visual Studio Code
 - Windsurf
+- Gemini CLI
 
 ### stdio-only Clients
 Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP servers:

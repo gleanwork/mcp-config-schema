@@ -12,6 +12,7 @@ export const ClientIdSchema = z.enum([
   'codex',
   'junie',
   'jetbrains',
+  'gemini',
 ]);
 
 export const ServerTypeSchema = z.enum(['http', 'stdio']);
@@ -215,6 +216,7 @@ export function validateGeneratedConfig(
     case 'windsurf':
     case 'junie':
     case 'jetbrains':
+    case 'gemini':
       schema = McpServersConfigSchema;
       break;
     default:

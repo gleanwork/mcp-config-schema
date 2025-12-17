@@ -1,0 +1,28 @@
+{
+  "id": "gemini",
+  "name": "gemini",
+  "displayName": "Gemini CLI",
+  "description": "Gemini CLI with native HTTP and stdio support",
+  "userConfigurable": true,
+  "documentationUrl": "https://geminicli.com/docs/tools/mcp-server/",
+  "transports": ["stdio", "http"],
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/.gemini/settings.json",
+    "linux": "$HOME/.gemini/settings.json",
+    "win32": "%USERPROFILE%\\.gemini\\settings.json"
+  },
+  "configStructure": {
+    "serversPropertyName": "mcpServers",
+    "httpPropertyMapping": {
+      "urlProperty": "httpUrl",
+      "headersProperty": "headers"
+    },
+    "stdioPropertyMapping": {
+      "commandProperty": "command",
+      "argsProperty": "args",
+      "envProperty": "env"
+    }
+  }
+}
