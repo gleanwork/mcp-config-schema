@@ -1,4 +1,5 @@
-import { MCPClientConfig, ClientId, Platform, safeValidateClientConfig } from './types.js';
+import { MCPClientConfig, Platform, safeValidateClientConfig } from './types.js';
+import type { MCPConfig } from './types.js';
 
 import { BaseConfigBuilder } from './builders/BaseConfigBuilder.js';
 import { GenericConfigBuilder } from './builders/GenericConfigBuilder.js';
@@ -19,6 +20,7 @@ import windsurfConfig from '../configs/windsurf.json';
 import junieConfig from '../configs/junie.json';
 import jetbrainsConfig from '../configs/jetbrains.json';
 import geminiConfig from '../configs/gemini.json';
+
 const allConfigs = [
   chatgptConfig,
   claudeCodeConfig,
@@ -34,39 +36,77 @@ const allConfigs = [
   geminiConfig,
 ];
 
-export class MCPConfigRegistry {
-  private configs: Map<ClientId, MCPClientConfig> = new Map();
-  private builderFactories: Map<ClientId, new (config: MCPClientConfig) => BaseConfigBuilder> =
-    new Map();
+/**
+ * Builder class constructor type.
+ * Used for registering custom builders.
+ */
+export type BuilderConstructor = new (config: MCPClientConfig) => BaseConfigBuilder;
 
-  constructor() {
-    this.loadConfigs();
+/**
+ * Options for creating an MCPConfigRegistry.
+ */
+export interface RegistryOptions {
+  /** Whether to load built-in client configs (default: true) */
+  loadBuiltInConfigs?: boolean;
+  /** MCP configuration for server settings */
+  mcpConfig?: MCPConfig;
+}
+
+export class MCPConfigRegistry {
+  private configs: Map<string, MCPClientConfig> = new Map();
+  private builderFactories: Map<string, BuilderConstructor> = new Map();
+  private mcpConfig?: MCPConfig;
+
+  constructor(options: RegistryOptions = {}) {
+    if (options.loadBuiltInConfigs !== false) {
+      this.loadConfigs();
+    }
     this.registerBuilders();
+    this.mcpConfig = options.mcpConfig;
   }
 
   private registerBuilders(): void {
     // Register specific builders for clients that need special handling
-    this.builderFactories.set(
-      'goose' as ClientId,
-      GooseConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
-    );
-    this.builderFactories.set(
-      'vscode' as ClientId,
-      VSCodeConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
-    );
-    this.builderFactories.set(
-      'cursor' as ClientId,
-      CursorConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
-    );
-    this.builderFactories.set(
-      'claude-code' as ClientId,
-      ClaudeCodeConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
-    );
-    this.builderFactories.set(
-      'codex' as ClientId,
-      CodexConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
-    );
+    this.builderFactories.set('goose', GooseConfigBuilder);
+    this.builderFactories.set('vscode', VSCodeConfigBuilder);
+    this.builderFactories.set('cursor', CursorConfigBuilder);
+    this.builderFactories.set('claude-code', ClaudeCodeConfigBuilder);
+    this.builderFactories.set('codex', CodexConfigBuilder);
     // Other clients will use GenericConfigBuilder by default
+  }
+
+  // ============ CLIENT REGISTRATION ============
+
+  /**
+   * Register a new client configuration at runtime.
+   * @param config - The client configuration to register
+   */
+  registerClient(config: MCPClientConfig): void {
+    this.validateBusinessRules(config);
+    this.configs.set(config.id, config);
+  }
+
+  /**
+   * Check if a client exists in the registry.
+   */
+  hasClient(clientId: string): boolean {
+    return this.configs.has(clientId);
+  }
+
+  /**
+   * Register a custom builder for a specific client.
+   * @param clientId - The client ID
+   * @param builderClass - The builder class constructor
+   */
+  registerBuilder(clientId: string, builderClass: BuilderConstructor): void {
+    this.builderFactories.set(clientId, builderClass);
+  }
+
+  /**
+   * Get the current MCP configuration.
+   */
+  getMcpConfig(): MCPConfig | undefined {
+    return this.mcpConfig;
   }
 
   private loadConfigs(): void {
@@ -113,7 +153,7 @@ export class MCPConfigRegistry {
     }
   }
 
-  getConfig(clientId: ClientId): MCPClientConfig | undefined {
+  getConfig(clientId: string): MCPClientConfig | undefined {
     return this.configs.get(clientId);
   }
 
@@ -157,7 +197,7 @@ export class MCPConfigRegistry {
    * @param clientId - The client to check
    * @returns true if the client needs mcp-remote for HTTP connections
    */
-  clientNeedsMcpRemote(clientId: ClientId): boolean {
+  clientNeedsMcpRemote(clientId: string): boolean {
     const config = this.getConfig(clientId);
     if (!config) {
       throw new Error(`Unknown client: ${clientId}`);
@@ -170,7 +210,7 @@ export class MCPConfigRegistry {
    * @param clientId - The client to check
    * @returns true if the client supports HTTP natively
    */
-  clientSupportsHttpNatively(clientId: ClientId): boolean {
+  clientSupportsHttpNatively(clientId: string): boolean {
     const config = this.getConfig(clientId);
     if (!config) {
       throw new Error(`Unknown client: ${clientId}`);
@@ -183,7 +223,7 @@ export class MCPConfigRegistry {
    * @param clientId - The client to check
    * @returns true if the client supports stdio
    */
-  clientSupportsStdio(clientId: ClientId): boolean {
+  clientSupportsStdio(clientId: string): boolean {
     const config = this.getConfig(clientId);
     if (!config) {
       throw new Error(`Unknown client: ${clientId}`);
@@ -191,7 +231,10 @@ export class MCPConfigRegistry {
     return config.transports.includes('stdio');
   }
 
-  createBuilder(clientId: ClientId): BaseConfigBuilder {
+  /**
+   * Create a configuration builder for a specific client.
+   */
+  createBuilder(clientId: string): BaseConfigBuilder {
     const config = this.getConfig(clientId);
     if (!config) {
       throw new Error(`Unknown client: ${clientId}`);
@@ -202,13 +245,15 @@ export class MCPConfigRegistry {
       );
     }
 
-    // Check if we have a specific builder for this client
+    // Create the builder
     const BuilderClass = this.builderFactories.get(clientId);
-    if (BuilderClass) {
-      return new BuilderClass(config);
+    const builder = BuilderClass ? new BuilderClass(config) : new GenericConfigBuilder(config);
+
+    // Inject MCP config if available
+    if (this.mcpConfig) {
+      builder.setMcpConfig(this.mcpConfig);
     }
 
-    // Fall back to GenericConfigBuilder for clients without custom builders
-    return new GenericConfigBuilder(config);
+    return builder;
   }
 }

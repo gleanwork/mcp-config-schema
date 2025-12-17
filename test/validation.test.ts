@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   safeValidateClientConfig,
-  safeValidateServerConfig,
-  validateServerConfig,
+  safeValidateConnectionOptions,
+  validateConnectionOptions,
 } from '../src/schemas';
 
 describe('Zod Validation', () => {
@@ -137,15 +137,15 @@ describe('Zod Validation', () => {
     });
   });
 
-  describe('Server Config Validation', () => {
+  describe('Connection Options Validation', () => {
     it('should validate remote server config', () => {
       const config = {
         transport: 'http',
-        serverUrl: 'https://glean.com/mcp/default',
-        serverName: 'glean',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'my-server',
       };
 
-      const result = safeValidateServerConfig(config);
+      const result = safeValidateConnectionOptions(config);
       expect(result.success).toBe(true);
     });
 
@@ -156,17 +156,17 @@ describe('Zod Validation', () => {
         apiToken: 'test-token',
       };
 
-      const result = safeValidateServerConfig(config);
+      const result = safeValidateConnectionOptions(config);
       expect(result.success).toBe(true);
     });
 
     it('should reject invalid transport', () => {
       const config = {
         transport: 'hybrid' as any, // Invalid
-        serverUrl: 'https://glean.com/mcp/default',
+        serverUrl: 'https://example.com/mcp/default',
       };
 
-      const result = safeValidateServerConfig(config);
+      const result = safeValidateConnectionOptions(config);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].path).toEqual(['transport']);
@@ -179,25 +179,25 @@ describe('Zod Validation', () => {
         serverUrl: 'not-a-url', // Now accepted as placeholder
       };
 
-      const result = safeValidateServerConfig(config);
+      const result = safeValidateConnectionOptions(config);
       expect(result.success).toBe(true);
 
       // Also test with placeholder URL
       const placeholderConfig = {
         transport: 'http',
-        serverUrl: 'https://[instance]-be.glean.com/mcp/[endpoint]',
+        serverUrl: 'https://[instance]-be.example.com/mcp/[endpoint]',
       };
 
-      const placeholderResult = safeValidateServerConfig(placeholderConfig);
+      const placeholderResult = safeValidateConnectionOptions(placeholderConfig);
       expect(placeholderResult.success).toBe(true);
     });
 
-    it('should throw on invalid config when using validateServerConfig', () => {
+    it('should throw on invalid config when using validateConnectionOptions', () => {
       const invalidConfig = {
         mode: 'invalid',
       };
 
-      expect(() => validateServerConfig(invalidConfig)).toThrow();
+      expect(() => validateConnectionOptions(invalidConfig)).toThrow();
     });
   });
 });

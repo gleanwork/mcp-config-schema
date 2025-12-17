@@ -1,48 +1,43 @@
 import { GenericConfigBuilder } from './GenericConfigBuilder.js';
-import { MCPServerConfig } from '../types.js';
+import { MCPConnectionOptions } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class CursorConfigBuilder extends GenericConfigBuilder {
-  buildOneClickUrl(serverData: MCPServerConfig): string {
+  buildOneClickUrl(options: MCPConnectionOptions): string {
     if (!this.config.protocolHandler) {
       throw new Error(`${this.config.displayName} does not support one-click installation`);
     }
 
     const serverName = buildMcpServerName({
-      transport: serverData.transport,
-      serverUrl: serverData.serverUrl,
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      transport: options.transport,
+      serverUrl: options.serverUrl,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     let config: Record<string, unknown>;
 
-    if (serverData.transport === 'http') {
+    if (options.transport === 'http') {
       config = {
         type: 'http',
-        url: serverData.serverUrl,
+        url: options.serverUrl,
       };
 
-      if (serverData.apiToken) {
+      if (options.apiToken) {
         config['headers'] = {
-          Authorization: `Bearer ${serverData.apiToken}`,
+          Authorization: `Bearer ${options.apiToken}`,
         };
       }
     } else {
       config = {
         type: 'stdio',
         command: 'npx',
-        args: ['-y', '@gleanwork/local-mcp-server'],
+        args: ['-y', this.getServerPackage()],
       };
 
-      if (serverData.instance || serverData.apiToken) {
-        config['env'] = {};
-        if (serverData.instance) {
-          (config['env'] as Record<string, string>)['GLEAN_INSTANCE'] = serverData.instance;
-        }
-        if (serverData.apiToken) {
-          (config['env'] as Record<string, string>)['GLEAN_API_TOKEN'] = serverData.apiToken;
-        }
+      const env = this.buildEnvVars(options);
+      if (Object.keys(env).length > 0) {
+        config['env'] = env;
       }
     }
 
@@ -53,40 +48,40 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       .replace('{{config}}', encodedConfig);
   }
 
-  protected buildRemoteCommand(serverData: MCPServerConfig): string {
-    const serverUrl = this.getServerUrl(serverData);
-    const packageName = this.getConfigureMcpServerPackage(serverData);
+  protected buildHttpCommand(options: MCPConnectionOptions): string {
+    const serverUrl = this.getServerUrl(options);
+    const packageName = this.getCliPackage(options);
 
     let command = `npx -y ${packageName} remote`;
     command += ` --url ${serverUrl}`;
     command += ` --client cursor`;
 
-    if (serverData.apiToken) {
-      command += ` --token ${serverData.apiToken}`;
+    if (options.apiToken) {
+      command += ` --token ${options.apiToken}`;
     }
 
     return command;
   }
 
-  protected buildLocalCommand(serverData: MCPServerConfig): string {
-    const packageName = this.getConfigureMcpServerPackage(serverData);
+  protected buildStdioCommand(options: MCPConnectionOptions): string {
+    const packageName = this.getCliPackage(options);
 
     let command = `npx -y ${packageName} local`;
 
-    if (serverData.instance) {
-      if (this.isUrl(serverData.instance)) {
-        command += ` --url ${serverData.instance}`;
+    if (options.instance) {
+      if (this.isUrl(options.instance)) {
+        command += ` --url ${options.instance}`;
       } else {
-        command += ` --instance ${serverData.instance}`;
+        command += ` --instance ${options.instance}`;
       }
     } else {
-      command += ` --instance ${this.getInstanceOrPlaceholder(serverData)}`;
+      command += ` --instance ${this.getInstanceOrPlaceholder(options)}`;
     }
 
     command += ` --client cursor`;
 
-    if (serverData.apiToken) {
-      command += ` --token ${serverData.apiToken}`;
+    if (options.apiToken) {
+      command += ` --token ${options.apiToken}`;
     }
 
     return command;

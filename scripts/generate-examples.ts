@@ -5,6 +5,7 @@
  */
 
 import { MCPConfigRegistry } from '../src/registry.js';
+import { examplePreset } from '../src/presets/example.js';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -12,7 +13,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const registry = new MCPConfigRegistry();
+const registry = new MCPConfigRegistry({ mcpConfig: examplePreset });
 const examplesDir = join(__dirname, '..', 'examples', 'configs');
 
 // Ensure directories exist
@@ -36,8 +37,8 @@ for (const client of clients) {
   // Generate HTTP configuration (for remote servers)
   const remoteConfig = builder.buildConfiguration({
     transport: 'http',
-    serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
-    serverName: 'glean',
+    serverUrl: 'https://api.example.com/mcp/default',
+    serverName: 'my-server',
   });
 
   const remoteExtension = client.configFormat === 'yaml' ? 'yaml' : client.configFormat === 'toml' ? 'toml' : 'json';
@@ -51,7 +52,7 @@ for (const client of clients) {
     transport: 'stdio',
     instance: 'your-instance',
     apiToken: 'your-api-token',
-    serverName: 'glean',
+    serverName: 'my-server',
   });
 
   const localExtension = client.configFormat === 'yaml' ? 'yaml' : client.configFormat === 'toml' ? 'toml' : 'json';

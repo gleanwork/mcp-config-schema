@@ -70,17 +70,17 @@ export const MCPClientConfigSchema = z.object({
 export const BuildOptionsSchema = z.object({
   includeRootObject: z.boolean().optional(),
   mcpRemoteVersion: z.string().optional(),
-  configureMcpServerVersion: z.string().optional(),
+  cliPackageVersion: z.string().optional(),
 });
 
-export const MCPServerConfigSchema = z
+export const MCPConnectionOptionsSchema = z
   .object({
     transport: TransportSchema,
     serverUrl: z.string().optional(), // Accept any string, not just valid URLs
     serverName: z.string().optional(),
     instance: z.string().optional(),
     apiToken: z.string().optional(),
-    productName: z.string().optional(), // For white-label support, defaults to 'glean'
+    productName: z.string().optional(), // For white-label/branding, defaults to 'mcp'
   })
   .merge(BuildOptionsSchema);
 
@@ -88,16 +88,16 @@ export function validateClientConfig(data: unknown) {
   return MCPClientConfigSchema.parse(data);
 }
 
-export function validateServerConfig(data: unknown) {
-  return MCPServerConfigSchema.parse(data);
+export function validateConnectionOptions(data: unknown) {
+  return MCPConnectionOptionsSchema.parse(data);
 }
 
 export function safeValidateClientConfig(data: unknown) {
   return MCPClientConfigSchema.safeParse(data);
 }
 
-export function safeValidateServerConfig(data: unknown) {
-  return MCPServerConfigSchema.safeParse(data);
+export function safeValidateConnectionOptions(data: unknown) {
+  return MCPConnectionOptionsSchema.safeParse(data);
 }
 
 export const HttpServerConfigSchema = z.object({

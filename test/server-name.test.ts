@@ -34,56 +34,56 @@ describe('Server Name Logic', () => {
   });
 
   it('normalizeProductName handles edge cases', () => {
-    expect(normalizeProductName('')).toBe('glean');
-    expect(normalizeProductName('   ')).toBe('glean');
+    expect(normalizeProductName('')).toBe('mcp');
+    expect(normalizeProductName('   ')).toBe('mcp');
     expect(normalizeProductName('123')).toBe('123');
     expect(normalizeProductName('Product123')).toBe('product123');
   });
 
   // extractServerNameFromUrl tests
   it('extractServerNameFromUrl extracts server name from standard MCP URL', () => {
-    expect(extractServerNameFromUrl('https://my-be.glean.com/mcp/analytics')).toBe('analytics');
-    expect(extractServerNameFromUrl('https://my-be.glean.com/mcp/default')).toBe('default');
-    expect(extractServerNameFromUrl('https://my-be.glean.com/mcp/custom-agent')).toBe(
+    expect(extractServerNameFromUrl('https://my-be.example.com/mcp/analytics')).toBe('analytics');
+    expect(extractServerNameFromUrl('https://my-be.example.com/mcp/default')).toBe('default');
+    expect(extractServerNameFromUrl('https://my-be.example.com/mcp/custom-agent')).toBe(
       'custom-agent'
     );
   });
 
   it('extractServerNameFromUrl handles URLs with trailing slashes', () => {
-    expect(extractServerNameFromUrl('https://my-be.glean.com/mcp/analytics/')).toBe('analytics');
-    expect(extractServerNameFromUrl('https://my-be.glean.com/mcp/default/')).toBe('default');
+    expect(extractServerNameFromUrl('https://my-be.example.com/mcp/analytics/')).toBe('analytics');
+    expect(extractServerNameFromUrl('https://my-be.example.com/mcp/default/')).toBe('default');
   });
 
   it('extractServerNameFromUrl handles URLs with additional path segments', () => {
-    expect(extractServerNameFromUrl('https://my-be.glean.com/mcp/analytics/v1')).toBe('analytics');
+    expect(extractServerNameFromUrl('https://my-be.example.com/mcp/analytics/v1')).toBe('analytics');
   });
 
   it('extractServerNameFromUrl returns null for URLs without MCP path', () => {
-    expect(extractServerNameFromUrl('https://my-be.glean.com/api/v1')).toBeNull();
-    expect(extractServerNameFromUrl('https://my-be.glean.com/')).toBeNull();
+    expect(extractServerNameFromUrl('https://my-be.example.com/api/v1')).toBeNull();
+    expect(extractServerNameFromUrl('https://my-be.example.com/')).toBeNull();
   });
 
   // buildMcpServerName tests - stdio transport
-  it('buildMcpServerName returns glean_local for stdio transport', () => {
-    expect(buildMcpServerName({ transport: 'stdio' })).toBe('glean_local');
+  it('buildMcpServerName returns mcp_local for stdio transport', () => {
+    expect(buildMcpServerName({ transport: 'stdio' })).toBe('mcp_local');
   });
 
   it('buildMcpServerName returns custom server name with stdio transport', () => {
-    expect(buildMcpServerName({ transport: 'stdio', serverName: 'custom' })).toBe('glean_custom');
+    expect(buildMcpServerName({ transport: 'stdio', serverName: 'custom' })).toBe('mcp_custom');
   });
 
   // buildMcpServerName tests - agents mode
-  it('buildMcpServerName returns glean_agents when agents flag is set', () => {
-    expect(buildMcpServerName({ agents: true })).toBe('glean_agents');
+  it('buildMcpServerName returns mcp_agents when agents flag is set', () => {
+    expect(buildMcpServerName({ agents: true })).toBe('mcp_agents');
   });
 
   it('buildMcpServerName prioritizes agents over serverUrl', () => {
     expect(
       buildMcpServerName({
         agents: true,
-        serverUrl: 'https://my-be.glean.com/mcp/analytics',
+        serverUrl: 'https://example.com/mcp/analytics',
       })
-    ).toBe('glean_agents');
+    ).toBe('mcp_agents');
   });
 
   // buildMcpServerName tests - http transport with URL
@@ -91,80 +91,80 @@ describe('Server Name Logic', () => {
     expect(
       buildMcpServerName({
         transport: 'http',
-        serverUrl: 'https://my-be.glean.com/mcp/analytics',
+        serverUrl: 'https://example.com/mcp/analytics',
       })
-    ).toBe('glean_analytics');
+    ).toBe('mcp_analytics');
   });
 
-  it('buildMcpServerName returns glean_default for default endpoint', () => {
+  it('buildMcpServerName returns mcp_default for default endpoint', () => {
     expect(
       buildMcpServerName({
         transport: 'http',
-        serverUrl: 'https://my-be.glean.com/mcp/default',
+        serverUrl: 'https://example.com/mcp/default',
       })
-    ).toBe('glean_default');
+    ).toBe('mcp_default');
   });
 
   it('buildMcpServerName handles custom-agent URLs', () => {
     expect(
       buildMcpServerName({
         transport: 'http',
-        serverUrl: 'https://my-be.glean.com/mcp/custom-agent',
+        serverUrl: 'https://example.com/mcp/custom-agent',
       })
-    ).toBe('glean_custom-agent');
+    ).toBe('mcp_custom-agent');
   });
 
   // buildMcpServerName tests - explicit serverName
   it('buildMcpServerName uses explicit serverName with prefix', () => {
-    expect(buildMcpServerName({ serverName: 'custom' })).toBe('glean_custom');
-    expect(buildMcpServerName({ serverName: 'analytics' })).toBe('glean_analytics');
+    expect(buildMcpServerName({ serverName: 'custom' })).toBe('mcp_custom');
+    expect(buildMcpServerName({ serverName: 'analytics' })).toBe('mcp_analytics');
   });
 
-  it('buildMcpServerName does not double-prefix if serverName already has glean prefix', () => {
-    expect(buildMcpServerName({ serverName: 'glean_custom' })).toBe('glean_custom');
-    expect(buildMcpServerName({ serverName: 'glean' })).toBe('glean');
+  it('buildMcpServerName does not double-prefix if serverName already has mcp prefix', () => {
+    expect(buildMcpServerName({ serverName: 'mcp_custom' })).toBe('mcp_custom');
+    expect(buildMcpServerName({ serverName: 'mcp' })).toBe('mcp');
   });
 
   it('buildMcpServerName explicit serverName overrides URL extraction', () => {
     expect(
       buildMcpServerName({
         transport: 'http',
-        serverUrl: 'https://my-be.glean.com/mcp/analytics',
+        serverUrl: 'https://example.com/mcp/analytics',
         serverName: 'custom',
       })
-    ).toBe('glean_custom');
+    ).toBe('mcp_custom');
   });
 
   // buildMcpServerName tests - fallback behavior
-  it('buildMcpServerName returns glean as default fallback', () => {
-    expect(buildMcpServerName({})).toBe('glean');
-    expect(buildMcpServerName({ transport: 'http' })).toBe('glean');
+  it('buildMcpServerName returns mcp as default fallback', () => {
+    expect(buildMcpServerName({})).toBe('mcp');
+    expect(buildMcpServerName({ transport: 'http' })).toBe('mcp');
   });
 
   // normalizeServerName tests
-  it('normalizeServerName adds glean_ prefix to names without it', () => {
-    expect(normalizeServerName('custom')).toBe('glean_custom');
-    expect(normalizeServerName('analytics')).toBe('glean_analytics');
+  it('normalizeServerName adds mcp_ prefix to names without it', () => {
+    expect(normalizeServerName('custom')).toBe('mcp_custom');
+    expect(normalizeServerName('analytics')).toBe('mcp_analytics');
   });
 
-  it('normalizeServerName does not double-prefix names that already have glean_', () => {
-    expect(normalizeServerName('glean_custom')).toBe('glean_custom');
-    expect(normalizeServerName('glean_analytics')).toBe('glean_analytics');
+  it('normalizeServerName does not double-prefix names that already have mcp_', () => {
+    expect(normalizeServerName('mcp_custom')).toBe('mcp_custom');
+    expect(normalizeServerName('mcp_analytics')).toBe('mcp_analytics');
   });
 
-  it('normalizeServerName handles names that start with just glean', () => {
-    expect(normalizeServerName('glean')).toBe('glean');
-    expect(normalizeServerName('gleancustom')).toBe('glean_custom');
+  it('normalizeServerName handles names that start with just mcp', () => {
+    expect(normalizeServerName('mcp')).toBe('mcp');
+    expect(normalizeServerName('mcpcustom')).toBe('mcp_custom');
   });
 
   it('normalizeServerName converts to lowercase', () => {
-    expect(normalizeServerName('CUSTOM')).toBe('glean_custom');
-    expect(normalizeServerName('Glean_Analytics')).toBe('glean_analytics');
+    expect(normalizeServerName('CUSTOM')).toBe('mcp_custom');
+    expect(normalizeServerName('MCP_Analytics')).toBe('mcp_analytics');
   });
 
   it('normalizeServerName handles edge cases', () => {
-    expect(normalizeServerName('')).toBe('glean');
-    expect(normalizeServerName('glean_')).toBe('glean');
+    expect(normalizeServerName('')).toBe('mcp');
+    expect(normalizeServerName('mcp_')).toBe('mcp');
   });
 
   it('normalizeServerName uses custom product name for prefix', () => {
@@ -219,16 +219,16 @@ describe('Server Name Logic', () => {
   });
 
   // Real-world white-label examples
-  it('buildMcpServerName handles Glean product name', () => {
-    expect(buildMcpServerName({ transport: 'stdio', productName: 'Glean' })).toBe('glean_local');
-    expect(buildMcpServerName({ agents: true, productName: 'Glean' })).toBe('glean_agents');
+  it('buildMcpServerName handles custom product name', () => {
+    expect(buildMcpServerName({ transport: 'stdio', productName: 'MyProduct' })).toBe('myproduct_local');
+    expect(buildMcpServerName({ agents: true, productName: 'MyProduct' })).toBe('myproduct_agents');
     expect(
       buildMcpServerName({
         transport: 'http',
         serverUrl: 'https://example.com/mcp/analytics',
-        productName: 'Glean',
+        productName: 'MyProduct',
       })
-    ).toBe('glean_analytics');
+    ).toBe('myproduct_analytics');
   });
 
   it('buildMcpServerName handles single-word custom product name', () => {

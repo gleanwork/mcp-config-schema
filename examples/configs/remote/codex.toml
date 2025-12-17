@@ -1,2 +1,2 @@
-[mcp_servers.glean]
-url = "https://glean-dev-be.glean.com/mcp/default"
+[mcp_servers.mcp_my-server]
+url = "https://api.example.com/mcp/default"

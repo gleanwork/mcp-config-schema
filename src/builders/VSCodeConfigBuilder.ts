@@ -1,10 +1,10 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPServerConfig } from '../types.js';
+import { MCPConnectionOptions } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class VSCodeConfigBuilder extends BaseConfigBuilder {
-  protected buildLocalConfig(
-    serverData: MCPServerConfig,
+  protected buildStdioConfig(
+    options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { serversPropertyName, stdioPropertyMapping } = this.config.configStructure;
@@ -15,35 +15,20 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
 
     const serverName = buildMcpServerName({
       transport: 'stdio',
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverName: options.serverName,
+      productName: options.productName,
     });
     const serverConfig: Record<string, unknown> = {};
 
     serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
-    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', '@gleanwork/local-mcp-server'];
+    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', this.getServerPackage()];
 
     if (stdioPropertyMapping.typeProperty) {
       serverConfig[stdioPropertyMapping.typeProperty] = 'stdio';
     }
 
     if (stdioPropertyMapping.envProperty) {
-      const env: Record<string, string> = {};
-
-      if (serverData.instance) {
-        if (
-          serverData.instance.startsWith('http://') ||
-          serverData.instance.startsWith('https://')
-        ) {
-          env.GLEAN_URL = serverData.instance;
-        } else {
-          env.GLEAN_INSTANCE = serverData.instance;
-        }
-      }
-
-      if (serverData.apiToken) {
-        env.GLEAN_API_TOKEN = serverData.apiToken;
-      }
+      const env = this.buildEnvVars(options);
 
       if (Object.keys(env).length > 0) {
         serverConfig[stdioPropertyMapping.envProperty] = env;
@@ -63,11 +48,11 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     };
   }
 
-  protected buildRemoteConfig(
-    serverData: MCPServerConfig,
+  protected buildHttpConfig(
+    options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
-    if (!serverData.serverUrl) {
+    if (!options.serverUrl) {
       throw new Error('Remote configuration requires serverUrl');
     }
 
@@ -76,9 +61,9 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
 
     const serverName = buildMcpServerName({
       transport: 'http',
-      serverUrl: serverData.serverUrl,
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverUrl: options.serverUrl,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     if (httpPropertyMapping && this.config.transports.includes('http')) {
@@ -88,12 +73,12 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
         serverConfig[httpPropertyMapping.typeProperty] = 'http';
       }
 
-      serverConfig[httpPropertyMapping.urlProperty] = serverData.serverUrl;
+      serverConfig[httpPropertyMapping.urlProperty] = options.serverUrl;
 
       // Add headers for authentication if API token is provided
-      if (httpPropertyMapping.headersProperty && serverData.apiToken) {
+      if (httpPropertyMapping.headersProperty && options.apiToken) {
         serverConfig[httpPropertyMapping.headersProperty] = {
-          Authorization: `Bearer ${serverData.apiToken}`,
+          Authorization: `Bearer ${options.apiToken}`,
         };
       }
 
@@ -116,14 +101,14 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
       }
 
       serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
-      const mcpRemotePackage = serverData.mcpRemoteVersion
-        ? `mcp-remote@${serverData.mcpRemoteVersion}`
+      const mcpRemotePackage = options.mcpRemoteVersion
+        ? `mcp-remote@${options.mcpRemoteVersion}`
         : 'mcp-remote';
-      const args = ['-y', mcpRemotePackage, serverData.serverUrl];
+      const args = ['-y', mcpRemotePackage, options.serverUrl];
 
       // Add bearer token as header for mcp-remote
-      if (serverData.apiToken) {
-        args.push('--header', `Authorization: Bearer ${serverData.apiToken}`);
+      if (options.apiToken) {
+        args.push('--header', `Authorization: Bearer ${options.apiToken}`);
       }
 
       serverConfig[stdioPropertyMapping.argsProperty] = args;
@@ -144,16 +129,16 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     }
   }
 
-  buildOneClickUrl(serverData: MCPServerConfig): string {
+  buildOneClickUrl(options: MCPConnectionOptions): string {
     if (!this.config.protocolHandler) {
       throw new Error(`${this.config.displayName} does not support one-click installation`);
     }
 
     const serverName = buildMcpServerName({
-      transport: serverData.transport,
-      serverUrl: serverData.serverUrl,
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      transport: options.transport,
+      serverUrl: options.serverUrl,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     // Build the appropriate config based on the client's capabilities
@@ -162,28 +147,23 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
       name: serverName,
     };
 
-    if (serverData.transport === 'http') {
+    if (options.transport === 'http') {
       config['type'] = 'http';
-      config['url'] = serverData.serverUrl;
+      config['url'] = options.serverUrl;
 
       // Add headers for authentication if API token is provided
-      if (serverData.apiToken) {
+      if (options.apiToken) {
         config['headers'] = {
-          Authorization: `Bearer ${serverData.apiToken}`,
+          Authorization: `Bearer ${options.apiToken}`,
         };
       }
     } else {
       config['type'] = 'stdio';
       config['command'] = 'npx';
-      config['args'] = ['-y', '@gleanwork/local-mcp-server'];
-      if (serverData.instance || serverData.apiToken) {
-        config['env'] = {};
-        if (serverData.instance) {
-          (config['env'] as Record<string, string>)['GLEAN_INSTANCE'] = serverData.instance;
-        }
-        if (serverData.apiToken) {
-          (config['env'] as Record<string, string>)['GLEAN_API_TOKEN'] = serverData.apiToken;
-        }
+      config['args'] = ['-y', this.getServerPackage()];
+      const env = this.buildEnvVars(options);
+      if (Object.keys(env).length > 0) {
+        config['env'] = env;
       }
     }
 
@@ -194,15 +174,15 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     return this.config.protocolHandler.urlTemplate.replace('{{config}}', encodedConfig);
   }
 
-  protected buildRemoteCommand(serverData: MCPServerConfig): string {
+  protected buildHttpCommand(options: MCPConnectionOptions): string {
     // VS Code has native support for HTTP servers via --add-mcp
-    const serverUrl = this.getServerUrl(serverData);
+    const serverUrl = this.getServerUrl(options);
 
     const serverName = buildMcpServerName({
-      transport: serverData.transport,
+      transport: options.transport,
       serverUrl: serverUrl,
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     const config: Record<string, unknown> = {
@@ -211,9 +191,9 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
       url: serverUrl,
     };
 
-    if (serverData.apiToken) {
+    if (options.apiToken) {
       config.headers = {
-        Authorization: `Bearer ${serverData.apiToken}`,
+        Authorization: `Bearer ${options.apiToken}`,
       };
     }
 
@@ -224,37 +204,22 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     return `code --add-mcp '${escapedConfig}'`;
   }
 
-  protected buildLocalCommand(serverData: MCPServerConfig): string {
+  protected buildStdioCommand(options: MCPConnectionOptions): string {
     // VS Code also supports stdio servers via --add-mcp
     const serverName = buildMcpServerName({
       transport: 'stdio',
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     const config: Record<string, unknown> = {
       name: serverName,
       type: 'stdio',
       command: 'npx',
-      args: ['-y', this.getLocalMcpServerPackage()],
+      args: ['-y', this.getServerPackage()],
     };
 
-    const env: Record<string, string> = {};
-
-    if (serverData.instance) {
-      if (this.isUrl(serverData.instance)) {
-        env.GLEAN_URL = serverData.instance;
-      } else {
-        env.GLEAN_INSTANCE = serverData.instance;
-      }
-    } else {
-      // Use placeholder if no instance
-      env.GLEAN_INSTANCE = this.getInstanceOrPlaceholder(serverData);
-    }
-
-    if (serverData.apiToken) {
-      env.GLEAN_API_TOKEN = serverData.apiToken;
-    }
+    const env = this.buildEnvVars(options);
 
     // Only add env to config if it has properties
     if (Object.keys(env).length > 0) {

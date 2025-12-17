@@ -1,10 +1,10 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPServerConfig } from '../types.js';
+import { MCPConnectionOptions } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 import { CLIENT } from '../constants.js';
 
-// Clients that can use configure-mcp-server
-const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
+// Clients that can use the CLI package
+const CLI_SUPPORTED_CLIENTS: readonly string[] = [
   CLIENT.CLAUDE_DESKTOP,
   CLIENT.WINDSURF,
   CLIENT.GOOSE,
@@ -15,8 +15,8 @@ const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
 ];
 
 export class GenericConfigBuilder extends BaseConfigBuilder {
-  protected buildLocalConfig(
-    serverData: MCPServerConfig,
+  protected buildStdioConfig(
+    options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { serversPropertyName, stdioPropertyMapping } = this.config.configStructure;
@@ -27,35 +27,20 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
 
     const serverName = buildMcpServerName({
       transport: 'stdio',
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverName: options.serverName,
+      productName: options.productName,
     });
     const serverConfig: Record<string, unknown> = {};
 
     serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
-    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', '@gleanwork/local-mcp-server'];
+    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', this.getServerPackage()];
 
     if (stdioPropertyMapping.typeProperty) {
       serverConfig[stdioPropertyMapping.typeProperty] = 'stdio';
     }
 
     if (stdioPropertyMapping.envProperty) {
-      const env: Record<string, string> = {};
-
-      if (serverData.instance) {
-        if (
-          serverData.instance.startsWith('http://') ||
-          serverData.instance.startsWith('https://')
-        ) {
-          env.GLEAN_URL = serverData.instance;
-        } else {
-          env.GLEAN_INSTANCE = serverData.instance;
-        }
-      }
-
-      if (serverData.apiToken) {
-        env.GLEAN_API_TOKEN = serverData.apiToken;
-      }
+      const env = this.buildEnvVars(options);
 
       if (Object.keys(env).length > 0) {
         serverConfig[stdioPropertyMapping.envProperty] = env;
@@ -75,11 +60,11 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     };
   }
 
-  protected buildRemoteConfig(
-    serverData: MCPServerConfig,
+  protected buildHttpConfig(
+    options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
-    if (!serverData.serverUrl) {
+    if (!options.serverUrl) {
       throw new Error('Remote configuration requires serverUrl');
     }
 
@@ -88,9 +73,9 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
 
     const serverName = buildMcpServerName({
       transport: 'http',
-      serverUrl: serverData.serverUrl,
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverUrl: options.serverUrl,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     if (httpPropertyMapping && this.config.transports.includes('http')) {
@@ -100,12 +85,12 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
         serverConfig[httpPropertyMapping.typeProperty] = 'http';
       }
 
-      serverConfig[httpPropertyMapping.urlProperty] = serverData.serverUrl;
+      serverConfig[httpPropertyMapping.urlProperty] = options.serverUrl;
 
       // Add headers for authentication if API token is provided
-      if (httpPropertyMapping.headersProperty && serverData.apiToken) {
+      if (httpPropertyMapping.headersProperty && options.apiToken) {
         serverConfig[httpPropertyMapping.headersProperty] = {
-          Authorization: `Bearer ${serverData.apiToken}`,
+          Authorization: `Bearer ${options.apiToken}`,
         };
       }
 
@@ -128,13 +113,13 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
       }
 
       serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
-      const mcpRemotePackage = serverData.mcpRemoteVersion
-        ? `mcp-remote@${serverData.mcpRemoteVersion}`
+      const mcpRemotePackage = options.mcpRemoteVersion
+        ? `mcp-remote@${options.mcpRemoteVersion}`
         : 'mcp-remote';
-      const args = ['-y', mcpRemotePackage, serverData.serverUrl];
+      const args = ['-y', mcpRemotePackage, options.serverUrl];
 
-      if (serverData.apiToken) {
-        args.push('--header', `Authorization: Bearer ${serverData.apiToken}`);
+      if (options.apiToken) {
+        args.push('--header', `Authorization: Bearer ${options.apiToken}`);
       }
 
       serverConfig[stdioPropertyMapping.argsProperty] = args;
@@ -155,7 +140,7 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     }
   }
 
-  buildOneClickUrl?(_serverData: MCPServerConfig): string {
+  buildOneClickUrl?(_options: MCPConnectionOptions): string {
     if (!this.config.protocolHandler) {
       throw new Error(`${this.config.displayName} does not support one-click installation`);
     }
@@ -163,48 +148,48 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     throw new Error(`One-click URL generation not implemented for ${this.config.displayName}`);
   }
 
-  protected buildRemoteCommand(serverData: MCPServerConfig): string | null {
-    if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
+  protected buildHttpCommand(options: MCPConnectionOptions): string | null {
+    if (!CLI_SUPPORTED_CLIENTS.includes(this.config.id)) {
       return null;
     }
 
-    const serverUrl = this.getServerUrl(serverData);
-    const packageName = this.getConfigureMcpServerPackage(serverData);
+    const serverUrl = this.getServerUrl(options);
+    const packageName = this.getCliPackage(options);
 
     let command = `npx -y ${packageName} remote`;
     command += ` --url ${serverUrl}`;
     command += ` --client ${this.config.id}`;
 
-    if (serverData.apiToken) {
-      command += ` --token ${serverData.apiToken}`;
+    if (options.apiToken) {
+      command += ` --token ${options.apiToken}`;
     }
 
     return command;
   }
 
-  protected buildLocalCommand(serverData: MCPServerConfig): string | null {
-    if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
+  protected buildStdioCommand(options: MCPConnectionOptions): string | null {
+    if (!CLI_SUPPORTED_CLIENTS.includes(this.config.id)) {
       return null;
     }
 
-    const packageName = this.getConfigureMcpServerPackage(serverData);
+    const packageName = this.getCliPackage(options);
 
     let command = `npx -y ${packageName} local`;
 
-    if (serverData.instance) {
-      if (this.isUrl(serverData.instance)) {
-        command += ` --url ${serverData.instance}`;
+    if (options.instance) {
+      if (this.isUrl(options.instance)) {
+        command += ` --url ${options.instance}`;
       } else {
-        command += ` --instance ${serverData.instance}`;
+        command += ` --instance ${options.instance}`;
       }
     } else {
-      command += ` --instance ${this.getInstanceOrPlaceholder(serverData)}`;
+      command += ` --instance ${this.getInstanceOrPlaceholder(options)}`;
     }
 
     command += ` --client ${this.config.id}`;
 
-    if (serverData.apiToken) {
-      command += ` --token ${serverData.apiToken}`;
+    if (options.apiToken) {
+      command += ` --token ${options.apiToken}`;
     }
 
     return command;

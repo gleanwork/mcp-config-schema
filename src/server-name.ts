@@ -10,13 +10,13 @@
  * - Trims underscores from start/end
  *
  * Examples:
- * - "Glean" -> "glean"
+ * - "Acme" -> "acme"
  * - "Acme Platform" -> "acme_platform"
  * - "My Product Name" -> "my_product_name"
  */
 export function normalizeProductName(productName: string): string {
   if (!productName) {
-    return 'glean';
+    return 'mcp';
   }
 
   const normalized = productName
@@ -26,12 +26,12 @@ export function normalizeProductName(productName: string): string {
     .replace(/^_|_$/g, ''); // Trim underscores from start/end
 
   // If the result is empty (e.g., from whitespace-only input), return default
-  return normalized || 'glean';
+  return normalized || 'mcp';
 }
 
 /**
  * Extracts the server name from a full MCP URL
- * e.g., https://my-be.glean.com/mcp/analytics -> analytics
+ * e.g., https://example.com/mcp/analytics -> analytics
  */
 export function extractServerNameFromUrl(url: string): string | null {
   const match = url.match(/\/mcp\/([^/]+)(?:\/|$)/);
@@ -55,7 +55,7 @@ export function buildMcpServerName(options: {
   agents?: boolean;
   productName?: string;
 }): string {
-  const productName = normalizeProductName(options.productName || 'glean');
+  const productName = normalizeProductName(options.productName || 'mcp');
 
   // If explicit server name is provided, use it with prefix
   if (options.serverName) {
@@ -93,7 +93,7 @@ export function buildMcpServerName(options: {
  * Normalizes a server name to ensure consistency
  * This is useful when accepting user input that might not follow conventions
  */
-export function normalizeServerName(name: string, productName: string = 'glean'): string {
+export function normalizeServerName(name: string, productName: string = 'mcp'): string {
   const normalizedProductName = normalizeProductName(productName);
 
   // Create a regex pattern that matches the product name with optional underscore

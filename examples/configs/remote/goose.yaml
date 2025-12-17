@@ -1,9 +1,9 @@
 extensions:
-  glean:
+  mcp_my-server:
     enabled: true
-    name: glean
+    name: mcp_my-server
     type: streamable_http
-    uri: https://glean-dev-be.glean.com/mcp/default
+    uri: https://api.example.com/mcp/default
     envs: {}
     env_keys: []
     headers: {}

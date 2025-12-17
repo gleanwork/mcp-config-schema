@@ -1,48 +1,43 @@
 import { GenericConfigBuilder } from './GenericConfigBuilder.js';
-import { MCPServerConfig } from '../types.js';
+import { MCPConnectionOptions } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
-  protected buildRemoteCommand(serverData: MCPServerConfig): string {
-    const serverUrl = this.getServerUrl(serverData);
+  protected buildHttpCommand(options: MCPConnectionOptions): string {
+    const serverUrl = this.getServerUrl(options);
 
     const serverName = buildMcpServerName({
-      transport: serverData.transport,
+      transport: options.transport,
       serverUrl: serverUrl,
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     let command = `claude mcp add ${serverName} ${serverUrl} --transport http --scope user`;
 
-    if (serverData.apiToken) {
-      command += ` --header "Authorization: Bearer ${serverData.apiToken}"`;
+    if (options.apiToken) {
+      command += ` --header "Authorization: Bearer ${options.apiToken}"`;
     }
 
     return command;
   }
 
-  protected buildLocalCommand(serverData: MCPServerConfig): string {
+  protected buildStdioCommand(options: MCPConnectionOptions): string {
     const serverName = buildMcpServerName({
       transport: 'stdio',
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     let command = `claude mcp add ${serverName} --scope user`;
 
-    if (serverData.instance) {
-      if (this.isUrl(serverData.instance)) {
-        command += ` --env GLEAN_URL=${serverData.instance}`;
-      } else {
-        command += ` --env GLEAN_INSTANCE=${serverData.instance}`;
-      }
-    }
-    if (serverData.apiToken) {
-      command += ` --env GLEAN_API_TOKEN=${serverData.apiToken}`;
+    // Add environment variables from config
+    const env = this.buildEnvVars(options);
+    for (const [key, value] of Object.entries(env)) {
+      command += ` --env ${key}=${value}`;
     }
 
-    command += ` -- npx -y ${this.getLocalMcpServerPackage()}`;
+    command += ` -- npx -y ${this.getServerPackage()}`;
 
     return command;
   }

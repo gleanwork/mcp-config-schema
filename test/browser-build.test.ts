@@ -8,9 +8,9 @@ describe('Browser Build', () => {
 
   it('exports validation functions', () => {
     expect(browserExports.validateClientConfig).toBeDefined();
-    expect(browserExports.validateServerConfig).toBeDefined();
+    expect(browserExports.validateConnectionOptions).toBeDefined();
     expect(browserExports.safeValidateClientConfig).toBeDefined();
-    expect(browserExports.safeValidateServerConfig).toBeDefined();
+    expect(browserExports.safeValidateConnectionOptions).toBeDefined();
   });
 
   it('exports schema validation functions', () => {
@@ -20,10 +20,11 @@ describe('Browser Build', () => {
     expect(browserExports.validateGeneratedConfig).toBeDefined();
   });
 
-  it('exports convenience functions', () => {
-    expect(browserExports.buildConfiguration).toBeDefined();
-    expect(browserExports.buildConfigurationString).toBeDefined();
-    expect(browserExports.buildOneClickUrl).toBeDefined();
+  it('exports factory function and preset', () => {
+    expect(browserExports.createMCPConfigFactory).toBeDefined();
+    expect(typeof browserExports.createMCPConfigFactory).toBe('function');
+    expect(browserExports.examplePreset).toBeDefined();
+    expect(browserExports.examplePreset.serverPackage).toBe('@example/mcp-server');
   });
 
   it('exports CLIENT constants', () => {
@@ -112,7 +113,7 @@ describe('Browser Build', () => {
 
     const cursorUrl = cursorBuilder.buildOneClickUrl(config);
     expect(cursorUrl).toContain('cursor://anysphere.cursor-deeplink/mcp/install');
-    expect(cursorUrl).toContain('name=glean_test-server');
+    expect(cursorUrl).toContain('name=mcp_test-server');
     expect(cursorUrl).toContain('config=');
   });
 });

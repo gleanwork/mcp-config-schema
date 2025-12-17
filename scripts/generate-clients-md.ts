@@ -384,9 +384,6 @@ function generateDocument(): string {
   sections.push('');
   sections.push('- [MCP Documentation](https://modelcontextprotocol.io)');
   sections.push('- [mcp-remote Bridge](https://www.npmjs.com/package/mcp-remote)');
-  sections.push(
-    '- [@gleanwork/local-mcp-server](https://www.npmjs.com/package/@gleanwork/local-mcp-server)'
-  );
   sections.push('');
   sections.push('---');
   sections.push('');

@@ -11,30 +11,44 @@ npm install @gleanwork/mcp-config-schema
 ## Quick Start
 
 ```typescript
-import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema';
+import { createMCPConfigFactory } from '@gleanwork/mcp-config-schema';
+import type { MCPConfig } from '@gleanwork/mcp-config-schema';
 
-const registry = new MCPConfigRegistry();
+// Define your MCP server configuration
+const config: MCPConfig = {
+  serverPackage: '@my-org/mcp-server',
+  cliPackage: '@my-org/configure-mcp',
+  envVars: {
+    url: 'MY_SERVER_URL',
+    instance: 'MY_INSTANCE',
+    token: 'MY_API_TOKEN',
+  },
+  urlPattern: 'https://[instance].example.com/mcp/[endpoint]',
+};
+
+// Create a configured MCP factory
+const mcp = createMCPConfigFactory(config);
 
 // Create a configuration builder for a specific client
-const builder = registry.createBuilder('cursor');
+const builder = mcp.createBuilder('cursor');
 
 // Generate configuration
-const config = builder.buildConfiguration({
-  mode: 'remote',
+const cursorConfig = builder.buildConfiguration({
+  transport: 'http',
   serverUrl: 'https://your-server.com/mcp/default',
   serverName: 'my-server',
 });
 
 // Write configuration to the client's config file (Node.js only)
 await builder.writeConfiguration({
-  mode: 'remote',
+  transport: 'http',
   serverUrl: 'https://your-server.com/mcp/default',
   serverName: 'my-server',
 });
 
 // Generate one-click install URL for supported clients (Cursor, VS Code)
 const oneClickUrl = builder.buildOneClickUrl({
-  mode: 'remote',
+  transport: 'http',
   serverUrl: 'https://your-server.com/mcp/default',
   serverName: 'my-server',
 });
@@ -50,106 +64,136 @@ This package serves as the **Single Source of Truth** for MCP client configurati
 - **Type-safe schemas** with TypeScript types and Zod validation
 - **Browser support** for web-based configuration tools
 - **Client detection** to identify which clients need special handling
+- **Factory pattern** for creating vendor-neutral configurations
 
 ## Supported Clients
 
-For detailed configuration examples and requirements for each client, see **[CLIENTS.md](CLIENTS.md)**.
+For the complete list of supported clients, configuration examples, and file locations, see **[CLIENTS.md](CLIENTS.md)**.
 
-### User-Configurable Clients
+## Configuration
 
-| Client                     | Connection Type | Requires mcp-remote? | Platform              |
-| -------------------------- | --------------- | -------------------- | --------------------- |
-| **Claude Code**            | HTTP native     | No                   | macOS, Linux, Windows |
-| **Visual Studio Code**     | HTTP native     | No                   | All                   |
-| **Claude Desktop**         | stdio only      | Yes (for HTTP)       | macOS, Windows, Linux |
-| **Cursor**                 | HTTP native     | No                   | All                   |
-| **Goose**                  | HTTP native     | No                   | macOS, Linux, Windows |
-| **Windsurf**               | HTTP native     | No                   | All                   |
-| **Codex**                  | HTTP native     | No                   | macOS, Linux, Windows |
-| **Junie (JetBrains)**      | stdio only      | Yes (for HTTP)       | macOS, Linux, Windows |
-| **JetBrains AI Assistant** | stdio only      | Yes (for HTTP)       | macOS, Linux, Windows |
+This package is vendor-neutral. You provide configuration for your MCP server to customize the generated output.
 
-### Centrally Managed Clients
+### Configuration Options
 
-- **ChatGPT** - Requires web UI configuration
-- **Claude for Teams/Enterprise** - Managed by organization admins
+```typescript
+import { createMCPConfigFactory } from '@gleanwork/mcp-config-schema';
+import type { MCPConfig } from '@gleanwork/mcp-config-schema';
 
-### One-Click Installation Support
+const myConfig: MCPConfig = {
+  // Package for local stdio server installations
+  serverPackage: '@my-company/mcp-server',
+  // Package for CLI configuration tool (optional)
+  cliPackage: '@my-company/configure-mcp',
+  // Default URL pattern with placeholders
+  urlPattern: 'https://[instance].my-company.com/mcp/[endpoint]',
+  // Environment variable mappings
+  envVars: {
+    url: 'MY_COMPANY_URL',
+    instance: 'MY_COMPANY_INSTANCE',
+    token: 'MY_COMPANY_API_TOKEN',
+  },
+};
 
-The following clients support one-click installation:
+const mcp = createMCPConfigFactory(myConfig);
+```
 
-| Client      | Protocol    | Format                                                               |
-| ----------- | ----------- | -------------------------------------------------------------------- |
-| **Cursor**  | `cursor://` | `cursor://anysphere.cursor-deeplink/mcp/install?name=...&config=...` |
-| **VS Code** | `vscode:`   | `vscode:mcp/install?{url-encoded-json-config}`                       |
+| Property | Type | Description |
+| --- | --- | --- |
+| `serverPackage` | `string` | npm package for local stdio server (e.g., `@my-company/mcp-server`) |
+| `cliPackage` | `string` | npm package for CLI configuration tool |
+| `urlPattern` | `string` | URL pattern with `[instance]` and `[endpoint]` placeholders |
+| `envVars.url` | `string` | Environment variable for full URL |
+| `envVars.instance` | `string` | Environment variable for instance identifier |
+| `envVars.token` | `string` | Environment variable for API token |
+
+### HTTP-Only Configuration
+
+For HTTP-only use cases (no stdio transport), you can use an empty config:
+
+```typescript
+const mcp = createMCPConfigFactory({});
+
+const builder = mcp.createBuilder('cursor');
+const config = builder.buildConfiguration({
+  transport: 'http',
+  serverUrl: 'https://api.example.com/mcp/default',
+  serverName: 'my-server',
+});
+```
 
 ## Core Usage
 
 ### Query Client Capabilities
 
 ```typescript
-import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema';
+import { createMCPConfigFactory } from '@gleanwork/mcp-config-schema';
 
-const registry = new MCPConfigRegistry();
+const mcp = createMCPConfigFactory({ serverPackage: '@my-org/mcp-server' });
 
 // Get client configuration
-const cursorConfig = registry.getConfig('cursor');
+const cursorConfig = mcp.getConfig('cursor');
 console.log(cursorConfig.displayName); // "Cursor"
 console.log(cursorConfig.userConfigurable); // true
-console.log(cursorConfig.transports); // ['stdio', 'http']
+
+// Check client capabilities
+console.log(mcp.clientSupportsHttpNatively('cursor')); // true
+console.log(mcp.clientNeedsMcpRemote('claude-desktop')); // true
 
 // Query different client groups
-const httpClients = registry.getNativeHttpClients();
-const bridgeClients = registry.getBridgeRequiredClients();
-const macClients = registry.getClientsByPlatform('darwin');
+const httpClients = mcp.getNativeHttpClients();
+const bridgeClients = mcp.getBridgeRequiredClients();
+const macClients = mcp.getClientsByPlatform('darwin');
 ```
 
 ### Generate Configurations
 
 ```typescript
-const builder = registry.createBuilder('claude-code');
+const mcp = createMCPConfigFactory({
+  serverPackage: '@my-org/mcp-server',
+  envVars: { instance: 'MY_INSTANCE', token: 'MY_TOKEN' },
+});
+const builder = mcp.createBuilder('claude-code');
 
-// Remote server configuration
+// Remote server configuration (HTTP)
 const remoteConfig = builder.buildConfiguration({
-  mode: 'remote',
+  transport: 'http',
   serverUrl: 'https://api.example.com/mcp/default',
   serverName: 'my-server',
 });
 
-// Local server configuration
+// Local server configuration (stdio)
 const localConfig = builder.buildConfiguration({
-  mode: 'local',
+  transport: 'stdio',
   instance: 'your-instance',
   apiToken: 'your-api-token',
 });
 
-// Generate partial configuration (without root object)
+// Generate partial configuration (without root object wrapper)
 const partialConfig = builder.buildConfiguration({
-  mode: 'remote',
+  transport: 'http',
   serverUrl: 'https://api.example.com/mcp/default',
   serverName: 'my-server',
-  includeRootObject: false, // Returns just the server entry without mcpServers wrapper
+  includeRootObject: false,
 });
 // Returns: { "my-server": { "type": "http", "url": "..." } }
-// Instead of: { "mcpServers": { "my-server": { "type": "http", "url": "..." } } }
+// Instead of: { "mcpServers": { "my-server": { ... } } }
 ```
 
 #### Partial Configuration (without root object)
 
-The `includeRootObject` option allows you to generate just the server configuration entry without the outer wrapper (`mcpServers`, `servers`, or `extensions` depending on the client). This is useful when you need to merge configurations into an existing setup:
+The `includeRootObject` option generates just the server entry without the outer wrapper (`mcpServers`, `servers`, or `extensions` depending on the client). This is useful when merging into an existing configuration:
 
 ```typescript
-// Generate partial config for merging into existing configuration
-const partialConfig = JSON.parse(
-  builder.buildConfiguration({
-    mode: 'remote',
-    serverUrl: 'https://api.example.com/mcp/default',
-    serverName: 'glean_custom',
-    includeRootObject: false,
-  })
-);
+// Generate partial config for merging
+const partialConfig = builder.buildConfiguration({
+  transport: 'http',
+  serverUrl: 'https://api.example.com/mcp/default',
+  serverName: 'my-server',
+  includeRootObject: false,
+});
 
-// Now you can easily merge it into an existing config
+// Merge into existing config file
 const existingConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 existingConfig.mcpServers = {
   ...existingConfig.mcpServers,
@@ -161,11 +205,11 @@ fs.writeFileSync(configPath, JSON.stringify(existingConfig, null, 2));
 ### Validate Configurations
 
 ```typescript
-import { validateServerConfig, safeValidateServerConfig } from '@gleanwork/mcp-config-schema';
+import { validateConnectionOptions, safeValidateConnectionOptions } from '@gleanwork/mcp-config-schema';
 
-// Validate input configuration
-const result = safeValidateServerConfig({
-  mode: 'remote',
+// Validate connection options
+const result = safeValidateConnectionOptions({
+  transport: 'http',
   serverUrl: 'https://your-server.com/mcp/default',
 });
 
@@ -176,138 +220,126 @@ if (!result.success) {
 
 ## Browser Support
 
-This package works in browsers! Use the `/browser` import path:
+This package works in browsers. Use the `/browser` import path:
 
 ```javascript
-// Browser-safe import
-import { MCPConfigRegistry, ConfigBuilder } from '@gleanwork/mcp-config-schema/browser';
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema/browser';
 
-const registry = new MCPConfigRegistry();
+const config = {
+  serverPackage: '@my-org/mcp-server',
+  envVars: { instance: 'MY_INSTANCE', token: 'MY_TOKEN' },
+};
+
+const registry = new MCPConfigRegistry({ mcpConfig: config });
 const builder = registry.createBuilder('cursor');
 
 // Generate configuration (works in browser)
-const config = builder.buildConfiguration({
-  mode: 'remote',
+const cursorConfig = builder.buildConfiguration({
+  transport: 'http',
   serverUrl: 'https://your-server.com/mcp/default',
 });
 
 // Copy to clipboard
-navigator.clipboard.writeText(config);
+navigator.clipboard.writeText(JSON.stringify(cursorConfig, null, 2));
 ```
 
 **Note:** File operations (`writeConfiguration`, `getConfigPath`) are not available in browsers and will throw clear error messages.
 
-### React Example
+## Direct Registry Usage
 
-```tsx
-import React from 'react';
-import { MCPConfigRegistry, ClientId } from '@gleanwork/mcp-config-schema/browser';
+For advanced use cases, you can use `MCPConfigRegistry` directly:
 
-function MCPConfigGenerator() {
-  const registry = new MCPConfigRegistry();
+```typescript
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema';
 
-  const handleGenerateConfig = (clientId: ClientId, serverUrl: string) => {
-    const builder = registry.createBuilder(clientId);
-    const config = builder.buildConfiguration({
-      mode: 'remote',
-      serverUrl,
-      serverName: 'glean',
-    });
+const config = {
+  serverPackage: '@my-org/mcp-server',
+  envVars: { instance: 'MY_INSTANCE', token: 'MY_TOKEN' },
+};
 
-    navigator.clipboard.writeText(config);
-  };
+// Create registry with MCP configuration
+const registry = new MCPConfigRegistry({ mcpConfig: config });
 
-  const clients = registry.getSupportedClients();
+// Register custom clients
+registry.registerClient({
+  id: 'my-custom-editor',
+  displayName: 'My Custom Editor',
+  userConfigurable: true,
+  transports: ['stdio', 'http'],
+  supportedPlatforms: ['darwin', 'linux', 'win32'],
+  configFormat: 'json',
+  configPath: {
+    darwin: '$HOME/.my-editor/mcp.json',
+    linux: '$HOME/.my-editor/mcp.json',
+    win32: '%USERPROFILE%\\.my-editor\\mcp.json',
+  },
+  configStructure: {
+    serversPropertyName: 'mcpServers',
+    httpPropertyMapping: {
+      typeProperty: 'type',
+      urlProperty: 'url',
+      headersProperty: 'headers',
+    },
+    stdioPropertyMapping: {
+      typeProperty: 'type',
+      commandProperty: 'command',
+      argsProperty: 'args',
+      envProperty: 'env',
+    },
+  },
+});
 
-  return (
-    <div>
-      {clients.map((client) => (
-        <button
-          key={client.id}
-          onClick={() => handleGenerateConfig(client.id, 'https://api.example.com/mcp')}
-        >
-          Configure {client.displayName}
-        </button>
-      ))}
-    </div>
-  );
-}
-```
+// Register custom builders for specific clients
+import { BaseConfigBuilder } from '@gleanwork/mcp-config-schema';
 
-## Configuration Examples
-
-> **📖 For complete configuration examples for all clients, see [CLIENTS.md](CLIENTS.md)**
-
-### Native HTTP Client (Claude Code, VS Code)
-
-```json
-{
-  "mcpServers": {
-    "my-server": {
-      "type": "http",
-      "url": "https://your-server.com/mcp/default"
-    }
+class MyCustomBuilder extends BaseConfigBuilder {
+  protected buildRemoteConfig(serverData, includeRootObject) {
+    // Custom implementation
   }
 }
+
+registry.registerBuilder('my-custom-editor', MyCustomBuilder);
 ```
 
-### stdio-only Clients (Claude Desktop, Junie, JetBrains AI)
+### Registry Options
 
-These clients require `mcp-remote` bridge for HTTP servers:
-
-```json
-{
-  "mcpServers": {
-    "my-server": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "https://your-server.com/mcp/default"]
-    }
-  }
-}
-```
-
-### Goose (YAML format with native HTTP)
-
-```yaml
-extensions:
-  my-server:
-    enabled: true
-    name: my-server
-    type: streamable_http
-    uri: https://your-server.com/mcp/default
-    envs: {}
-    env_keys: []
-    headers: {}
-    description: ''
-    timeout: 300
-    bundled: null
-    available_tools: []
-```
-
-## Configuration File Locations
-
-| Client              | macOS                                                             | Linux                                 | Windows                                           |
-| ------------------- | ----------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------- |
-| Claude Code         | `~/.claude.json`                                                  | `~/.claude.json`                      | `%USERPROFILE%\.claude.json`                      |
-| VS Code             | `~/Library/Application Support/Code/User/mcp.json`                | `~/.config/Code/User/mcp.json`        | `%APPDATA%\Code\User\mcp.json`                    |
-| Claude Desktop      | `~/Library/Application Support/Claude/claude_desktop_config.json` | `~/.config/Claude/claude_desktop_config.json` | `%APPDATA%\Claude\claude_desktop_config.json` |
-| Cursor              | `~/.cursor/mcp.json`                                              | `~/.cursor/mcp.json`                  | `%USERPROFILE%\.cursor\mcp.json`                  |
-| Goose               | `~/.config/goose/config.yaml`                                     | `~/.config/goose/config.yaml`         | `%USERPROFILE%\.config\goose\config.yaml`         |
-| Windsurf            | `~/.codeium/windsurf/mcp_config.json`                             | `~/.codeium/windsurf/mcp_config.json` | `%USERPROFILE%\.codeium\windsurf\mcp_config.json` |
-| Codex               | `~/.codex/config.toml`                                            | `~/.codex/config.toml`                | `%USERPROFILE%\.codex\config.toml`                |
-| Junie               | `~/.junie/mcp.json`                                               | `~/.junie/mcp.json`                   | `%USERPROFILE%\.junie\mcp.json`                   |
-| JetBrains AI        | Configure via IDE UI                                              | Configure via IDE UI                  | Configure via IDE UI                              |
+| Option | Type | Description |
+| --- | --- | --- |
+| `mcpConfig` | `MCPConfig` | MCP server configuration (required for stdio transport) |
+| `loadBuiltInConfigs` | `boolean` | Whether to load built-in client configs (default: `true`) |
 
 ## API Reference
 
 ### Types
 
+- `MCPConfig` - Configuration for your MCP server
+- `MCPEnvVarNames` - Environment variable name mappings
+- `MCPConfigFactory` - Factory instance returned by `createMCPConfigFactory()`
+- `MCPConnectionOptions` - Connection options for building configurations
 - `ClientId` - Union of all supported client identifiers
 - `MCPClientConfig` - Full client configuration schema
-- `MCPServerConfig` - Server connection configuration
 - `Platform` - 'darwin' | 'linux' | 'win32'
 - `Transport` - 'http' | 'stdio'
+
+### Factory Function
+
+- `createMCPConfigFactory(config)` - Create a configured MCP factory instance
+
+### MCPConfigFactory Methods
+
+- `createBuilder(clientId)` - Create a configuration builder
+- `buildConfiguration(clientId, options)` - Generate configuration
+- `buildConfigurationString(clientId, options)` - Generate config as string
+- `buildCommand(clientId, options)` - Generate CLI command
+- `buildOneClickUrl(clientId, options)` - Generate one-click URL
+- `getConfig(clientId)` - Get configuration for a specific client
+- `getAllConfigs()` - Get all client configurations
+- `getNativeHttpClients()` - Get HTTP-native clients
+- `getBridgeRequiredClients()` - Get clients needing mcp-remote
+- `getClientsByPlatform(platform)` - Get platform-specific clients
+- `clientNeedsMcpRemote(clientId)` - Check if client needs mcp-remote
+- `clientSupportsHttpNatively(clientId)` - Check if client supports HTTP
+- `hasClient(clientId)` - Check if client exists
 
 ### Registry Methods
 
@@ -318,18 +350,53 @@ extensions:
 - `getBridgeRequiredClients()` - Get clients needing mcp-remote
 - `getClientsByPlatform(platform)` - Get platform-specific clients
 - `createBuilder(clientId)` - Create a configuration builder
+- `registerClient(config)` - Register a custom client
+- `registerBuilder(clientId, builder)` - Register a custom builder
 
 ### Builder Methods
 
-- `buildConfiguration(serverConfig)` - Generate configuration content
-- `writeConfiguration(serverConfig)` - Write config to file (Node.js only)
+- `buildConfiguration(options)` - Generate configuration content
+- `writeConfiguration(options)` - Write config to file (Node.js only)
 - `getConfigPath()` - Get the config file path (Node.js only)
+- `buildCommand(options)` - Generate CLI command
+- `buildOneClickUrl(options)` - Generate one-click URL
 
 ### Validation Functions
 
-- `validateServerConfig(config)` - Validate server configuration (throws)
-- `safeValidateServerConfig(config)` - Safe validation (returns result)
+- `validateConnectionOptions(options)` - Validate connection options (throws)
+- `safeValidateConnectionOptions(options)` - Safe validation (returns result)
 - `validateGeneratedConfig(config, clientId)` - Validate generated output
+
+## Migration from v1.x/v2.x
+
+If you were using an older version, migrate to the current factory API:
+
+```typescript
+// Before (v1.x with plugins or v2.x)
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema';
+const registry = new MCPConfigRegistry();
+const builder = registry.createBuilder('cursor');
+
+// After (v3.x with factory)
+import { createMCPConfigFactory } from '@gleanwork/mcp-config-schema';
+
+const config = {
+  serverPackage: '@my-org/mcp-server',
+  envVars: { instance: 'MY_INSTANCE', token: 'MY_TOKEN' },
+};
+
+const mcp = createMCPConfigFactory(config);
+const builder = mcp.createBuilder('cursor');
+```
+
+Key changes:
+- **No implicit defaults** - Must provide your own configuration
+- **Factory function** - Use `createMCPConfigFactory()` to create a factory instance
+- **Type renames** - `McpConfig` → `MCPConfig`, `EnvVars` → `MCPEnvVarNames`, `MCPServerConfig` → `MCPConnectionOptions`
+- **Property renames** - `serverCommand` → `serverPackage`, `installCommand` → `cliPackage`
+- **Function renames** - `createMcpConfig()` → `createMCPConfigFactory()`, `validateServerConfig()` → `validateConnectionOptions()`
+
+See [docs/migrations/v3-factory-api.md](docs/migrations/v3-factory-api.md) for detailed migration instructions.
 
 ## Development
 
@@ -352,7 +419,7 @@ npm run generate:docs
 
 ## Documentation
 
-- **[CLIENTS.md](CLIENTS.md)** - Comprehensive client compatibility matrix with detailed configuration examples
+- **[CLIENTS.md](CLIENTS.md)** - Comprehensive client compatibility matrix with configuration examples
 - **[API Reference](#api-reference)** - Complete API documentation
 
 ## License
@@ -361,4 +428,4 @@ MIT - See [LICENSE](LICENSE) file for details
 
 ## Contributing
 
-This package is part of the Glean MCP ecosystem. For issues and contributions, please visit the repository.
+For issues and contributions, please visit the repository.

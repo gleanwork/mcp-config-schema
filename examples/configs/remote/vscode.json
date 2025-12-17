@@ -1,8 +1,8 @@
 {
   "servers": {
-    "glean": {
+    "mcp_my-server": {
       "type": "http",
-      "url": "https://glean-dev-be.glean.com/mcp/default"
+      "url": "https://api.example.com/mcp/default"
     }
   }
 }

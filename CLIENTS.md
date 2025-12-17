@@ -108,9 +108,9 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ```json snippet=examples/configs/remote/claude-code.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "type": "http",
-      "url": "https://glean-dev-be.glean.com/mcp/default"
+      "url": "https://api.example.com/mcp/default"
     }
   }
 }
@@ -124,16 +124,16 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ```json snippet=examples/configs/local/claude-code.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_INSTANCE": "your-instance",
+        "EXAMPLE_API_TOKEN": "your-api-token"
       }
     }
   }
@@ -196,13 +196,13 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ```json snippet=examples/configs/remote/claude-desktop.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
         "mcp-remote",
-        "https://glean-dev-be.glean.com/mcp/default"
+        "https://api.example.com/mcp/default"
       ]
     }
   }
@@ -217,16 +217,16 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ```json snippet=examples/configs/local/claude-desktop.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_INSTANCE": "your-instance",
+        "EXAMPLE_API_TOKEN": "your-api-token"
       }
     }
   }
@@ -320,8 +320,8 @@ This document provides a comprehensive overview of all supported MCP clients, th
 <summary><strong>HTTP Configuration (native)</strong></summary>
 
 ```toml snippet=examples/configs/remote/codex.toml
-[mcp_servers.glean]
-url = "https://glean-dev-be.glean.com/mcp/default"
+[mcp_servers.mcp_my-server]
+url = "https://api.example.com/mcp/default"
 ```
 
 </details>
@@ -330,13 +330,13 @@ url = "https://glean-dev-be.glean.com/mcp/default"
 <summary><strong>Standard I/O Configuration (local process)</strong></summary>
 
 ```toml snippet=examples/configs/local/codex.toml
-[mcp_servers.glean]
+[mcp_servers.mcp_my-server]
 command = "npx"
-args = [ "-y", "@gleanwork/local-mcp-server" ]
+args = [ "-y", "@example/mcp-server" ]
 
-[mcp_servers.glean.env]
-GLEAN_INSTANCE = "your-instance"
-GLEAN_API_TOKEN = "your-api-token"
+[mcp_servers.mcp_my-server.env]
+EXAMPLE_INSTANCE = "your-instance"
+EXAMPLE_API_TOKEN = "your-api-token"
 ```
 
 </details>
@@ -403,9 +403,9 @@ GLEAN_API_TOKEN = "your-api-token"
 ```json snippet=examples/configs/remote/cursor.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "type": "http",
-      "url": "https://glean-dev-be.glean.com/mcp/default"
+      "url": "https://api.example.com/mcp/default"
     }
   }
 }
@@ -419,16 +419,16 @@ GLEAN_API_TOKEN = "your-api-token"
 ```json snippet=examples/configs/local/cursor.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_INSTANCE": "your-instance",
+        "EXAMPLE_API_TOKEN": "your-api-token"
       }
     }
   }
@@ -492,11 +492,11 @@ GLEAN_API_TOKEN = "your-api-token"
 
 ```yaml snippet=examples/configs/remote/goose.yaml
 extensions:
-  glean:
+  mcp_my-server:
     enabled: true
-    name: glean
+    name: mcp_my-server
     type: streamable_http
-    uri: https://glean-dev-be.glean.com/mcp/default
+    uri: https://api.example.com/mcp/default
     envs: {}
     env_keys: []
     headers: {}
@@ -513,12 +513,12 @@ extensions:
 
 ```yaml snippet=examples/configs/local/goose.yaml
 extensions:
-  glean:
-    name: glean
+  mcp_my-server:
+    name: mcp_my-server
     cmd: npx
     args:
       - '-y'
-      - '@gleanwork/local-mcp-server'
+      - '@example/mcp-server'
     type: stdio
     timeout: 300
     enabled: true
@@ -526,8 +526,8 @@ extensions:
     description: null
     env_keys: []
     envs:
-      GLEAN_INSTANCE: your-instance
-      GLEAN_API_TOKEN: your-api-token
+      EXAMPLE_INSTANCE: your-instance
+      EXAMPLE_API_TOKEN: your-api-token
 ```
 
 </details>
@@ -595,9 +595,9 @@ extensions:
 ```json snippet=examples/configs/remote/vscode.json
 {
   "servers": {
-    "glean": {
+    "mcp_my-server": {
       "type": "http",
-      "url": "https://glean-dev-be.glean.com/mcp/default"
+      "url": "https://api.example.com/mcp/default"
     }
   }
 }
@@ -611,16 +611,16 @@ extensions:
 ```json snippet=examples/configs/local/vscode.json
 {
   "servers": {
-    "glean": {
+    "mcp_my-server": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_INSTANCE": "your-instance",
+        "EXAMPLE_API_TOKEN": "your-api-token"
       }
     }
   }
@@ -684,8 +684,8 @@ extensions:
 ```json snippet=examples/configs/remote/windsurf.json
 {
   "mcpServers": {
-    "glean": {
-      "serverUrl": "https://glean-dev-be.glean.com/mcp/default"
+    "mcp_my-server": {
+      "serverUrl": "https://api.example.com/mcp/default"
     }
   }
 }
@@ -699,15 +699,15 @@ extensions:
 ```json snippet=examples/configs/local/windsurf.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_INSTANCE": "your-instance",
+        "EXAMPLE_API_TOKEN": "your-api-token"
       }
     }
   }
@@ -769,13 +769,13 @@ extensions:
 ```json snippet=examples/configs/remote/junie.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
         "mcp-remote",
-        "https://glean-dev-be.glean.com/mcp/default"
+        "https://api.example.com/mcp/default"
       ]
     }
   }
@@ -790,16 +790,16 @@ extensions:
 ```json snippet=examples/configs/local/junie.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_INSTANCE": "your-instance",
+        "EXAMPLE_API_TOKEN": "your-api-token"
       }
     }
   }
@@ -853,13 +853,13 @@ extensions:
 ```json snippet=examples/configs/remote/jetbrains.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
         "mcp-remote",
-        "https://glean-dev-be.glean.com/mcp/default"
+        "https://api.example.com/mcp/default"
       ]
     }
   }
@@ -874,16 +874,16 @@ extensions:
 ```json snippet=examples/configs/local/jetbrains.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_INSTANCE": "your-instance",
+        "EXAMPLE_API_TOKEN": "your-api-token"
       }
     }
   }
@@ -946,8 +946,8 @@ extensions:
 ```json snippet=examples/configs/remote/gemini.json
 {
   "mcpServers": {
-    "glean": {
-      "httpUrl": "https://glean-dev-be.glean.com/mcp/default"
+    "mcp_my-server": {
+      "httpUrl": "https://api.example.com/mcp/default"
     }
   }
 }
@@ -961,15 +961,15 @@ extensions:
 ```json snippet=examples/configs/local/gemini.json
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_INSTANCE": "your-instance",
+        "EXAMPLE_API_TOKEN": "your-api-token"
       }
     }
   }
@@ -1035,7 +1035,6 @@ Some clients support one-click installation via custom protocols:
 
 - [MCP Documentation](https://modelcontextprotocol.io)
 - [mcp-remote Bridge](https://www.npmjs.com/package/mcp-remote)
-- [@gleanwork/local-mcp-server](https://www.npmjs.com/package/@gleanwork/local-mcp-server)
 
 ---
 

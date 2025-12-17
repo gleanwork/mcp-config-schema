@@ -1,7 +1,7 @@
-[mcp_servers.glean]
+[mcp_servers.mcp_my-server]
 command = "npx"
-args = [ "-y", "@gleanwork/local-mcp-server" ]
+args = [ "-y", "@example/mcp-server" ]
 
-[mcp_servers.glean.env]
-GLEAN_INSTANCE = "your-instance"
-GLEAN_API_TOKEN = "your-api-token"
+[mcp_servers.mcp_my-server.env]
+EXAMPLE_INSTANCE = "your-instance"
+EXAMPLE_API_TOKEN = "your-api-token"

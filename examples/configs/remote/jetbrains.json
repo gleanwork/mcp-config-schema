@@ -1,12 +1,12 @@
 {
   "mcpServers": {
-    "glean": {
+    "mcp_my-server": {
       "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
         "mcp-remote",
-        "https://glean-dev-be.glean.com/mcp/default"
+        "https://api.example.com/mcp/default"
       ]
     }
   }

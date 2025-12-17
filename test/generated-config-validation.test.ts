@@ -11,7 +11,7 @@ describe('Generated Config Validation', () => {
     it('should validate valid HTTP config', () => {
       const config = {
         mcpServers: {
-          glean: {
+          my_server: {
             type: 'http',
             url: 'https://example.com/mcp/default',
           },
@@ -25,13 +25,13 @@ describe('Generated Config Validation', () => {
     it('should validate valid stdio config', () => {
       const config = {
         mcpServers: {
-          glean: {
+          my_server: {
             type: 'stdio',
             command: 'npx',
-            args: ['-y', '@gleanwork/local-mcp-server'],
+            args: ['-y', '@example/mcp-server'],
             env: {
-              GLEAN_INSTANCE: 'my-company',
-              GLEAN_API_TOKEN: 'test-token',
+              EXAMPLE_INSTANCE: 'my-company',
+              EXAMPLE_API_TOKEN: 'test-token',
             },
           },
         },
@@ -44,7 +44,7 @@ describe('Generated Config Validation', () => {
     it('should reject invalid URL in HTTP config', () => {
       const config = {
         mcpServers: {
-          glean: {
+          my_server: {
             type: 'http',
             url: 'not-a-url',
           },
@@ -61,7 +61,7 @@ describe('Generated Config Validation', () => {
     it('should reject missing required fields', () => {
       const config = {
         mcpServers: {
-          glean: {
+          my_server: {
             type: 'stdio',
           },
         },
@@ -76,7 +76,7 @@ describe('Generated Config Validation', () => {
     it('should validate valid VS Code config', () => {
       const config = {
         servers: {
-          glean: {
+          my_server: {
             type: 'http',
             url: 'https://example.com/mcp/default',
           },
@@ -90,7 +90,7 @@ describe('Generated Config Validation', () => {
     it('should reject config with wrong top-level key', () => {
       const config = {
         mcpServers: {
-          glean: {
+          my_server: {
             type: 'http',
             url: 'https://example.com/mcp/default',
           },
@@ -106,8 +106,8 @@ describe('Generated Config Validation', () => {
     it('should validate valid Goose config', () => {
       const config = {
         extensions: {
-          glean: {
-            name: 'glean',
+          my_server: {
+            name: 'my_server',
             cmd: 'npx',
             args: ['-y', 'mcp-remote', 'https://example.com/mcp/default'],
             type: 'stdio',
@@ -128,8 +128,8 @@ describe('Generated Config Validation', () => {
     it('should reject config missing required Goose fields', () => {
       const config = {
         extensions: {
-          glean: {
-            name: 'glean',
+          my_server: {
+            name: 'my_server',
             cmd: 'npx',
             args: ['-y', 'mcp-remote'],
           },
@@ -145,7 +145,7 @@ describe('Generated Config Validation', () => {
     it('should validate Claude Code config', () => {
       const config = {
         mcpServers: {
-          glean: {
+          my_server: {
             type: 'http',
             url: 'https://example.com/mcp/default',
           },
@@ -159,7 +159,7 @@ describe('Generated Config Validation', () => {
     it('should validate VS Code config', () => {
       const config = {
         servers: {
-          glean: {
+          my_server: {
             type: 'http',
             url: 'https://example.com/mcp/default',
           },
@@ -173,8 +173,8 @@ describe('Generated Config Validation', () => {
     it('should validate Goose config', () => {
       const config = {
         extensions: {
-          glean: {
-            name: 'glean',
+          my_server: {
+            name: 'my_server',
             cmd: 'npx',
             args: ['-y', 'mcp-remote', 'https://example.com/mcp/default'],
             type: 'stdio',
@@ -195,7 +195,7 @@ describe('Generated Config Validation', () => {
     it('should validate Cursor config', () => {
       const config = {
         mcpServers: {
-          glean: {
+          my_server: {
             type: 'stdio',
             command: 'npx',
             args: ['-y', 'mcp-remote', 'https://example.com/mcp/default'],
@@ -210,7 +210,7 @@ describe('Generated Config Validation', () => {
     it('should validate Windsurf config without type field', () => {
       const config = {
         mcpServers: {
-          glean: {
+          my_server: {
             command: 'npx',
             args: ['-y', 'mcp-remote', 'https://example.com/mcp/default'],
           },
@@ -224,7 +224,7 @@ describe('Generated Config Validation', () => {
     it('should reject unknown client ID', () => {
       const config = {
         mcpServers: {
-          glean: {
+          my_server: {
             type: 'http',
             url: 'https://example.com/mcp/default',
           },
