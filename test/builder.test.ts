@@ -665,6 +665,81 @@ describe('ConfigBuilder', () => {
       `);
     });
 
+    it('should generate correct HTTP config for Gemini CLI', () => {
+      const builder = registry.createBuilder(CLIENT.GEMINI);
+      const result = builder.buildConfiguration(remoteConfig);
+
+      const validation = validateGeneratedConfig(result, 'gemini');
+      expect(validation.success).toBe(true);
+
+      // Gemini uses httpUrl (not url) and no type property
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "mcpServers": {
+            "glean": {
+              "httpUrl": "https://glean-dev-be.glean.com/mcp/default",
+            },
+          },
+        }
+      `);
+    });
+
+    it('should add bearer token to Gemini CLI HTTP config', () => {
+      const builder = registry.createBuilder(CLIENT.GEMINI);
+      const result = builder.buildConfiguration({
+        transport: 'http',
+        serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
+        apiToken: 'test-token-123',
+      });
+
+      const validation = validateGeneratedConfig(result, 'gemini');
+      expect(validation.success).toBe(true);
+
+      // Should include headers with Authorization when token is provided
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "mcpServers": {
+            "glean_default": {
+              "headers": {
+                "Authorization": "Bearer test-token-123",
+              },
+              "httpUrl": "https://glean-dev-be.glean.com/mcp/default",
+            },
+          },
+        }
+      `);
+    });
+
+    it('should generate correct stdio config for Gemini CLI', () => {
+      const builder = registry.createBuilder(CLIENT.GEMINI);
+      const result = builder.buildConfiguration({
+        transport: 'stdio',
+        instance: 'test-instance',
+        apiToken: 'test-token',
+      });
+
+      const validation = validateGeneratedConfig(result, 'gemini');
+      expect(validation.success).toBe(true);
+
+      // Gemini stdio uses command, args, env - no type property
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "mcpServers": {
+            "glean_local": {
+              "args": [
+                "-y",
+                "@gleanwork/local-mcp-server",
+              ],
+              "command": "npx",
+              "env": {
+                "GLEAN_API_TOKEN": "test-token",
+                "GLEAN_INSTANCE": "test-instance",
+              },
+            },
+          },
+        }
+      `);
+    });
 
     it('should generate correct YAML config for Goose', () => {
       const builder = registry.createBuilder(CLIENT.GOOSE);
