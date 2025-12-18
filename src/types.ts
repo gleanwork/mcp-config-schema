@@ -21,6 +21,10 @@ import {
   VsCodeConfigSchema,
   GooseServerConfigSchema,
   GooseConfigSchema,
+  GeminiHttpServerConfigSchema,
+  GeminiStdioServerConfigSchema,
+  GeminiServerConfigSchema,
+  GeminiConfigSchema,
 } from './schemas.js';
 
 export type Platform = z.infer<typeof PlatformSchema>;
@@ -44,6 +48,10 @@ export type McpServersConfig = z.infer<typeof McpServersConfigSchema>;
 export type VsCodeConfig = z.infer<typeof VsCodeConfigSchema>;
 export type GooseServerConfig = z.infer<typeof GooseServerConfigSchema>;
 export type GooseConfig = z.infer<typeof GooseConfigSchema>;
+export type GeminiHttpServerConfig = z.infer<typeof GeminiHttpServerConfigSchema>;
+export type GeminiStdioServerConfig = z.infer<typeof GeminiStdioServerConfigSchema>;
+export type GeminiServerConfig = z.infer<typeof GeminiServerConfigSchema>;
+export type GeminiConfig = z.infer<typeof GeminiConfigSchema>;
 export interface ValidationResult {
   success: boolean;
   data?: unknown;
@@ -72,6 +80,10 @@ export {
   VsCodeConfigSchema,
   GooseServerConfigSchema,
   GooseConfigSchema,
+  GeminiHttpServerConfigSchema,
+  GeminiStdioServerConfigSchema,
+  GeminiServerConfigSchema,
+  GeminiConfigSchema,
 } from './schemas.js';
 
 export {
@@ -83,7 +95,9 @@ export {
   validateMcpServersConfig,
   validateVsCodeConfig,
   validateGooseConfig,
+  validateGeminiConfig,
   safeValidateMcpServersConfig,
   safeValidateVsCodeConfig,
   safeValidateGooseConfig,
+  safeValidateGeminiConfig,
 } from './schemas.js';

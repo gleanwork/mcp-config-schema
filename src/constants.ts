@@ -13,6 +13,7 @@ export const CLIENT = {
   CHATGPT: 'chatgpt',
   JUNIE: 'junie',
   JETBRAINS: 'jetbrains',
+  GEMINI: 'gemini',
 } as const;
 
 /**
@@ -30,6 +31,7 @@ export const CLIENT_DISPLAY_NAME = {
   CHATGPT: 'ChatGPT',
   JUNIE: 'Junie (JetBrains)',
   JETBRAINS: 'JetBrains AI Assistant',
+  GEMINI: 'Gemini CLI',
 } as const;
 
 /**
@@ -58,6 +60,7 @@ export function getDisplayName(clientId: ClientIdConstant): ClientDisplayName {
     [CLIENT.CHATGPT]: CLIENT_DISPLAY_NAME.CHATGPT,
     [CLIENT.JUNIE]: CLIENT_DISPLAY_NAME.JUNIE,
     [CLIENT.JETBRAINS]: CLIENT_DISPLAY_NAME.JETBRAINS,
+    [CLIENT.GEMINI]: CLIENT_DISPLAY_NAME.GEMINI,
   };
   return mapping[clientId];
 }

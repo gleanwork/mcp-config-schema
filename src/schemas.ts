@@ -12,6 +12,7 @@ export const ClientIdSchema = z.enum([
   'codex',
   'junie',
   'jetbrains',
+  'gemini',
 ]);
 
 export const ServerTypeSchema = z.enum(['http', 'stdio']);
@@ -108,6 +109,18 @@ export const HttpServerConfigAltSchema = z.object({
   serverUrl: z.string().url(), // Windsurf uses 'serverUrl' instead of 'url'
 });
 
+export const GeminiHttpServerConfigSchema = z.object({
+  httpUrl: z.string().url(), // Gemini CLI uses 'httpUrl' for HTTP streaming (not 'url' which is for SSE)
+  headers: z.record(z.string(), z.string()).optional(),
+});
+
+export const GeminiStdioServerConfigSchema = z.object({
+  command: z.string(),
+  args: z.array(z.string()),
+  env: z.record(z.string(), z.string()).optional(),
+  // Gemini doesn't use 'type' property
+});
+
 export const StdioServerConfigSchema = z.object({
   type: z.literal('stdio').optional(), // Some clients don't include type property
   command: z.string(),
@@ -193,6 +206,15 @@ export const CodexConfigSchema = z.object({
   mcp_servers: z.record(z.string(), CodexServerConfigSchema),
 });
 
+export const GeminiServerConfigSchema = z.union([
+  GeminiHttpServerConfigSchema,
+  GeminiStdioServerConfigSchema,
+]);
+
+export const GeminiConfigSchema = z.object({
+  mcpServers: z.record(z.string(), GeminiServerConfigSchema),
+});
+
 export function validateGeneratedConfig(
   config: unknown,
   clientId: string
@@ -208,6 +230,9 @@ export function validateGeneratedConfig(
       break;
     case 'codex':
       schema = CodexConfigSchema;
+      break;
+    case 'gemini':
+      schema = GeminiConfigSchema;
       break;
     case 'claude-code':
     case 'claude-desktop':
@@ -242,7 +267,9 @@ export const validateMcpServersConfig = McpServersConfigSchema.parse;
 export const validateVsCodeConfig = VsCodeConfigSchema.parse;
 export const validateGooseConfig = GooseConfigSchema.parse;
 export const validateCodexConfig = CodexConfigSchema.parse;
+export const validateGeminiConfig = GeminiConfigSchema.parse;
 export const safeValidateMcpServersConfig = McpServersConfigSchema.safeParse;
 export const safeValidateVsCodeConfig = VsCodeConfigSchema.safeParse;
 export const safeValidateGooseConfig = GooseConfigSchema.safeParse;
 export const safeValidateCodexConfig = CodexConfigSchema.safeParse;
+export const safeValidateGeminiConfig = GeminiConfigSchema.safeParse;
