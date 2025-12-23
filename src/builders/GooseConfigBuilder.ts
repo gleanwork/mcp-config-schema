@@ -1,8 +1,15 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPConnectionOptions } from '../types.js';
+import { MCPConnectionOptions, GooseMCPConfig, MCPServersRecord } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
-export class GooseConfigBuilder extends BaseConfigBuilder {
+function isGooseMCPConfig(config: GooseMCPConfig | MCPServersRecord): config is GooseMCPConfig {
+  return typeof config === 'object' && config !== null && 'extensions' in config;
+}
+
+/**
+ * Config builder for Goose which uses { extensions: {...} } format.
+ */
+export class GooseConfigBuilder extends BaseConfigBuilder<GooseMCPConfig> {
   protected buildLocalConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
@@ -177,13 +184,16 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
     return null;
   }
 
-  getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    // Goose uses extensions wrapper
-    if (config['extensions']) {
-      const extensions = config['extensions'] as Record<string, Record<string, unknown>>;
-      const normalized: Record<string, unknown> = {};
+  getNormalizedServersConfig(config: GooseMCPConfig | MCPServersRecord): MCPServersRecord {
+    // Use type guard to determine if this is a full wrapped config
+    const servers: MCPServersRecord = isGooseMCPConfig(config) ? config.extensions : config;
 
-      for (const [name, gooseConfig] of Object.entries(extensions)) {
+    // Normalize Goose-specific property names to standard format
+    const normalized: MCPServersRecord = {};
+
+    for (const [name, value] of Object.entries(servers)) {
+      const gooseConfig = value as Record<string, unknown>;
+      if (typeof gooseConfig === 'object' && gooseConfig !== null) {
         normalized[name] = {
           type: gooseConfig.type === 'streamable_http' ? 'http' : gooseConfig.type,
           command: gooseConfig.cmd,
@@ -191,24 +201,6 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
           env: gooseConfig.envs,
           url: gooseConfig.uri,
           headers: gooseConfig.headers,
-        };
-      }
-
-      return normalized;
-    }
-
-    // Check if it's already flat (no wrapper)
-    const normalized: Record<string, unknown> = {};
-    for (const [name, gooseConfig] of Object.entries(config)) {
-      if (typeof gooseConfig === 'object' && gooseConfig !== null) {
-        const gc = gooseConfig as Record<string, unknown>;
-        normalized[name] = {
-          type: gc.type === 'streamable_http' ? 'http' : gc.type,
-          command: gc.cmd,
-          args: gc.args,
-          env: gc.envs,
-          url: gc.uri,
-          headers: gc.headers,
         };
       }
     }

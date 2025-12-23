@@ -1,7 +1,11 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPConnectionOptions } from '../types.js';
+import { MCPConnectionOptions, StandardMCPConfig, MCPServersRecord } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 import { CLIENT } from '../constants.js';
+
+function isStandardMCPConfig(config: StandardMCPConfig | MCPServersRecord): config is StandardMCPConfig {
+  return typeof config === 'object' && config !== null && 'mcpServers' in config;
+}
 
 // Clients that can use configure-mcp-server
 const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
@@ -14,7 +18,11 @@ const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
   CLIENT.JUNIE,
 ];
 
-export class GenericConfigBuilder extends BaseConfigBuilder {
+/**
+ * Generic config builder for clients using the standard { mcpServers: {...} } format.
+ * Used by: Claude Desktop, Windsurf, JetBrains, Junie, Gemini, ChatGPT, Claude Teams Enterprise
+ */
+export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
   protected buildLocalConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
@@ -184,18 +192,12 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     return null;
   }
 
-  getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    const { serversPropertyName } = this.config.configStructure;
-
-    if (config[serversPropertyName]) {
-      return config[serversPropertyName] as Record<string, unknown>;
+  getNormalizedServersConfig(config: StandardMCPConfig | MCPServersRecord): MCPServersRecord {
+    // Use type guard to narrow the union
+    if (isStandardMCPConfig(config)) {
+      return config.mcpServers;
     }
-
-    const firstKey = Object.keys(config)[0];
-    if (firstKey && typeof config[firstKey] === 'object') {
-      return config;
-    }
-
-    return {};
+    // Flat config from includeRootObject: false - already the servers record
+    return config;
   }
 }

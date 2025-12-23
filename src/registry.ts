@@ -3,6 +3,7 @@ import {
   ClientId,
   Platform,
   RegistryOptions,
+  ConfigForClient,
   safeValidateClientConfig,
 } from './types.js';
 
@@ -205,10 +206,25 @@ export class MCPConfigRegistry {
 
   /**
    * Create a configuration builder for a specific client.
+   *
+   * The returned builder is typed based on the client ID:
+   * - 'vscode' returns a builder producing VSCodeMCPConfig
+   * - 'goose' returns a builder producing GooseMCPConfig
+   * - 'codex' returns a builder producing CodexMCPConfig
+   * - All others return a builder producing StandardMCPConfig
+   *
+   * @typeParam C - The client ID type (inferred from clientId parameter)
    * @param clientId - The client ID to create a builder for
-   * @returns A configured builder instance
+   * @returns A typed builder instance
+   *
+   * @example
+   * ```typescript
+   * const vsCodeBuilder = registry.createBuilder('vscode');
+   * const config = vsCodeBuilder.buildConfiguration(options);
+   * config.servers; // ✓ Typed as MCPServersRecord
+   * ```
    */
-  createBuilder(clientId: ClientId): BaseConfigBuilder {
+  createBuilder<C extends ClientId>(clientId: C): BaseConfigBuilder<ConfigForClient<C>> {
     const config = this.getConfig(clientId);
     if (!config) {
       throw new Error(`Unknown client: ${clientId}`);
@@ -226,6 +242,7 @@ export class MCPConfigRegistry {
     // Inject registry options into the builder
     builder.setRegistryOptions(this.options);
 
-    return builder;
+    // Internal cast: runtime builder selection is correct, we're just informing TypeScript
+    return builder as BaseConfigBuilder<ConfigForClient<C>>;
   }
 }

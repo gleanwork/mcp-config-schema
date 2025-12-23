@@ -76,18 +76,5 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
     return null;
   }
 
-  getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    const { serversPropertyName } = this.config.configStructure;
-
-    if (config[serversPropertyName]) {
-      return config[serversPropertyName] as Record<string, unknown>;
-    }
-
-    const firstKey = Object.keys(config)[0];
-    if (firstKey && typeof config[firstKey] === 'object') {
-      return config;
-    }
-
-    return {};
-  }
+  // Inherits getNormalizedServersConfig from GenericConfigBuilder
 }

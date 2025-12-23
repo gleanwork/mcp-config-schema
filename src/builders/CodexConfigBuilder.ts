@@ -1,8 +1,15 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPConnectionOptions } from '../types.js';
+import { MCPConnectionOptions, CodexMCPConfig, MCPServersRecord } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
-export class CodexConfigBuilder extends BaseConfigBuilder {
+function isCodexMCPConfig(config: CodexMCPConfig | MCPServersRecord): config is CodexMCPConfig {
+  return typeof config === 'object' && config !== null && 'mcp_servers' in config;
+}
+
+/**
+ * Config builder for Codex which uses { mcp_servers: {...} } format (snake_case).
+ */
+export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
   protected buildLocalConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
@@ -151,36 +158,22 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
     return command;
   }
 
-  getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    // Codex uses mcp_servers wrapper
-    if (config['mcp_servers']) {
-      const mcpServers = config['mcp_servers'] as Record<string, Record<string, unknown>>;
-      const normalized: Record<string, unknown> = {};
+  getNormalizedServersConfig(config: CodexMCPConfig | MCPServersRecord): MCPServersRecord {
+    // Use type guard to determine if this is a full wrapped config
+    const servers: MCPServersRecord = isCodexMCPConfig(config) ? config.mcp_servers : config;
 
-      for (const [name, codexConfig] of Object.entries(mcpServers)) {
+    // Normalize Codex-specific property names to standard format
+    const normalized: MCPServersRecord = {};
+
+    for (const [name, value] of Object.entries(servers)) {
+      const codexConfig = value as Record<string, unknown>;
+      if (typeof codexConfig === 'object' && codexConfig !== null) {
         normalized[name] = {
           command: codexConfig.command,
           args: codexConfig.args,
           env: codexConfig.env,
           url: codexConfig.url,
           headers: codexConfig.http_headers,
-        };
-      }
-
-      return normalized;
-    }
-
-    // Check if it's already flat (no wrapper)
-    const normalized: Record<string, unknown> = {};
-    for (const [name, codexConfig] of Object.entries(config)) {
-      if (typeof codexConfig === 'object' && codexConfig !== null) {
-        const cc = codexConfig as Record<string, unknown>;
-        normalized[name] = {
-          command: cc.command,
-          args: cc.args,
-          env: cc.env,
-          url: cc.url,
-          headers: cc.http_headers,
         };
       }
     }

@@ -1,6 +1,8 @@
 import {
   MCPClientConfig,
   MCPConnectionOptions,
+  MCPConfig,
+  MCPServersRecord,
   Platform,
   RegistryOptions,
   validateConnectionOptions,
@@ -16,7 +18,13 @@ function isNodeEnvironment(): boolean {
   );
 }
 
-export abstract class BaseConfigBuilder {
+/**
+ * Abstract base class for building MCP client configurations.
+ *
+ * @typeParam TConfig - The config output type (e.g., StandardMCPConfig, VSCodeMCPConfig).
+ *                      Defaults to MCPConfig union for backwards compatibility.
+ */
+export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
   protected platform: Platform;
   protected registryOptions: RegistryOptions = {};
 
@@ -123,7 +131,17 @@ export abstract class BaseConfigBuilder {
     return 'darwin';
   }
 
-  buildConfiguration(options: MCPConnectionOptions): Record<string, unknown> {
+  /**
+   * Build a configuration object for this client.
+   *
+   * @param options - Connection options specifying transport type, URLs, credentials, etc.
+   * @returns When includeRootObject is false, returns MCPServersRecord (flat servers).
+   *          Otherwise returns TConfig (full wrapped config).
+   */
+  buildConfiguration(options: MCPConnectionOptions & { includeRootObject: false }): MCPServersRecord;
+  buildConfiguration(options: MCPConnectionOptions & { includeRootObject?: true }): TConfig;
+  buildConfiguration(options: MCPConnectionOptions): TConfig | MCPServersRecord;
+  buildConfiguration(options: MCPConnectionOptions): TConfig | MCPServersRecord {
     if (!this.config.userConfigurable) {
       throw new Error(
         `${this.config.displayName} does not support local configuration. ` +
@@ -134,26 +152,33 @@ export abstract class BaseConfigBuilder {
     const validatedOptions = validateConnectionOptions(options);
     const includeRootObject = validatedOptions.includeRootObject !== false;
 
-    let configObj: Record<string, unknown> = {};
+    let result: Record<string, unknown> = {};
 
     if (validatedOptions.transport === 'stdio') {
-      configObj = this.buildLocalConfig(validatedOptions, includeRootObject);
+      result = this.buildLocalConfig(validatedOptions, includeRootObject);
     } else if (validatedOptions.transport === 'http') {
-      configObj = this.buildRemoteConfig(validatedOptions, includeRootObject);
+      result = this.buildRemoteConfig(validatedOptions, includeRootObject);
     } else {
       throw new Error(`Invalid transport: ${validatedOptions.transport}`);
     }
 
-    return configObj;
+    // Type assertion is safe: subclasses ensure correct shape based on includeRootObject
+    return result as TConfig | MCPServersRecord;
   }
 
-  toString(config: Record<string, unknown>): string {
+  /**
+   * Convert a configuration object to a string (JSON, YAML, or TOML).
+   * @param config - The configuration object to serialize (full or partial).
+   * @returns The serialized configuration string.
+   */
+  toString(config: TConfig | MCPServersRecord): string {
     if (this.config.configFormat === 'json') {
       return JSON.stringify(config, null, 2);
     } else if (this.config.configFormat === 'yaml') {
       return yaml.dump(config);
     } else if (this.config.configFormat === 'toml') {
-      return TOML.stringify(config);
+      // Cast through unknown for TOML serialization since interfaces lack index signatures
+      return TOML.stringify(config as unknown as Record<string, unknown>);
     }
 
     throw new Error(`Unsupported config format: ${this.config.configFormat}`);
@@ -212,7 +237,16 @@ export abstract class BaseConfigBuilder {
     }
   }
 
-  abstract getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown>;
+  /**
+   * Extract and normalize the servers configuration from a config object.
+   * Subclasses implement this to handle their specific config shapes.
+   *
+   * @param config - Either a full config (TConfig) or a flat servers record (MCPServersRecord).
+   *                 Full configs come from buildConfiguration() with includeRootObject: true (default).
+   *                 Flat configs come from buildConfiguration() with includeRootObject: false.
+   * @returns A normalized record of server configurations.
+   */
+  abstract getNormalizedServersConfig(config: TConfig | MCPServersRecord): MCPServersRecord;
 
   getConfigPath(): string {
     if (typeof process === 'undefined' || !process.platform) {

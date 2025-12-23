@@ -1,8 +1,15 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPConnectionOptions } from '../types.js';
+import { MCPConnectionOptions, VSCodeMCPConfig, MCPServersRecord } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
-export class VSCodeConfigBuilder extends BaseConfigBuilder {
+function isVSCodeMCPConfig(config: VSCodeMCPConfig | MCPServersRecord): config is VSCodeMCPConfig {
+  return typeof config === 'object' && config !== null && 'servers' in config;
+}
+
+/**
+ * Config builder for VS Code which uses { servers: {...} } format.
+ */
+export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
   protected buildLocalConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
@@ -243,21 +250,12 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     return `code --add-mcp '${escapedConfig}'`;
   }
 
-  getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    const { serversPropertyName } = this.config.configStructure;
-
-    // Check for different wrapper structures
-    if (config[serversPropertyName]) {
-      return config[serversPropertyName] as Record<string, unknown>;
+  getNormalizedServersConfig(config: VSCodeMCPConfig | MCPServersRecord): MCPServersRecord {
+    // Use type guard to narrow the union
+    if (isVSCodeMCPConfig(config)) {
+      return config.servers;
     }
-
-    // Check if it's already flat (no wrapper)
-    const firstKey = Object.keys(config)[0];
-    if (firstKey && typeof config[firstKey] === 'object') {
-      // Assume it's a flat server config
-      return config;
-    }
-
-    return {};
+    // Flat config from includeRootObject: false - already the servers record
+    return config;
   }
 }
