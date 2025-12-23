@@ -138,7 +138,9 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
    * @returns When includeRootObject is false, returns MCPServersRecord (flat servers).
    *          Otherwise returns TConfig (full wrapped config).
    */
-  buildConfiguration(options: MCPConnectionOptions & { includeRootObject: false }): MCPServersRecord;
+  buildConfiguration(
+    options: MCPConnectionOptions & { includeRootObject: false }
+  ): MCPServersRecord;
   buildConfiguration(options: MCPConnectionOptions & { includeRootObject?: true }): TConfig;
   buildConfiguration(options: MCPConnectionOptions): TConfig | MCPServersRecord;
   buildConfiguration(options: MCPConnectionOptions): TConfig | MCPServersRecord {

@@ -3,7 +3,9 @@ import { MCPConnectionOptions, StandardMCPConfig, MCPServersRecord } from '../ty
 import { buildMcpServerName } from '../server-name.js';
 import { CLIENT } from '../constants.js';
 
-function isStandardMCPConfig(config: StandardMCPConfig | MCPServersRecord): config is StandardMCPConfig {
+function isStandardMCPConfig(
+  config: StandardMCPConfig | MCPServersRecord
+): config is StandardMCPConfig {
   return typeof config === 'object' && config !== null && 'mcpServers' in config;
 }
 
