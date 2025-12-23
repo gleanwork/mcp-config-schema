@@ -15,8 +15,28 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Registry options for Glean (used for stdio transport tests)
+// Note: The new vendor-neutral API only needs serverPackage and cliPackage.
+// Environment variables are passed directly via the `env` option in MCPConnectionOptions.
+const GLEAN_REGISTRY_OPTIONS = {
+  serverPackage: '@gleanwork/local-mcp-server',
+  cliPackage: '@gleanwork/configure-mcp-server',
+};
+
+// Helper to create Glean environment variables (for tests that need stdio transport)
+const createGleanEnv = (instance: string, token?: string) => ({
+  GLEAN_INSTANCE: instance,
+  ...(token && { GLEAN_API_TOKEN: token }),
+});
+
+const createGleanUrlEnv = (url: string, token?: string) => ({
+  GLEAN_URL: url,
+  ...(token && { GLEAN_API_TOKEN: token }),
+});
+
 describe('ConfigBuilder', () => {
-  const registry = new MCPConfigRegistry();
+  // Registry with Glean config for all tests
+  const registry = new MCPConfigRegistry(GLEAN_REGISTRY_OPTIONS);
 
   describe('buildCommand', () => {
     it('generates VS Code command with remote server', () => {
@@ -25,7 +45,7 @@ describe('ConfigBuilder', () => {
         transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
-        apiToken: 'test-token',
+        headers: { Authorization: 'Bearer test-token' },
       });
 
       expect(command).toMatchInlineSnapshot(
@@ -38,8 +58,7 @@ describe('ConfigBuilder', () => {
       const command = vscodeBuilder.buildCommand({
         transport: 'stdio',
         serverName: 'local-test',
-        instance: 'test-instance',
-        apiToken: 'test-token',
+        env: createGleanEnv('test-instance', 'test-token'),
       });
 
       expect(command).toMatchInlineSnapshot(
@@ -53,7 +72,7 @@ describe('ConfigBuilder', () => {
         transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
-        apiToken: 'test-token',
+        headers: { Authorization: 'Bearer test-token' },
       });
 
       expect(command).toMatchInlineSnapshot(
@@ -65,9 +84,8 @@ describe('ConfigBuilder', () => {
       const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const command = claudeBuilder.buildCommand({
         transport: 'stdio',
-        instance: 'test-instance',
         serverName: 'local-test',
-        apiToken: 'test-token',
+        env: createGleanEnv('test-instance', 'test-token'),
       });
 
       expect(command).toMatchInlineSnapshot(
@@ -81,26 +99,23 @@ describe('ConfigBuilder', () => {
         transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
-        apiToken: 'test-token',
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client cursor --token test-token"`
+        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client cursor"`
       );
     });
 
-    it('generates Cursor command with local server', () => {
+    it('generates Cursor command with local server returns null', () => {
       const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
       const command = cursorBuilder.buildCommand({
         transport: 'stdio',
-        instance: 'test-instance',
         serverName: 'local-test',
-        apiToken: 'test-token',
+        env: createGleanEnv('test-instance', 'test-token'),
       });
 
-      expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server local --instance test-instance --client cursor --token test-token"`
-      );
+      // Local commands return null as they are CLI-tool specific
+      expect(command).toBeNull();
     });
 
     it('generates Junie command with remote server', () => {
@@ -109,40 +124,23 @@ describe('ConfigBuilder', () => {
         transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
-        apiToken: 'test-token',
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client junie --token test-token"`
+        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client junie"`
       );
     });
 
-    it('generates Junie command with local server', () => {
+    it('generates Junie command with local server returns null', () => {
       const junieBuilder = registry.createBuilder(CLIENT.JUNIE);
       const command = junieBuilder.buildCommand({
         transport: 'stdio',
-        instance: 'test-instance',
         serverName: 'local-test',
-        apiToken: 'test-token',
+        env: createGleanEnv('test-instance', 'test-token'),
       });
 
-      expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server local --instance test-instance --client junie --token test-token"`
-      );
-    });
-
-    it('handles URL-style instance for local config', () => {
-      const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
-      const command = cursorBuilder.buildCommand({
-        transport: 'stdio',
-        instance: 'https://test-instance.glean.com',
-        serverName: 'local-test',
-        apiToken: 'test-token',
-      });
-
-      expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server local --url https://test-instance.glean.com --client cursor --token test-token"`
-      );
+      // Local commands return null as they are CLI-tool specific
+      expect(command).toBeNull();
     });
 
     it('throws for clients without local config support', () => {
@@ -158,7 +156,7 @@ describe('ConfigBuilder', () => {
         transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: "test's-server",
-        apiToken: 'test-token',
+        headers: { Authorization: 'Bearer test-token' },
       });
 
       expect(command).toMatchInlineSnapshot(
@@ -166,43 +164,37 @@ describe('ConfigBuilder', () => {
       );
     });
 
-    it('uses configureMcpServerVersion when provided for Cursor', () => {
+    it('uses cliPackage for Cursor remote commands', () => {
       const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
       const command = cursorBuilder.buildCommand({
         transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
-        apiToken: 'test-token',
-        configureMcpServerVersion: 'beta',
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server@beta remote --url https://example.com/mcp/default --client cursor --token test-token"`
+        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client cursor"`
       );
     });
 
-    it('uses configureMcpServerVersion for local commands', () => {
+    it('local commands return null for generic CLI clients', () => {
+      // Local commands return null as they are CLI-tool specific
       const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
       const command = cursorBuilder.buildCommand({
         transport: 'stdio',
-        instance: 'test-instance',
         serverName: 'local-test',
-        apiToken: 'test-token',
-        configureMcpServerVersion: '1.0.0-beta.3',
+        env: createGleanEnv('test-instance', 'test-token'),
       });
 
-      expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server@1.0.0-beta.3 local --instance test-instance --client cursor --token test-token"`
-      );
+      expect(command).toBeNull();
     });
 
     it('Claude Code native command ignores configureMcpServerVersion for local', () => {
       const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const command = claudeBuilder.buildCommand({
         transport: 'stdio',
-        instance: 'test-instance',
         serverName: 'local-test',
-        configureMcpServerVersion: 'latest',
+        env: { GLEAN_INSTANCE: 'test-instance' },
       });
 
       // Claude Code uses native command, so configureMcpServerVersion doesn't apply
@@ -212,16 +204,17 @@ describe('ConfigBuilder', () => {
     });
 
     it('uses configureMcpServerVersion for Goose', () => {
+      // Note: configureMcpServerVersion is no longer used - the CLI package version
+      // is determined by the cliPackage option in registry options
       const gooseBuilder = registry.createBuilder(CLIENT.GOOSE);
       const command = gooseBuilder.buildCommand({
         transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
-        configureMcpServerVersion: '2.0.0',
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server@2.0.0 remote --url https://example.com/mcp/default --client goose"`
+        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client goose"`
       );
     });
 
@@ -231,9 +224,11 @@ describe('ConfigBuilder', () => {
         transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
         serverName: 'test-server',
-        apiToken: 'test-token',
+        headers: { Authorization: 'Bearer test-token' },
+        env: { GLEAN_API_TOKEN: 'test-token' },
       });
 
+      // Codex CLI uses bearer-token-env-var to reference the env var containing the token
       expect(command).toMatchInlineSnapshot(
         `"codex mcp add --url https://example.com/mcp/default --bearer-token-env-var GLEAN_API_TOKEN glean_test-server"`
       );
@@ -243,9 +238,8 @@ describe('ConfigBuilder', () => {
       const codexBuilder = registry.createBuilder(CLIENT.CODEX);
       const command = codexBuilder.buildCommand({
         transport: 'stdio',
-        instance: 'test-instance',
         serverName: 'local-test',
-        apiToken: 'test-token',
+        env: createGleanEnv('test-instance', 'test-token'),
       });
 
       expect(command).toMatchInlineSnapshot(
@@ -260,7 +254,7 @@ describe('ConfigBuilder', () => {
           transport: 'http',
           serverUrl: 'https://example.com/mcp/default',
           serverName: 'test-server',
-          apiToken: 'test-token',
+          headers: { Authorization: 'Bearer test-token' },
           productName: 'acme',
         });
         expect(command).toMatchInlineSnapshot(
@@ -273,9 +267,8 @@ describe('ConfigBuilder', () => {
         const command = vscodeBuilder.buildCommand({
           transport: 'stdio',
           serverName: 'local-test',
-          instance: 'test-instance',
-          apiToken: 'test-token',
           productName: 'corp',
+          env: createGleanEnv('test-instance', 'test-token'),
         });
         expect(command).toMatchInlineSnapshot(
           `"code --add-mcp '{"name":"corp_local-test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"test-instance","GLEAN_API_TOKEN":"test-token"}}'"`
@@ -287,7 +280,6 @@ describe('ConfigBuilder', () => {
         const config = cursorBuilder.buildConfiguration({
           transport: 'http',
           serverUrl: 'https://example.com/mcp/analytics',
-          apiToken: 'test-token',
           productName: 'mycompany',
         });
         expect(Object.keys(config.mcpServers as Record<string, unknown>)[0]).toBe(
@@ -334,37 +326,38 @@ describe('ConfigBuilder', () => {
       });
 
       it('handles missing serverUrl for remote', () => {
+        // Without registry options, buildCommand returns null for stdio-based commands
         const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
         const command = cursorBuilder.buildCommand({
           transport: 'http',
           serverName: 'test',
         });
-        expect(command).toMatchInlineSnapshot(
-          `"npx -y @gleanwork/configure-mcp-server remote --url https://[instance]-be.glean.com/mcp/[endpoint] --client cursor"`
-        );
+        // Returns null because serverUrl is required for http transport
+        expect(command).toBe(null);
       });
 
-      it('handles missing instance for local', () => {
+      it('handles missing env for local', () => {
         const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
         const command = vscodeBuilder.buildCommand({
           transport: 'stdio',
           serverName: 'test',
         });
+        // No env vars when none are provided
         expect(command).toMatchInlineSnapshot(
-          `"code --add-mcp '{"name":"glean_test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"[instance]"}}'"`
+          `"code --add-mcp '{"name":"glean_test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"]}'"`
         );
       });
 
       it('handles empty string serverUrl', () => {
+        // Empty string serverUrl means no URL provided, so should return null
         const gooseBuilder = registry.createBuilder(CLIENT.GOOSE);
         const command = gooseBuilder.buildCommand({
           transport: 'http',
           serverUrl: '',
           serverName: 'test',
         });
-        expect(command).toMatchInlineSnapshot(
-          `"npx -y @gleanwork/configure-mcp-server remote --url https://[instance]-be.glean.com/mcp/[endpoint] --client goose"`
-        );
+        // Returns null because serverUrl is required for http transport
+        expect(command).toBe(null);
       });
 
       it('handles claude-teams-enterprise client', () => {
@@ -411,17 +404,10 @@ describe('ConfigBuilder', () => {
       });
 
       it('handles all supported clients for remote', () => {
-        const clients = [
-          CLIENT.CLAUDE_CODE,
-          CLIENT.CODEX,
-          CLIENT.CURSOR,
-          CLIENT.VSCODE,
-          CLIENT.WINDSURF,
-          CLIENT.GOOSE,
-          CLIENT.CLAUDE_DESKTOP,
-        ];
+        // Only VS Code and Claude Code have native HTTP commands that don't require cliPackage
+        const nativeHttpClients = [CLIENT.CLAUDE_CODE, CLIENT.VSCODE];
 
-        clients.forEach((clientId) => {
+        nativeHttpClients.forEach((clientId) => {
           const command = buildCommand(clientId, {
             transport: 'http',
             serverUrl: 'https://example.com/mcp',
@@ -430,9 +416,24 @@ describe('ConfigBuilder', () => {
           expect(command).not.toBe(null);
           expect(command).toContain('example.com/mcp');
         });
+
+        // Clients that need cliPackage will return null without registry options
+        const cliPackageClients = [CLIENT.CURSOR, CLIENT.WINDSURF, CLIENT.GOOSE, CLIENT.CLAUDE_DESKTOP];
+
+        cliPackageClients.forEach((clientId) => {
+          const command = buildCommand(clientId, {
+            transport: 'http',
+            serverUrl: 'https://example.com/mcp',
+            serverName: 'test',
+          });
+          // Returns null because cliPackage is not configured
+          expect(command).toBe(null);
+        });
       });
 
       it('handles all supported clients for local', () => {
+        // Without registry options, buildCommand returns null for stdio transport
+        // because serverPackage is not configured
         const clients = [
           CLIENT.CLAUDE_CODE,
           CLIENT.CODEX,
@@ -449,8 +450,8 @@ describe('ConfigBuilder', () => {
             instance: 'my-instance',
             serverName: 'test',
           });
-          expect(command).not.toBe(null);
-          expect(command).toContain('my-instance');
+          // Returns null because serverPackage is not configured
+          expect(command).toBe(null);
         });
       });
     });
@@ -508,8 +509,7 @@ describe('ConfigBuilder', () => {
       const config = {
         transport: 'stdio' as const,
         serverName: 'local-test',
-        instance: 'test-instance',
-        apiToken: 'test-token',
+        env: createGleanEnv('test-instance', 'test-token'),
       };
       const url = vscodeBuilder.buildOneClickUrl!(config);
 
@@ -684,18 +684,18 @@ describe('ConfigBuilder', () => {
       `);
     });
 
-    it('should add bearer token to Gemini CLI HTTP config', () => {
+    it('should add headers to Gemini CLI HTTP config', () => {
       const builder = registry.createBuilder(CLIENT.GEMINI);
       const result = builder.buildConfiguration({
         transport: 'http',
         serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
-        apiToken: 'test-token-123',
+        headers: { Authorization: 'Bearer test-token-123' },
       });
 
       const validation = validateGeneratedConfig(result, 'gemini');
       expect(validation.success).toBe(true);
 
-      // Should include headers with Authorization when token is provided
+      // Should include headers when provided
       expect(result).toMatchInlineSnapshot(`
         {
           "mcpServers": {
@@ -714,8 +714,7 @@ describe('ConfigBuilder', () => {
       const builder = registry.createBuilder(CLIENT.GEMINI);
       const result = builder.buildConfiguration({
         transport: 'stdio',
-        instance: 'test-instance',
-        apiToken: 'test-token',
+        env: createGleanEnv('test-instance', 'test-token'),
       });
 
       const validation = validateGeneratedConfig(result, 'gemini');
@@ -767,12 +766,12 @@ describe('ConfigBuilder', () => {
       `);
     });
 
-    it('should add bearer token to Goose HTTP config', () => {
+    it('should add headers to Goose HTTP config', () => {
       const builder = registry.createBuilder(CLIENT.GOOSE);
       const result = builder.buildConfiguration({
         transport: 'http',
         serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
-        apiToken: 'test-token-123',
+        headers: { Authorization: 'Bearer test-token-123' },
       });
 
       const validation = validateGeneratedConfig(result, 'goose');
@@ -814,12 +813,12 @@ describe('ConfigBuilder', () => {
       `);
     });
 
-    it('should add bearer token to Codex HTTP config', () => {
+    it('should add headers to Codex HTTP config', () => {
       const builder = registry.createBuilder(CLIENT.CODEX);
       const result = builder.buildConfiguration({
         transport: 'http',
         serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
-        apiToken: 'test-token-123',
+        headers: { Authorization: 'Bearer test-token-123' },
       });
 
       const validation = validateGeneratedConfig(result, 'codex');
@@ -842,8 +841,7 @@ describe('ConfigBuilder', () => {
       const builder = registry.createBuilder(CLIENT.CODEX);
       const result = builder.buildConfiguration({
         transport: 'stdio',
-        instance: 'test-instance',
-        apiToken: 'test-token',
+        env: createGleanEnv('test-instance', 'test-token'),
       });
 
       const validation = validateGeneratedConfig(result, 'codex');
@@ -866,8 +864,10 @@ describe('ConfigBuilder', () => {
   describe('Local configurations', () => {
     const localConfig = {
       transport: 'stdio' as const,
-      instance: 'my-company',
-      apiToken: 'test-token',
+      env: {
+        GLEAN_INSTANCE: 'my-company',
+        GLEAN_API_TOKEN: 'test-token',
+      },
     };
 
     it('should generate correct local config for Claude Code', () => {
@@ -1156,12 +1156,12 @@ describe('ConfigBuilder', () => {
       `);
     });
 
-    it('should add bearer token to Windsurf HTTP config', () => {
+    it('should add headers to Windsurf HTTP config', () => {
       const builder = registry.createBuilder(CLIENT.WINDSURF);
       const result = builder.buildConfiguration({
         transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
-        apiToken: 'test-token-123',
+        headers: { Authorization: 'Bearer test-token-123' },
       });
 
       const validation = validateGeneratedConfig(result, 'windsurf');
@@ -1205,12 +1205,11 @@ describe('ConfigBuilder', () => {
       `);
     });
 
-    it('should handle URL-style instance for local config', () => {
+    it('should handle URL-style env for local config', () => {
       const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const config = builder.buildConfiguration({
         transport: 'stdio',
-        instance: 'https://my-company.glean.com',
-        apiToken: 'test-token',
+        env: createGleanUrlEnv('https://my-company.glean.com', 'test-token'),
       });
 
       const parsed = config;
@@ -1450,10 +1449,12 @@ describe('ConfigBuilder', () => {
     describe('Local configurations', () => {
       const localConfig = {
         transport: 'stdio' as const,
-        instance: 'my-company',
-        apiToken: 'test-token',
         serverName: 'glean_local',
         includeRootObject: false,
+        env: {
+          GLEAN_INSTANCE: 'my-company',
+          GLEAN_API_TOKEN: 'test-token',
+        },
       };
 
       it('should generate partial local config for Claude Code', () => {
@@ -1494,14 +1495,13 @@ describe('ConfigBuilder', () => {
         expect(result).not.toHaveProperty('mcpServers');
       });
 
-      it('should handle URL-style instance with partial config', () => {
+      it('should handle URL-style env with partial config', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const result = builder.buildConfiguration({
           transport: 'stdio',
-          instance: 'https://my-company.glean.com',
-          apiToken: 'test-token',
           serverName: 'glean_custom',
           includeRootObject: false,
+          env: createGleanUrlEnv('https://my-company.glean.com', 'test-token'),
         });
 
         expect(result).toEqual({

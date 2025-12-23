@@ -1,4 +1,10 @@
-import { MCPClientConfig, ClientId, Platform, safeValidateClientConfig } from './types.js';
+import {
+  MCPClientConfig,
+  ClientId,
+  Platform,
+  RegistryOptions,
+  safeValidateClientConfig,
+} from './types.js';
 
 import { BaseConfigBuilder } from './builders/BaseConfigBuilder.js';
 import { GenericConfigBuilder } from './builders/GenericConfigBuilder.js';
@@ -38,8 +44,14 @@ export class MCPConfigRegistry {
   private configs: Map<ClientId, MCPClientConfig> = new Map();
   private builderFactories: Map<ClientId, new (config: MCPClientConfig) => BaseConfigBuilder> =
     new Map();
+  private options: RegistryOptions;
 
-  constructor() {
+  /**
+   * Create a new MCP configuration registry.
+   * @param options - Optional configuration for server packages, env vars, etc.
+   */
+  constructor(options: RegistryOptions = {}) {
+    this.options = options;
     this.loadConfigs();
     this.registerBuilders();
   }
@@ -191,6 +203,11 @@ export class MCPConfigRegistry {
     return config.transports.includes('stdio');
   }
 
+  /**
+   * Create a configuration builder for a specific client.
+   * @param clientId - The client ID to create a builder for
+   * @returns A configured builder instance
+   */
   createBuilder(clientId: ClientId): BaseConfigBuilder {
     const config = this.getConfig(clientId);
     if (!config) {
@@ -204,11 +221,11 @@ export class MCPConfigRegistry {
 
     // Check if we have a specific builder for this client
     const BuilderClass = this.builderFactories.get(clientId);
-    if (BuilderClass) {
-      return new BuilderClass(config);
-    }
+    const builder = BuilderClass ? new BuilderClass(config) : new GenericConfigBuilder(config);
 
-    // Fall back to GenericConfigBuilder for clients without custom builders
-    return new GenericConfigBuilder(config);
+    // Inject registry options into the builder
+    builder.setRegistryOptions(this.options);
+
+    return builder;
   }
 }

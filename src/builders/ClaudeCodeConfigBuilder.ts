@@ -1,48 +1,54 @@
 import { GenericConfigBuilder } from './GenericConfigBuilder.js';
-import { MCPServerConfig } from '../types.js';
+import { MCPConnectionOptions } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
-  protected buildRemoteCommand(serverData: MCPServerConfig): string {
-    const serverUrl = this.getServerUrl(serverData);
+  protected buildRemoteCommand(options: MCPConnectionOptions): string {
+    if (!options.serverUrl) {
+      throw new Error('Remote configuration requires serverUrl');
+    }
+
+    // Substitute URL template variables
+    const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
     const serverName = buildMcpServerName({
-      transport: serverData.transport,
-      serverUrl: serverUrl,
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      transport: options.transport,
+      serverUrl: options.serverUrl,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
-    let command = `claude mcp add ${serverName} ${serverUrl} --transport http --scope user`;
+    let command = `claude mcp add ${serverName} ${resolvedUrl} --transport http --scope user`;
 
-    if (serverData.apiToken) {
-      command += ` --header "Authorization: Bearer ${serverData.apiToken}"`;
+    // Add headers as command arguments
+    const headers = this.buildHeaders(options);
+    if (headers) {
+      for (const [key, value] of Object.entries(headers)) {
+        command += ` --header "${key}: ${value}"`;
+      }
     }
 
     return command;
   }
 
-  protected buildLocalCommand(serverData: MCPServerConfig): string {
+  protected buildLocalCommand(options: MCPConnectionOptions): string {
     const serverName = buildMcpServerName({
       transport: 'stdio',
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     let command = `claude mcp add ${serverName} --scope user`;
 
-    if (serverData.instance) {
-      if (this.isUrl(serverData.instance)) {
-        command += ` --env GLEAN_URL=${serverData.instance}`;
-      } else {
-        command += ` --env GLEAN_INSTANCE=${serverData.instance}`;
+    // Use generic env vars from options
+    const env = this.getEnvVars(options);
+    if (env) {
+      for (const [key, value] of Object.entries(env)) {
+        command += ` --env ${key}=${value}`;
       }
     }
-    if (serverData.apiToken) {
-      command += ` --env GLEAN_API_TOKEN=${serverData.apiToken}`;
-    }
 
-    command += ` -- npx -y ${this.getLocalMcpServerPackage()}`;
+    command += ` -- npx -y ${this.serverPackage}`;
 
     return command;
   }

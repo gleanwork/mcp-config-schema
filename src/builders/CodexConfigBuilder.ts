@@ -1,10 +1,10 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPServerConfig } from '../types.js';
+import { MCPConnectionOptions } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class CodexConfigBuilder extends BaseConfigBuilder {
   protected buildLocalConfig(
-    serverData: MCPServerConfig,
+    options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { stdioPropertyMapping } = this.config.configStructure;
@@ -15,35 +15,19 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
 
     const serverName = buildMcpServerName({
       transport: 'stdio',
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     const serverConfig: Record<string, unknown> = {};
 
     serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
-    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', '@gleanwork/local-mcp-server'];
+    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', this.serverPackage];
 
-    // Add environment variables if present
+    // Use generic env vars from options
     if (stdioPropertyMapping.envProperty) {
-      const env: Record<string, string> = {};
-
-      if (serverData.instance) {
-        if (
-          serverData.instance.startsWith('http://') ||
-          serverData.instance.startsWith('https://')
-        ) {
-          env.GLEAN_URL = serverData.instance;
-        } else {
-          env.GLEAN_INSTANCE = serverData.instance;
-        }
-      }
-
-      if (serverData.apiToken) {
-        env.GLEAN_API_TOKEN = serverData.apiToken;
-      }
-
-      if (Object.keys(env).length > 0) {
+      const env = this.getEnvVars(options);
+      if (env) {
         serverConfig[stdioPropertyMapping.envProperty] = env;
       }
     }
@@ -63,32 +47,34 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
   }
 
   protected buildRemoteConfig(
-    serverData: MCPServerConfig,
+    options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
-    if (!serverData.serverUrl) {
+    if (!options.serverUrl) {
       throw new Error('Remote configuration requires serverUrl');
     }
 
     const { httpPropertyMapping } = this.config.configStructure;
 
+    // Substitute URL template variables
+    const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
+
     const serverName = buildMcpServerName({
       transport: 'http',
-      serverUrl: serverData.serverUrl,
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverUrl: options.serverUrl,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     if (httpPropertyMapping && this.config.transports.includes('http')) {
       const serverConfig: Record<string, unknown> = {};
 
-      serverConfig[httpPropertyMapping.urlProperty] = serverData.serverUrl;
+      serverConfig[httpPropertyMapping.urlProperty] = resolvedUrl;
 
-      // Add bearer token via http_headers if apiToken is provided
-      if (serverData.apiToken && httpPropertyMapping.headersProperty) {
-        serverConfig[httpPropertyMapping.headersProperty] = {
-          Authorization: `Bearer ${serverData.apiToken}`,
-        };
+      // Use generic headers
+      const headers = this.buildHeaders(options);
+      if (httpPropertyMapping.headersProperty && headers) {
+        serverConfig[httpPropertyMapping.headersProperty] = headers;
       }
 
       if (!includeRootObject) {
@@ -108,22 +94,33 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
     }
   }
 
-  protected buildRemoteCommand(serverData: MCPServerConfig): string {
-    const serverUrl = this.getServerUrl(serverData);
+  protected buildRemoteCommand(options: MCPConnectionOptions): string {
+    if (!options.serverUrl) {
+      throw new Error('Remote configuration requires serverUrl');
+    }
+
+    // Substitute URL template variables
+    const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
+
     const serverName = buildMcpServerName({
       transport: 'http',
-      serverUrl: serverUrl,
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverUrl: options.serverUrl,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
-    let command = `codex mcp add --url ${serverUrl}`;
+    let command = `codex mcp add --url ${resolvedUrl}`;
 
-    if (serverData.apiToken) {
-      // For Codex, we pass the bearer token via an environment variable
-      // The user would need to set this env var before running the command
-      // Using a standard name like GLEAN_API_TOKEN
-      command += ` --bearer-token-env-var GLEAN_API_TOKEN`;
+    // For Codex CLI, if headers are provided, we need to find the token env var
+    // This is a simplified approach - for full control, use configuration files
+    const headers = this.buildHeaders(options);
+    if (headers && headers['Authorization']) {
+      // Find the first env var that might contain the token
+      const env = this.getEnvVars(options);
+      const tokenEnvVar = env && Object.keys(env).find((k) => k.toLowerCase().includes('token'));
+      if (tokenEnvVar) {
+        command += ` --bearer-token-env-var ${tokenEnvVar}`;
+      }
     }
 
     command += ` ${serverName}`;
@@ -131,29 +128,25 @@ export class CodexConfigBuilder extends BaseConfigBuilder {
     return command;
   }
 
-  protected buildLocalCommand(serverData: MCPServerConfig): string {
+  protected buildLocalCommand(options: MCPConnectionOptions): string {
     const serverName = buildMcpServerName({
       transport: 'stdio',
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     // Format: codex mcp add <server-name> --env VAR1=VALUE1 --env VAR2=VALUE2 -- <stdio server-command>
     let command = `codex mcp add ${serverName}`;
 
-    if (serverData.instance) {
-      if (this.isUrl(serverData.instance)) {
-        command += ` --env GLEAN_URL=${serverData.instance}`;
-      } else {
-        command += ` --env GLEAN_INSTANCE=${serverData.instance}`;
+    // Use generic env vars from options
+    const env = this.getEnvVars(options);
+    if (env) {
+      for (const [key, value] of Object.entries(env)) {
+        command += ` --env ${key}=${value}`;
       }
     }
 
-    if (serverData.apiToken) {
-      command += ` --env GLEAN_API_TOKEN=${serverData.apiToken}`;
-    }
-
-    command += ` -- npx -y ${this.getLocalMcpServerPackage()}`;
+    command += ` -- npx -y ${this.serverPackage}`;
 
     return command;
   }

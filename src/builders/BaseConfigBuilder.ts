@@ -1,11 +1,12 @@
-import { MCPClientConfig, MCPServerConfig, Platform, validateServerConfig } from '../types.js';
+import {
+  MCPClientConfig,
+  MCPConnectionOptions,
+  Platform,
+  RegistryOptions,
+  validateConnectionOptions,
+} from '../types.js';
 import * as yaml from 'js-yaml';
 import * as TOML from 'smol-toml';
-
-const DEFAULT_PLACEHOLDER_URL = 'https://[instance]-be.glean.com/mcp/[endpoint]';
-const DEFAULT_PLACEHOLDER_INSTANCE = '[instance]';
-const CONFIGURE_MCP_SERVER_PACKAGE = '@gleanwork/configure-mcp-server';
-const LOCAL_MCP_SERVER_PACKAGE = '@gleanwork/local-mcp-server';
 
 function isNodeEnvironment(): boolean {
   return (
@@ -17,9 +18,83 @@ function isNodeEnvironment(): boolean {
 
 export abstract class BaseConfigBuilder {
   protected platform: Platform;
+  protected registryOptions: RegistryOptions = {};
 
   constructor(protected config: MCPClientConfig) {
     this.platform = this.detectPlatform();
+  }
+
+  /**
+   * Set the registry options for this builder.
+   * Called by MCPConfigRegistry when creating a builder.
+   */
+  setRegistryOptions(options: RegistryOptions): void {
+    this.registryOptions = options;
+  }
+
+  /**
+   * Get the server package, or throw if not configured.
+   * Required for stdio transport configurations.
+   */
+  protected get serverPackage(): string {
+    if (!this.registryOptions.serverPackage) {
+      throw new Error(
+        'No server package configured. Provide serverPackage in registry options for stdio transport.'
+      );
+    }
+    return this.registryOptions.serverPackage;
+  }
+
+  /**
+   * Get the CLI package, or throw if not configured.
+   * Required for CLI command generation.
+   */
+  protected get cliPackage(): string {
+    if (!this.registryOptions.cliPackage) {
+      throw new Error(
+        'No CLI package configured. Provide cliPackage in registry options for CLI commands.'
+      );
+    }
+    return this.registryOptions.cliPackage;
+  }
+
+  /**
+   * Substitute variables in a URL template.
+   * URL templates use {variableName} syntax (aligned with MCP registry spec).
+   * Example: "https://api.example.com/{region}/mcp" with { region: "us-east-1" }
+   *          becomes "https://api.example.com/us-east-1/mcp"
+   */
+  protected substituteUrlVariables(
+    urlTemplate: string,
+    variables?: Record<string, string>
+  ): string {
+    if (!variables || Object.keys(variables).length === 0) {
+      return urlTemplate;
+    }
+
+    let result = urlTemplate;
+    for (const [name, value] of Object.entries(variables)) {
+      result = result.replace(new RegExp(`\\{${name}\\}`, 'g'), value);
+    }
+    return result;
+  }
+
+  /**
+   * Build HTTP headers from options.
+   */
+  protected buildHeaders(options: MCPConnectionOptions): Record<string, string> | undefined {
+    if (options.headers && Object.keys(options.headers).length > 0) {
+      return { ...options.headers };
+    }
+    return undefined;
+  }
+
+  /**
+   * Get environment variables for stdio transport.
+   * Uses the new generic `env` option directly.
+   */
+  protected getEnvVars(options: MCPConnectionOptions): Record<string, string> | undefined {
+    return options.env && Object.keys(options.env).length > 0 ? options.env : undefined;
   }
 
   protected detectPlatform(): Platform {
@@ -48,7 +123,7 @@ export abstract class BaseConfigBuilder {
     return 'darwin';
   }
 
-  buildConfiguration(serverData: MCPServerConfig): Record<string, unknown> {
+  buildConfiguration(options: MCPConnectionOptions): Record<string, unknown> {
     if (!this.config.userConfigurable) {
       throw new Error(
         `${this.config.displayName} does not support local configuration. ` +
@@ -56,17 +131,17 @@ export abstract class BaseConfigBuilder {
       );
     }
 
-    const validatedConfig = validateServerConfig(serverData);
-    const includeRootObject = validatedConfig.includeRootObject !== false;
+    const validatedOptions = validateConnectionOptions(options);
+    const includeRootObject = validatedOptions.includeRootObject !== false;
 
     let configObj: Record<string, unknown> = {};
 
-    if (validatedConfig.transport === 'stdio') {
-      configObj = this.buildLocalConfig(validatedConfig, includeRootObject);
-    } else if (validatedConfig.transport === 'http') {
-      configObj = this.buildRemoteConfig(validatedConfig, includeRootObject);
+    if (validatedOptions.transport === 'stdio') {
+      configObj = this.buildLocalConfig(validatedOptions, includeRootObject);
+    } else if (validatedOptions.transport === 'http') {
+      configObj = this.buildRemoteConfig(validatedOptions, includeRootObject);
     } else {
-      throw new Error(`Invalid transport: ${validatedConfig.transport}`);
+      throw new Error(`Invalid transport: ${validatedOptions.transport}`);
     }
 
     return configObj;
@@ -85,69 +160,39 @@ export abstract class BaseConfigBuilder {
   }
 
   protected abstract buildLocalConfig(
-    serverData: MCPServerConfig,
+    options: MCPConnectionOptions,
     includeRootObject: boolean
   ): Record<string, unknown>;
 
   protected abstract buildRemoteConfig(
-    serverData: MCPServerConfig,
+    options: MCPConnectionOptions,
     includeRootObject: boolean
   ): Record<string, unknown>;
 
-  buildOneClickUrl?(serverData: MCPServerConfig): string;
+  buildOneClickUrl?(options: MCPConnectionOptions): string;
 
-  buildCommand(serverData: MCPServerConfig): string | null {
+  buildCommand(options: MCPConnectionOptions): string | null {
     try {
-      const validatedConfig = validateServerConfig(serverData);
+      const validatedOptions = validateConnectionOptions(options);
 
-      if (validatedConfig.transport === 'http') {
-        return this.buildRemoteCommand(validatedConfig);
+      if (validatedOptions.transport === 'http') {
+        return this.buildRemoteCommand(validatedOptions);
       } else {
-        return this.buildLocalCommand(validatedConfig);
+        return this.buildLocalCommand(validatedOptions);
       }
     } catch (error) {
       return null;
     }
   }
 
-  protected abstract buildRemoteCommand(serverData: MCPServerConfig): string | null;
-  protected abstract buildLocalCommand(serverData: MCPServerConfig): string | null;
-
-  /**
-   * Helper to get the configure-mcp-server package name with optional version
-   */
-  protected getConfigureMcpServerPackage(serverData: MCPServerConfig): string {
-    return serverData.configureMcpServerVersion
-      ? `${CONFIGURE_MCP_SERVER_PACKAGE}@${serverData.configureMcpServerVersion}`
-      : CONFIGURE_MCP_SERVER_PACKAGE;
-  }
-
-  /**
-   * Helper to get the server URL with fallback to placeholder
-   */
-  protected getServerUrl(serverData: MCPServerConfig): string {
-    return serverData.serverUrl || DEFAULT_PLACEHOLDER_URL;
-  }
-
-  /**
-   * Helper to get the instance with fallback to placeholder
-   */
-  protected getInstanceOrPlaceholder(serverData: MCPServerConfig): string {
-    return serverData.instance || DEFAULT_PLACEHOLDER_INSTANCE;
-  }
+  protected abstract buildRemoteCommand(options: MCPConnectionOptions): string | null;
+  protected abstract buildLocalCommand(options: MCPConnectionOptions): string | null;
 
   /**
    * Helper to determine if a string is a URL
    */
   protected isUrl(str: string): boolean {
     return str.startsWith('http://') || str.startsWith('https://');
-  }
-
-  /**
-   * Get the local MCP server package name
-   */
-  protected getLocalMcpServerPackage(): string {
-    return LOCAL_MCP_SERVER_PACKAGE;
   }
 
   /**

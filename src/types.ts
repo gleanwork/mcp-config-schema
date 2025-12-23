@@ -10,7 +10,7 @@ import {
   ConfigStructureSchema,
   PlatformPathsSchema,
   MCPClientConfigSchema,
-  MCPServerConfigSchema,
+  MCPConnectionOptionsSchema,
   BuildOptionsSchema,
   HttpServerConfigSchema,
   HttpServerConfigAltSchema,
@@ -27,6 +27,17 @@ import {
   GeminiConfigSchema,
 } from './schemas.js';
 
+/**
+ * Options for creating an MCPConfigRegistry.
+ * These options configure how stdio transport configurations are generated.
+ */
+export interface RegistryOptions {
+  /** NPM package for stdio server (e.g., '@my-org/mcp-server') */
+  serverPackage?: string;
+  /** NPM package for CLI tool (e.g., '@my-org/configure-mcp') */
+  cliPackage?: string;
+}
+
 export type Platform = z.infer<typeof PlatformSchema>;
 export type ClientId = z.infer<typeof ClientIdSchema>;
 export type SupportedTransports = z.infer<typeof SupportedTransportsSchema>;
@@ -37,7 +48,9 @@ export type StdioConfigStructure = z.infer<typeof StdioConfigStructureSchema>;
 export type ConfigStructure = z.infer<typeof ConfigStructureSchema>;
 export type PlatformPaths = z.infer<typeof PlatformPathsSchema>;
 export type MCPClientConfig = z.infer<typeof MCPClientConfigSchema>;
-export type MCPServerConfig = z.infer<typeof MCPServerConfigSchema>;
+export type MCPConnectionOptions = z.infer<typeof MCPConnectionOptionsSchema>;
+/** @deprecated Use MCPConnectionOptions instead */
+export type MCPServerConfig = MCPConnectionOptions;
 export type BuildOptions = z.infer<typeof BuildOptionsSchema>;
 export type HttpServerConfig = z.infer<typeof HttpServerConfigSchema>;
 export type HttpServerConfigAlt = z.infer<typeof HttpServerConfigAltSchema>;
@@ -69,6 +82,7 @@ export {
   ConfigStructureSchema,
   HttpConfigStructureSchema,
   StdioConfigStructureSchema,
+  MCPConnectionOptionsSchema,
   MCPServerConfigSchema,
   BuildOptionsSchema,
   HttpServerConfigSchema,
@@ -88,8 +102,10 @@ export {
 
 export {
   validateClientConfig,
+  validateConnectionOptions,
   validateServerConfig,
   safeValidateClientConfig,
+  safeValidateConnectionOptions,
   safeValidateServerConfig,
   validateGeneratedConfig,
   validateMcpServersConfig,

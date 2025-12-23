@@ -73,31 +73,48 @@ export const BuildOptionsSchema = z.object({
   configureMcpServerVersion: z.string().optional(),
 });
 
-export const MCPServerConfigSchema = z
+export const MCPConnectionOptionsSchema = z
   .object({
     transport: TransportSchema,
-    serverUrl: z.string().optional(), // Accept any string, not just valid URLs
+    // HTTP transport options
+    serverUrl: z.string().optional(), // URL or URL template with {urlVariables}
+    urlVariables: z.record(z.string(), z.string()).optional(), // Values for URL template variables
+    headers: z.record(z.string(), z.string()).optional(), // HTTP headers (e.g., Authorization)
+    // stdio transport options
+    env: z.record(z.string(), z.string()).optional(), // Environment variables for stdio server
+    // Common options
     serverName: z.string().optional(),
-    instance: z.string().optional(),
-    apiToken: z.string().optional(),
-    productName: z.string().optional(), // For white-label support, defaults to 'glean'
+    productName: z.string().optional(), // For white-label support
   })
   .merge(BuildOptionsSchema);
+
+/** @deprecated Use MCPConnectionOptionsSchema instead */
+export const MCPServerConfigSchema = MCPConnectionOptionsSchema;
 
 export function validateClientConfig(data: unknown) {
   return MCPClientConfigSchema.parse(data);
 }
 
+export function validateConnectionOptions(data: unknown) {
+  return MCPConnectionOptionsSchema.parse(data);
+}
+
+/** @deprecated Use validateConnectionOptions instead */
 export function validateServerConfig(data: unknown) {
-  return MCPServerConfigSchema.parse(data);
+  return MCPConnectionOptionsSchema.parse(data);
 }
 
 export function safeValidateClientConfig(data: unknown) {
   return MCPClientConfigSchema.safeParse(data);
 }
 
+export function safeValidateConnectionOptions(data: unknown) {
+  return MCPConnectionOptionsSchema.safeParse(data);
+}
+
+/** @deprecated Use safeValidateConnectionOptions instead */
 export function safeValidateServerConfig(data: unknown) {
-  return MCPServerConfigSchema.safeParse(data);
+  return MCPConnectionOptionsSchema.safeParse(data);
 }
 
 export const HttpServerConfigSchema = z.object({

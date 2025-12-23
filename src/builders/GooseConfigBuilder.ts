@@ -1,10 +1,10 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPServerConfig } from '../types.js';
+import { MCPConnectionOptions } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class GooseConfigBuilder extends BaseConfigBuilder {
   protected buildLocalConfig(
-    serverData: MCPServerConfig,
+    options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { stdioPropertyMapping } = this.config.configStructure;
@@ -15,33 +15,22 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
 
     const serverName = buildMcpServerName({
       transport: 'stdio',
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverName: options.serverName,
+      productName: options.productName,
     });
 
     const serverConfig: Record<string, unknown> = {};
 
     serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
-    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', '@gleanwork/local-mcp-server'];
+    serverConfig[stdioPropertyMapping.argsProperty] = ['-y', this.serverPackage];
 
     if (stdioPropertyMapping.typeProperty) {
       serverConfig[stdioPropertyMapping.typeProperty] = 'stdio';
     }
 
     // Goose uses 'envs' property directly, not through stdioPropertyMapping.envProperty
-    const envs: Record<string, string> = {};
-
-    if (serverData.instance) {
-      if (serverData.instance.startsWith('http://') || serverData.instance.startsWith('https://')) {
-        envs.GLEAN_URL = serverData.instance;
-      } else {
-        envs.GLEAN_INSTANCE = serverData.instance;
-      }
-    }
-
-    if (serverData.apiToken) {
-      envs.GLEAN_API_TOKEN = serverData.apiToken;
-    }
+    // Use generic env vars from options
+    const envs = this.getEnvVars(options) || {};
 
     const gooseServerConfig = {
       name: serverName,
@@ -69,10 +58,10 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
   }
 
   protected buildRemoteConfig(
-    serverData: MCPServerConfig,
+    options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
-    if (!serverData.serverUrl) {
+    if (!options.serverUrl) {
       throw new Error('Remote configuration requires serverUrl');
     }
 
@@ -81,10 +70,13 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
 
     const serverName = buildMcpServerName({
       transport: 'http',
-      serverUrl: serverData.serverUrl,
-      serverName: serverData.serverName,
-      productName: serverData.productName,
+      serverUrl: options.serverUrl,
+      serverName: options.serverName,
+      productName: options.productName,
     });
+
+    // Substitute URL template variables
+    const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
     if (httpPropertyMapping && this.config.transports.includes('http')) {
       const serverConfig: Record<string, unknown> = {};
@@ -94,13 +86,10 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
         serverConfig[httpPropertyMapping.typeProperty] = 'streamable_http';
       }
 
-      serverConfig[httpPropertyMapping.urlProperty] = serverData.serverUrl;
+      serverConfig[httpPropertyMapping.urlProperty] = resolvedUrl;
 
-      // Goose doesn't use httpPropertyMapping.headersProperty, it has its own headers property
-      const headers: Record<string, string> = {};
-      if (serverData.apiToken) {
-        headers['Authorization'] = `Bearer ${serverData.apiToken}`;
-      }
+      // Use generic headers
+      const headers = this.buildHeaders(options) || {};
 
       const gooseServerConfig = {
         enabled: true,
@@ -127,6 +116,7 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
         },
       };
     } else if (stdioPropertyMapping) {
+      // Use mcp-remote bridge for clients that don't support HTTP natively
       const serverConfig: Record<string, unknown> = {};
 
       if (stdioPropertyMapping.typeProperty) {
@@ -134,14 +124,17 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
       }
 
       serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
-      const mcpRemotePackage = serverData.mcpRemoteVersion
-        ? `mcp-remote@${serverData.mcpRemoteVersion}`
+      const mcpRemotePackage = options.mcpRemoteVersion
+        ? `mcp-remote@${options.mcpRemoteVersion}`
         : 'mcp-remote';
-      const args = ['-y', mcpRemotePackage, serverData.serverUrl];
+      const args = ['-y', mcpRemotePackage, resolvedUrl];
 
-      // Add bearer token as header for mcp-remote
-      if (serverData.apiToken) {
-        args.push('--header', `Authorization: Bearer ${serverData.apiToken}`);
+      // Add headers as mcp-remote arguments
+      const headers = this.buildHeaders(options);
+      if (headers) {
+        for (const [key, value] of Object.entries(headers)) {
+          args.push('--header', `${key}: ${value}`);
+        }
       }
 
       serverConfig[stdioPropertyMapping.argsProperty] = args;
@@ -162,45 +155,26 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
     }
   }
 
-  protected buildRemoteCommand(serverData: MCPServerConfig): string {
-    const serverUrl = this.getServerUrl(serverData);
-    const packageName = this.getConfigureMcpServerPackage(serverData);
+  protected buildRemoteCommand(options: MCPConnectionOptions): string | null {
+    if (!options.serverUrl) {
+      return null;
+    }
+
+    // Substitute URL template variables
+    const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
     // Goose is supported by configure-mcp-server
-    let command = `npx -y ${packageName} remote`;
-    command += ` --url ${serverUrl}`;
+    let command = `npx -y ${this.cliPackage} remote`;
+    command += ` --url ${resolvedUrl}`;
     command += ` --client goose`;
-
-    if (serverData.apiToken) {
-      command += ` --token ${serverData.apiToken}`;
-    }
 
     return command;
   }
 
-  protected buildLocalCommand(serverData: MCPServerConfig): string {
-    const packageName = this.getConfigureMcpServerPackage(serverData);
-
-    let command = `npx -y ${packageName} local`;
-
-    if (serverData.instance) {
-      // Handle instance URL vs instance name
-      if (this.isUrl(serverData.instance)) {
-        command += ` --url ${serverData.instance}`;
-      } else {
-        command += ` --instance ${serverData.instance}`;
-      }
-    } else {
-      command += ` --instance ${this.getInstanceOrPlaceholder(serverData)}`;
-    }
-
-    command += ` --client goose`;
-
-    if (serverData.apiToken) {
-      command += ` --token ${serverData.apiToken}`;
-    }
-
-    return command;
+  protected buildLocalCommand(_options: MCPConnectionOptions): string | null {
+    // Local command generation requires the cliPackage to handle environment variables
+    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly
+    return null;
   }
 
   getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
