@@ -25,14 +25,14 @@ const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
  * Used by: Claude Desktop, Windsurf, JetBrains, Junie, Gemini, ChatGPT, Claude Teams Enterprise
  */
 export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
-  protected buildLocalConfig(
+  protected buildStdioConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { serversPropertyName, stdioPropertyMapping } = this.config.configStructure;
 
     if (!stdioPropertyMapping) {
-      throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
     const serverName = buildMcpServerName({
@@ -70,12 +70,12 @@ export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
     };
   }
 
-  protected buildRemoteConfig(
+  protected buildHttpConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     const { serversPropertyName, httpPropertyMapping, stdioPropertyMapping } =
@@ -153,7 +153,7 @@ export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
         },
       };
     } else {
-      throw new Error(`Client ${this.config.id} doesn't support remote server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support HTTP server configuration`);
     }
   }
 
@@ -165,7 +165,7 @@ export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
     throw new Error(`One-click URL generation not implemented for ${this.config.displayName}`);
   }
 
-  protected buildRemoteCommand(options: MCPConnectionOptions): string | null {
+  protected buildHttpCommand(options: MCPConnectionOptions): string | null {
     if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
       return null;
     }
@@ -184,13 +184,13 @@ export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
     return command;
   }
 
-  protected buildLocalCommand(_options: MCPConnectionOptions): string | null {
+  protected buildStdioCommand(_options: MCPConnectionOptions): string | null {
     if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
       return null;
     }
 
-    // Local command generation requires the cliPackage to handle environment variables
-    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly
+    // Stdio command generation requires the cliPackage to handle environment variables.
+    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly.
     return null;
   }
 

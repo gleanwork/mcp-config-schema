@@ -3,9 +3,9 @@ import { MCPConnectionOptions } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
 export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
-  protected buildRemoteCommand(options: MCPConnectionOptions): string {
+  protected buildHttpCommand(options: MCPConnectionOptions): string {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     // Substitute URL template variables
@@ -31,7 +31,7 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
     return command;
   }
 
-  protected buildLocalCommand(options: MCPConnectionOptions): string {
+  protected buildStdioCommand(options: MCPConnectionOptions): string {
     const serverName = buildMcpServerName({
       transport: 'stdio',
       serverName: options.serverName,

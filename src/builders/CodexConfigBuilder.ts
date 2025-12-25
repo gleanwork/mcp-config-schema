@@ -10,14 +10,14 @@ function isCodexMCPConfig(config: CodexMCPConfig | MCPServersRecord): config is 
  * Config builder for Codex which uses { mcp_servers: {...} } format (snake_case).
  */
 export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
-  protected buildLocalConfig(
+  protected buildStdioConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { stdioPropertyMapping } = this.config.configStructure;
 
     if (!stdioPropertyMapping) {
-      throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
     const serverName = buildMcpServerName({
@@ -53,12 +53,12 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
     };
   }
 
-  protected buildRemoteConfig(
+  protected buildHttpConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     const { httpPropertyMapping } = this.config.configStructure;
@@ -97,13 +97,13 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
         },
       };
     } else {
-      throw new Error(`Client ${this.config.id} doesn't support remote server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support HTTP server configuration`);
     }
   }
 
-  protected buildRemoteCommand(options: MCPConnectionOptions): string {
+  protected buildHttpCommand(options: MCPConnectionOptions): string {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     // Substitute URL template variables
@@ -135,7 +135,7 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
     return command;
   }
 
-  protected buildLocalCommand(options: MCPConnectionOptions): string {
+  protected buildStdioCommand(options: MCPConnectionOptions): string {
     const serverName = buildMcpServerName({
       transport: 'stdio',
       serverName: options.serverName,

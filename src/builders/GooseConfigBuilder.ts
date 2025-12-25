@@ -10,14 +10,14 @@ function isGooseMCPConfig(config: GooseMCPConfig | MCPServersRecord): config is 
  * Config builder for Goose which uses { extensions: {...} } format.
  */
 export class GooseConfigBuilder extends BaseConfigBuilder<GooseMCPConfig> {
-  protected buildLocalConfig(
+  protected buildStdioConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { stdioPropertyMapping } = this.config.configStructure;
 
     if (!stdioPropertyMapping) {
-      throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
     const serverName = buildMcpServerName({
@@ -64,12 +64,12 @@ export class GooseConfigBuilder extends BaseConfigBuilder<GooseMCPConfig> {
     };
   }
 
-  protected buildRemoteConfig(
+  protected buildHttpConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     const { serversPropertyName, httpPropertyMapping, stdioPropertyMapping } =
@@ -158,11 +158,11 @@ export class GooseConfigBuilder extends BaseConfigBuilder<GooseMCPConfig> {
         },
       };
     } else {
-      throw new Error(`Client ${this.config.id} doesn't support remote server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support HTTP server configuration`);
     }
   }
 
-  protected buildRemoteCommand(options: MCPConnectionOptions): string | null {
+  protected buildHttpCommand(options: MCPConnectionOptions): string | null {
     if (!options.serverUrl) {
       return null;
     }
@@ -178,9 +178,9 @@ export class GooseConfigBuilder extends BaseConfigBuilder<GooseMCPConfig> {
     return command;
   }
 
-  protected buildLocalCommand(_options: MCPConnectionOptions): string | null {
-    // Local command generation requires the cliPackage to handle environment variables
-    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly
+  protected buildStdioCommand(_options: MCPConnectionOptions): string | null {
+    // Stdio command generation requires the cliPackage to handle environment variables.
+    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly.
     return null;
   }
 

@@ -10,14 +10,14 @@ function isVSCodeMCPConfig(config: VSCodeMCPConfig | MCPServersRecord): config i
  * Config builder for VS Code which uses { servers: {...} } format.
  */
 export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
-  protected buildLocalConfig(
+  protected buildStdioConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { serversPropertyName, stdioPropertyMapping } = this.config.configStructure;
 
     if (!stdioPropertyMapping) {
-      throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
     const serverName = buildMcpServerName({
@@ -55,12 +55,12 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
     };
   }
 
-  protected buildRemoteConfig(
+  protected buildHttpConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     const { serversPropertyName, httpPropertyMapping, stdioPropertyMapping } =
@@ -137,7 +137,7 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
         },
       };
     } else {
-      throw new Error(`Client ${this.config.id} doesn't support remote server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support HTTP server configuration`);
     }
   }
 
@@ -190,9 +190,9 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
     return this.config.protocolHandler.urlTemplate.replace('{{config}}', encodedConfig);
   }
 
-  protected buildRemoteCommand(options: MCPConnectionOptions): string {
+  protected buildHttpCommand(options: MCPConnectionOptions): string {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     // Substitute URL template variables
@@ -224,7 +224,7 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
     return `code --add-mcp '${escapedConfig}'`;
   }
 
-  protected buildLocalCommand(options: MCPConnectionOptions): string {
+  protected buildStdioCommand(options: MCPConnectionOptions): string {
     // VS Code also supports stdio servers via --add-mcp
     const serverName = buildMcpServerName({
       transport: 'stdio',

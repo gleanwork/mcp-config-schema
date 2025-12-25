@@ -157,9 +157,9 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
     let result: Record<string, unknown> = {};
 
     if (validatedOptions.transport === 'stdio') {
-      result = this.buildLocalConfig(validatedOptions, includeRootObject);
+      result = this.buildStdioConfig(validatedOptions, includeRootObject);
     } else if (validatedOptions.transport === 'http') {
-      result = this.buildRemoteConfig(validatedOptions, includeRootObject);
+      result = this.buildHttpConfig(validatedOptions, includeRootObject);
     } else {
       throw new Error(`Invalid transport: ${validatedOptions.transport}`);
     }
@@ -186,12 +186,12 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
     throw new Error(`Unsupported config format: ${this.config.configFormat}`);
   }
 
-  protected abstract buildLocalConfig(
+  protected abstract buildStdioConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean
   ): Record<string, unknown>;
 
-  protected abstract buildRemoteConfig(
+  protected abstract buildHttpConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean
   ): Record<string, unknown>;
@@ -203,17 +203,17 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
       const validatedOptions = validateConnectionOptions(options);
 
       if (validatedOptions.transport === 'http') {
-        return this.buildRemoteCommand(validatedOptions);
+        return this.buildHttpCommand(validatedOptions);
       } else {
-        return this.buildLocalCommand(validatedOptions);
+        return this.buildStdioCommand(validatedOptions);
       }
     } catch (error) {
       return null;
     }
   }
 
-  protected abstract buildRemoteCommand(options: MCPConnectionOptions): string | null;
-  protected abstract buildLocalCommand(options: MCPConnectionOptions): string | null;
+  protected abstract buildHttpCommand(options: MCPConnectionOptions): string | null;
+  protected abstract buildStdioCommand(options: MCPConnectionOptions): string | null;
 
   /**
    * Helper to determine if a string is a URL
