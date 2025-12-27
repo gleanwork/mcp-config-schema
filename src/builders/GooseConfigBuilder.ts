@@ -1,16 +1,23 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPConnectionOptions } from '../types.js';
+import { MCPConnectionOptions, GooseMCPConfig, MCPServersRecord } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
-export class GooseConfigBuilder extends BaseConfigBuilder {
-  protected buildLocalConfig(
+function isGooseMCPConfig(config: GooseMCPConfig | MCPServersRecord): config is GooseMCPConfig {
+  return typeof config === 'object' && config !== null && 'extensions' in config;
+}
+
+/**
+ * Config builder for Goose which uses { extensions: {...} } format.
+ */
+export class GooseConfigBuilder extends BaseConfigBuilder<GooseMCPConfig> {
+  protected buildStdioConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { stdioPropertyMapping } = this.config.configStructure;
 
     if (!stdioPropertyMapping) {
-      throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
     const serverName = buildMcpServerName({
@@ -57,12 +64,12 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
     };
   }
 
-  protected buildRemoteConfig(
+  protected buildHttpConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     const { serversPropertyName, httpPropertyMapping, stdioPropertyMapping } =
@@ -151,11 +158,11 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
         },
       };
     } else {
-      throw new Error(`Client ${this.config.id} doesn't support remote server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support HTTP server configuration`);
     }
   }
 
-  protected buildRemoteCommand(options: MCPConnectionOptions): string | null {
+  protected buildHttpCommand(options: MCPConnectionOptions): string | null {
     if (!options.serverUrl) {
       return null;
     }
@@ -171,19 +178,22 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
     return command;
   }
 
-  protected buildLocalCommand(_options: MCPConnectionOptions): string | null {
-    // Local command generation requires the cliPackage to handle environment variables
-    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly
+  protected buildStdioCommand(_options: MCPConnectionOptions): string | null {
+    // Stdio command generation requires the cliPackage to handle environment variables.
+    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly.
     return null;
   }
 
-  getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    // Goose uses extensions wrapper
-    if (config['extensions']) {
-      const extensions = config['extensions'] as Record<string, Record<string, unknown>>;
-      const normalized: Record<string, unknown> = {};
+  getNormalizedServersConfig(config: GooseMCPConfig | MCPServersRecord): MCPServersRecord {
+    // Use type guard to determine if this is a full wrapped config
+    const servers: MCPServersRecord = isGooseMCPConfig(config) ? config.extensions : config;
 
-      for (const [name, gooseConfig] of Object.entries(extensions)) {
+    // Normalize Goose-specific property names to standard format
+    const normalized: MCPServersRecord = {};
+
+    for (const [name, value] of Object.entries(servers)) {
+      const gooseConfig = value as Record<string, unknown>;
+      if (typeof gooseConfig === 'object' && gooseConfig !== null) {
         normalized[name] = {
           type: gooseConfig.type === 'streamable_http' ? 'http' : gooseConfig.type,
           command: gooseConfig.cmd,
@@ -191,24 +201,6 @@ export class GooseConfigBuilder extends BaseConfigBuilder {
           env: gooseConfig.envs,
           url: gooseConfig.uri,
           headers: gooseConfig.headers,
-        };
-      }
-
-      return normalized;
-    }
-
-    // Check if it's already flat (no wrapper)
-    const normalized: Record<string, unknown> = {};
-    for (const [name, gooseConfig] of Object.entries(config)) {
-      if (typeof gooseConfig === 'object' && gooseConfig !== null) {
-        const gc = gooseConfig as Record<string, unknown>;
-        normalized[name] = {
-          type: gc.type === 'streamable_http' ? 'http' : gc.type,
-          command: gc.cmd,
-          args: gc.args,
-          env: gc.envs,
-          url: gc.uri,
-          headers: gc.headers,
         };
       }
     }

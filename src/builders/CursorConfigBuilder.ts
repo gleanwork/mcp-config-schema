@@ -55,7 +55,7 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       .replace('{{config}}', encodedConfig);
   }
 
-  protected buildRemoteCommand(options: MCPConnectionOptions): string | null {
+  protected buildHttpCommand(options: MCPConnectionOptions): string | null {
     if (!options.serverUrl) {
       return null;
     }
@@ -70,24 +70,9 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
     return command;
   }
 
-  protected buildLocalCommand(_options: MCPConnectionOptions): string | null {
-    // Local command generation requires the cliPackage to handle environment variables
-    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly
+  protected buildStdioCommand(_options: MCPConnectionOptions): string | null {
+    // Stdio command generation requires the cliPackage to handle environment variables.
+    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly.
     return null;
-  }
-
-  getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    const { serversPropertyName } = this.config.configStructure;
-
-    if (config[serversPropertyName]) {
-      return config[serversPropertyName] as Record<string, unknown>;
-    }
-
-    const firstKey = Object.keys(config)[0];
-    if (firstKey && typeof config[firstKey] === 'object') {
-      return config;
-    }
-
-    return {};
   }
 }

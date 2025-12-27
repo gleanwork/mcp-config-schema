@@ -1,7 +1,13 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPConnectionOptions } from '../types.js';
+import { MCPConnectionOptions, StandardMCPConfig, MCPServersRecord } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 import { CLIENT } from '../constants.js';
+
+function isStandardMCPConfig(
+  config: StandardMCPConfig | MCPServersRecord
+): config is StandardMCPConfig {
+  return typeof config === 'object' && config !== null && 'mcpServers' in config;
+}
 
 // Clients that can use configure-mcp-server
 const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
@@ -14,15 +20,19 @@ const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
   CLIENT.JUNIE,
 ];
 
-export class GenericConfigBuilder extends BaseConfigBuilder {
-  protected buildLocalConfig(
+/**
+ * Generic config builder for clients using the standard { mcpServers: {...} } format.
+ * Used by: Claude Desktop, Windsurf, JetBrains, Junie, Gemini, ChatGPT, Claude Teams Enterprise
+ */
+export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
+  protected buildStdioConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { serversPropertyName, stdioPropertyMapping } = this.config.configStructure;
 
     if (!stdioPropertyMapping) {
-      throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
     const serverName = buildMcpServerName({
@@ -60,12 +70,12 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     };
   }
 
-  protected buildRemoteConfig(
+  protected buildHttpConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     const { serversPropertyName, httpPropertyMapping, stdioPropertyMapping } =
@@ -143,7 +153,7 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
         },
       };
     } else {
-      throw new Error(`Client ${this.config.id} doesn't support remote server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support HTTP server configuration`);
     }
   }
 
@@ -155,7 +165,7 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     throw new Error(`One-click URL generation not implemented for ${this.config.displayName}`);
   }
 
-  protected buildRemoteCommand(options: MCPConnectionOptions): string | null {
+  protected buildHttpCommand(options: MCPConnectionOptions): string | null {
     if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
       return null;
     }
@@ -174,28 +184,22 @@ export class GenericConfigBuilder extends BaseConfigBuilder {
     return command;
   }
 
-  protected buildLocalCommand(_options: MCPConnectionOptions): string | null {
+  protected buildStdioCommand(_options: MCPConnectionOptions): string | null {
     if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
       return null;
     }
 
-    // Local command generation requires the cliPackage to handle environment variables
-    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly
+    // Stdio command generation requires the cliPackage to handle environment variables.
+    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly.
     return null;
   }
 
-  getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    const { serversPropertyName } = this.config.configStructure;
-
-    if (config[serversPropertyName]) {
-      return config[serversPropertyName] as Record<string, unknown>;
+  getNormalizedServersConfig(config: StandardMCPConfig | MCPServersRecord): MCPServersRecord {
+    // Use type guard to narrow the union
+    if (isStandardMCPConfig(config)) {
+      return config.mcpServers;
     }
-
-    const firstKey = Object.keys(config)[0];
-    if (firstKey && typeof config[firstKey] === 'object') {
-      return config;
-    }
-
-    return {};
+    // Flat config from includeRootObject: false - already the servers record
+    return config;
   }
 }

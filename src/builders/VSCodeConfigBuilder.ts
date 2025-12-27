@@ -1,16 +1,23 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
-import { MCPConnectionOptions } from '../types.js';
+import { MCPConnectionOptions, VSCodeMCPConfig, MCPServersRecord } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 
-export class VSCodeConfigBuilder extends BaseConfigBuilder {
-  protected buildLocalConfig(
+function isVSCodeMCPConfig(config: VSCodeMCPConfig | MCPServersRecord): config is VSCodeMCPConfig {
+  return typeof config === 'object' && config !== null && 'servers' in config;
+}
+
+/**
+ * Config builder for VS Code which uses { servers: {...} } format.
+ */
+export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
+  protected buildStdioConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     const { serversPropertyName, stdioPropertyMapping } = this.config.configStructure;
 
     if (!stdioPropertyMapping) {
-      throw new Error(`Client ${this.config.id} doesn't support local server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
     const serverName = buildMcpServerName({
@@ -48,12 +55,12 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     };
   }
 
-  protected buildRemoteConfig(
+  protected buildHttpConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true
   ): Record<string, unknown> {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     const { serversPropertyName, httpPropertyMapping, stdioPropertyMapping } =
@@ -130,7 +137,7 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
         },
       };
     } else {
-      throw new Error(`Client ${this.config.id} doesn't support remote server configuration`);
+      throw new Error(`Client ${this.config.id} doesn't support HTTP server configuration`);
     }
   }
 
@@ -183,9 +190,9 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     return this.config.protocolHandler.urlTemplate.replace('{{config}}', encodedConfig);
   }
 
-  protected buildRemoteCommand(options: MCPConnectionOptions): string {
+  protected buildHttpCommand(options: MCPConnectionOptions): string {
     if (!options.serverUrl) {
-      throw new Error('Remote configuration requires serverUrl');
+      throw new Error('HTTP transport requires a server URL');
     }
 
     // Substitute URL template variables
@@ -217,7 +224,7 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     return `code --add-mcp '${escapedConfig}'`;
   }
 
-  protected buildLocalCommand(options: MCPConnectionOptions): string {
+  protected buildStdioCommand(options: MCPConnectionOptions): string {
     // VS Code also supports stdio servers via --add-mcp
     const serverName = buildMcpServerName({
       transport: 'stdio',
@@ -243,21 +250,12 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder {
     return `code --add-mcp '${escapedConfig}'`;
   }
 
-  getNormalizedServersConfig(config: Record<string, unknown>): Record<string, unknown> {
-    const { serversPropertyName } = this.config.configStructure;
-
-    // Check for different wrapper structures
-    if (config[serversPropertyName]) {
-      return config[serversPropertyName] as Record<string, unknown>;
+  getNormalizedServersConfig(config: VSCodeMCPConfig | MCPServersRecord): MCPServersRecord {
+    // Use type guard to narrow the union
+    if (isVSCodeMCPConfig(config)) {
+      return config.servers;
     }
-
-    // Check if it's already flat (no wrapper)
-    const firstKey = Object.keys(config)[0];
-    if (firstKey && typeof config[firstKey] === 'object') {
-      // Assume it's a flat server config
-      return config;
-    }
-
-    return {};
+    // Flat config from includeRootObject: false - already the servers record
+    return config;
   }
 }

@@ -38,6 +38,85 @@ export interface RegistryOptions {
   cliPackage?: string;
 }
 
+// ============================================================================
+// Config Output Types
+// These types represent the shape of configuration objects returned by builders.
+// ============================================================================
+
+/**
+ * Record type for the servers collection within a config.
+ * The value is `unknown` since different clients have different server config schemas.
+ */
+export type MCPServersRecord = Record<string, unknown>;
+
+/**
+ * Standard MCP config format used by most clients.
+ * Clients: Claude Desktop, Cursor, Windsurf, Claude Code, JetBrains, Junie, Gemini, ChatGPT, Claude Teams Enterprise
+ */
+export interface StandardMCPConfig {
+  mcpServers: MCPServersRecord;
+}
+
+/**
+ * VS Code MCP config format.
+ * Uses 'servers' instead of 'mcpServers'.
+ */
+export interface VSCodeMCPConfig {
+  servers: MCPServersRecord;
+}
+
+/**
+ * Goose MCP config format.
+ * Uses 'extensions' instead of 'mcpServers'.
+ */
+export interface GooseMCPConfig {
+  extensions: MCPServersRecord;
+}
+
+/**
+ * Codex MCP config format.
+ * Uses 'mcp_servers' (snake_case) instead of 'mcpServers'.
+ */
+export interface CodexMCPConfig {
+  mcp_servers: MCPServersRecord;
+}
+
+/**
+ * Union of all config output formats.
+ */
+export type MCPConfig = StandardMCPConfig | VSCodeMCPConfig | GooseMCPConfig | CodexMCPConfig;
+
+/**
+ * Maps a ClientId to its corresponding config output type.
+ * Use this with generics to get properly typed config objects.
+ *
+ * @example
+ * ```typescript
+ * function getConfig<C extends ClientId>(clientId: C): ConfigForClient<C> { ... }
+ * const vsCodeConfig = getConfig('vscode'); // Type: VSCodeMCPConfig
+ * vsCodeConfig.servers; // ✓ Typed correctly
+ * ```
+ */
+export type ConfigForClient<C extends ClientId> = C extends 'vscode'
+  ? VSCodeMCPConfig
+  : C extends 'goose'
+    ? GooseMCPConfig
+    : C extends 'codex'
+      ? CodexMCPConfig
+      : StandardMCPConfig;
+
+/**
+ * Maps a ClientId to its servers property name.
+ * Useful for dynamic property access.
+ */
+export type ServersKeyForClient<C extends ClientId> = C extends 'vscode'
+  ? 'servers'
+  : C extends 'goose'
+    ? 'extensions'
+    : C extends 'codex'
+      ? 'mcp_servers'
+      : 'mcpServers';
+
 export type Platform = z.infer<typeof PlatformSchema>;
 export type ClientId = z.infer<typeof ClientIdSchema>;
 export type SupportedTransports = z.infer<typeof SupportedTransportsSchema>;

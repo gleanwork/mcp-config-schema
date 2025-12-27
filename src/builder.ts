@@ -1,4 +1,4 @@
-import { ClientId, MCPServerConfig } from './types.js';
+import { ClientId, MCPServerConfig, MCPServersRecord, ConfigForClient } from './types.js';
 import { MCPConfigRegistry } from './registry.js';
 
 // Create a singleton instance of the registry
@@ -8,14 +8,39 @@ const registry = new MCPConfigRegistry();
  * Convenience function to build configuration for a specific client
  * without needing to instantiate the registry directly.
  *
- * @param clientId - The client to build configuration for
- * @param serverData - The server configuration data
- * @returns The built configuration object
+ * The return type is based on the client ID and includeRootObject option:
+ * - When includeRootObject is false, returns MCPServersRecord (flat servers)
+ * - When includeRootObject is true/undefined:
+ *   - 'vscode' returns VSCodeMCPConfig
+ *   - 'goose' returns GooseMCPConfig
+ *   - 'codex' returns CodexMCPConfig
+ *   - All others return StandardMCPConfig
+ *
+ * @example
+ * ```typescript
+ * const vsCodeConfig = buildConfiguration('vscode', options);
+ * vsCodeConfig.servers; // ✓ Typed as MCPServersRecord
+ *
+ * const partial = buildConfiguration('cursor', { transport: 'stdio', includeRootObject: false });
+ * // partial is MCPServersRecord (flat)
+ * ```
  */
-export function buildConfiguration(
-  clientId: ClientId,
+export function buildConfiguration<C extends ClientId>(
+  clientId: C,
+  serverData: MCPServerConfig & { includeRootObject: false }
+): MCPServersRecord;
+export function buildConfiguration<C extends ClientId>(
+  clientId: C,
+  serverData: MCPServerConfig & { includeRootObject?: true }
+): ConfigForClient<C>;
+export function buildConfiguration<C extends ClientId>(
+  clientId: C,
   serverData: MCPServerConfig
-): Record<string, unknown> {
+): ConfigForClient<C> | MCPServersRecord;
+export function buildConfiguration<C extends ClientId>(
+  clientId: C,
+  serverData: MCPServerConfig
+): ConfigForClient<C> | MCPServersRecord {
   const builder = registry.createBuilder(clientId);
   return builder.buildConfiguration(serverData);
 }
