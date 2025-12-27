@@ -1,0 +1,2 @@
+[mcp_servers.glean_example]
+url = "https://api.example.com/mcp"

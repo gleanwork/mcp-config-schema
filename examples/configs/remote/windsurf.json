@@ -1,7 +1,0 @@
-{
-  "mcpServers": {
-    "glean": {
-      "serverUrl": "https://glean-dev-be.glean.com/mcp/default"
-    }
-  }
-}

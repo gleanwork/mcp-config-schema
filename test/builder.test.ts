@@ -1002,7 +1002,7 @@ describe('ConfigBuilder', () => {
   describe('Unsupported clients', () => {
     it('should throw when trying to create builder for ChatGPT', () => {
       expect(() => registry.createBuilder(CLIENT.CHATGPT)).toThrow(
-        'Cannot create builder for ChatGPT: ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.'
+        'Cannot create builder for ChatGPT: ChatGPT is web-based and requires configuring MCP servers through their web UI. No local configuration file support.'
       );
     });
 
