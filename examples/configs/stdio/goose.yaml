@@ -1,10 +1,10 @@
 extensions:
-  glean:
-    name: glean
+  glean_example:
+    name: glean_example
     cmd: npx
     args:
       - '-y'
-      - '@gleanwork/local-mcp-server'
+      - '@example/mcp-server'
     type: stdio
     timeout: 300
     enabled: true
@@ -12,5 +12,4 @@ extensions:
     description: null
     env_keys: []
     envs:
-      GLEAN_INSTANCE: your-instance
-      GLEAN_API_TOKEN: your-api-token
+      EXAMPLE_API_KEY: your-api-key

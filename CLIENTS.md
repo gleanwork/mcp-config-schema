@@ -5,7 +5,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ## Quick Reference
 
 | Client | Configuration | Connection Type | Requires mcp-remote? | Platforms |
-|--------|---------------|-----------------|---------------------|-----------|
+|---|---|---|---|---|
 | **ChatGPT** | Managed | HTTP only | No | Web-based |
 | **Claude Code** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 | **Claude for Desktop** | User-configurable | stdio only | Yes (for HTTP) | macOS, Windows, Linux |
@@ -26,7 +26,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 - **Configuration**: Centrally managed
 - **Connection Type**: HTTP only (managed)
 - **Documentation**: [Link](https://platform.openai.com/docs/mcp#test-and-connect-your-mcp-server)
-- **Notes**: ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.
+- **Notes**: ChatGPT is web-based and requires configuring MCP servers through their web UI. No local configuration file support.
 
 <details>
 <summary><strong>Internal Configuration Schema</strong></summary>
@@ -36,9 +36,9 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "id": "chatgpt",
   "name": "chatgpt",
   "displayName": "ChatGPT",
-  "description": "ChatGPT web interface - requires GPT configuration through web UI",
+  "description": "ChatGPT web interface - requires MCP configuration through web UI",
   "userConfigurable": false,
-  "localConfigNotes": "ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.",
+  "localConfigNotes": "ChatGPT is web-based and requires configuring MCP servers through their web UI. No local configuration file support.",
   "transports": ["http"],
   "supportedPlatforms": [],
   "configFormat": "json",
@@ -61,7 +61,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 - **Documentation**: [Link](https://docs.claude.com/en/docs/claude-code/mcp)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.claude.json`
+  - **macOS/Linux**: `$HOME/.claude.json`
   - **Windows**: `%USERPROFILE%\.claude.json`
 
 <details>
@@ -103,14 +103,14 @@ This document provides a comprehensive overview of all supported MCP clients, th
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (native)</strong></summary>
+<summary><strong>HTTP Configuration</strong></summary>
 
-```json snippet=examples/configs/remote/claude-code.json
+```json snippet=examples/configs/http/claude-code.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "type": "http",
-      "url": "https://glean-dev-be.glean.com/mcp/default"
+      "url": "https://api.example.com/mcp"
     }
   }
 }
@@ -119,21 +119,20 @@ This document provides a comprehensive overview of all supported MCP clients, th
 </details>
 
 <details>
-<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+<summary><strong>stdio Configuration</strong></summary>
 
-```json snippet=examples/configs/local/claude-code.json
+```json snippet=examples/configs/stdio/claude-code.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_API_KEY": "your-api-key"
       }
     }
   }
@@ -191,18 +190,18 @@ This document provides a comprehensive overview of all supported MCP clients, th
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (via stdio with mcp-remote bridge)</strong></summary>
+<summary><strong>HTTP Configuration (via mcp-remote bridge)</strong></summary>
 
-```json snippet=examples/configs/remote/claude-desktop.json
+```json snippet=examples/configs/http/claude-desktop.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
         "mcp-remote",
-        "https://glean-dev-be.glean.com/mcp/default"
+        "https://api.example.com/mcp"
       ]
     }
   }
@@ -212,21 +211,20 @@ This document provides a comprehensive overview of all supported MCP clients, th
 </details>
 
 <details>
-<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+<summary><strong>stdio Configuration</strong></summary>
 
-```json snippet=examples/configs/local/claude-desktop.json
+```json snippet=examples/configs/stdio/claude-desktop.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_API_KEY": "your-api-key"
       }
     }
   }
@@ -277,7 +275,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 - **Documentation**: [Link](https://developers.openai.com/codex/mcp)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.codex/config.toml`
+  - **macOS/Linux**: `$HOME/.codex/config.toml`
   - **Windows**: `%USERPROFILE%\.codex\config.toml`
 
 <details>
@@ -317,26 +315,25 @@ This document provides a comprehensive overview of all supported MCP clients, th
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (native)</strong></summary>
+<summary><strong>HTTP Configuration</strong></summary>
 
-```toml snippet=examples/configs/remote/codex.toml
-[mcp_servers.glean]
-url = "https://glean-dev-be.glean.com/mcp/default"
+```toml snippet=examples/configs/http/codex.toml
+[mcp_servers.glean_example]
+url = "https://api.example.com/mcp"
 ```
 
 </details>
 
 <details>
-<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+<summary><strong>stdio Configuration</strong></summary>
 
-```toml snippet=examples/configs/local/codex.toml
-[mcp_servers.glean]
+```toml snippet=examples/configs/stdio/codex.toml
+[mcp_servers.glean_example]
 command = "npx"
-args = [ "-y", "@gleanwork/local-mcp-server" ]
+args = [ "-y", "@example/mcp-server" ]
 
-[mcp_servers.glean.env]
-GLEAN_INSTANCE = "your-instance"
-GLEAN_API_TOKEN = "your-api-token"
+[mcp_servers.glean_example.env]
+EXAMPLE_API_KEY = "your-api-key"
 ```
 
 </details>
@@ -351,7 +348,7 @@ GLEAN_API_TOKEN = "your-api-token"
 - **Supported Platforms**: macOS, Linux, Windows
 - **One-Click Protocol**: `cursor://`
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.cursor/mcp.json`
+  - **macOS/Linux**: `$HOME/.cursor/mcp.json`
   - **Windows**: `%USERPROFILE%\.cursor\mcp.json`
 
 <details>
@@ -398,14 +395,14 @@ GLEAN_API_TOKEN = "your-api-token"
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (native)</strong></summary>
+<summary><strong>HTTP Configuration</strong></summary>
 
-```json snippet=examples/configs/remote/cursor.json
+```json snippet=examples/configs/http/cursor.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "type": "http",
-      "url": "https://glean-dev-be.glean.com/mcp/default"
+      "url": "https://api.example.com/mcp"
     }
   }
 }
@@ -414,21 +411,20 @@ GLEAN_API_TOKEN = "your-api-token"
 </details>
 
 <details>
-<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+<summary><strong>stdio Configuration</strong></summary>
 
-```json snippet=examples/configs/local/cursor.json
+```json snippet=examples/configs/stdio/cursor.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_API_KEY": "your-api-key"
       }
     }
   }
@@ -447,7 +443,7 @@ GLEAN_API_TOKEN = "your-api-token"
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Format**: YAML
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.config/goose/config.yaml`
+  - **macOS/Linux**: `$HOME/.config/goose/config.yaml`
   - **Windows**: `%USERPROFILE%\.config\goose\config.yaml`
 
 <details>
@@ -488,15 +484,15 @@ GLEAN_API_TOKEN = "your-api-token"
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (native)</strong></summary>
+<summary><strong>HTTP Configuration</strong></summary>
 
-```yaml snippet=examples/configs/remote/goose.yaml
+```yaml snippet=examples/configs/http/goose.yaml
 extensions:
-  glean:
+  glean_example:
     enabled: true
-    name: glean
+    name: glean_example
     type: streamable_http
-    uri: https://glean-dev-be.glean.com/mcp/default
+    uri: https://api.example.com/mcp
     envs: {}
     env_keys: []
     headers: {}
@@ -509,16 +505,16 @@ extensions:
 </details>
 
 <details>
-<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+<summary><strong>stdio Configuration</strong></summary>
 
-```yaml snippet=examples/configs/local/goose.yaml
+```yaml snippet=examples/configs/stdio/goose.yaml
 extensions:
-  glean:
-    name: glean
+  glean_example:
+    name: glean_example
     cmd: npx
     args:
       - '-y'
-      - '@gleanwork/local-mcp-server'
+      - '@example/mcp-server'
     type: stdio
     timeout: 300
     enabled: true
@@ -526,8 +522,7 @@ extensions:
     description: null
     env_keys: []
     envs:
-      GLEAN_INSTANCE: your-instance
-      GLEAN_API_TOKEN: your-api-token
+      EXAMPLE_API_KEY: your-api-key
 ```
 
 </details>
@@ -590,14 +585,14 @@ extensions:
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (native)</strong></summary>
+<summary><strong>HTTP Configuration</strong></summary>
 
-```json snippet=examples/configs/remote/vscode.json
+```json snippet=examples/configs/http/vscode.json
 {
   "servers": {
-    "glean": {
+    "glean_example": {
       "type": "http",
-      "url": "https://glean-dev-be.glean.com/mcp/default"
+      "url": "https://api.example.com/mcp"
     }
   }
 }
@@ -606,21 +601,20 @@ extensions:
 </details>
 
 <details>
-<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+<summary><strong>stdio Configuration</strong></summary>
 
-```json snippet=examples/configs/local/vscode.json
+```json snippet=examples/configs/stdio/vscode.json
 {
   "servers": {
-    "glean": {
+    "glean_example": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_API_KEY": "your-api-key"
       }
     }
   }
@@ -638,7 +632,7 @@ extensions:
 - **Documentation**: [Link](https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.codeium/windsurf/mcp_config.json`
+  - **macOS/Linux**: `$HOME/.codeium/windsurf/mcp_config.json`
   - **Windows**: `%USERPROFILE%\.codeium\windsurf\mcp_config.json`
 
 <details>
@@ -679,13 +673,13 @@ extensions:
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (native)</strong></summary>
+<summary><strong>HTTP Configuration</strong></summary>
 
-```json snippet=examples/configs/remote/windsurf.json
+```json snippet=examples/configs/http/windsurf.json
 {
   "mcpServers": {
-    "glean": {
-      "serverUrl": "https://glean-dev-be.glean.com/mcp/default"
+    "glean_example": {
+      "serverUrl": "https://api.example.com/mcp"
     }
   }
 }
@@ -694,20 +688,19 @@ extensions:
 </details>
 
 <details>
-<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+<summary><strong>stdio Configuration</strong></summary>
 
-```json snippet=examples/configs/local/windsurf.json
+```json snippet=examples/configs/stdio/windsurf.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_API_KEY": "your-api-key"
       }
     }
   }
@@ -726,7 +719,7 @@ extensions:
 - **Supported Platforms**: macOS, Linux, Windows
 - **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.junie/mcp.json`
+  - **macOS/Linux**: `$HOME/.junie/mcp.json`
   - **Windows**: `%USERPROFILE%\.junie\mcp.json`
 
 <details>
@@ -764,18 +757,18 @@ extensions:
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (via stdio with mcp-remote bridge)</strong></summary>
+<summary><strong>HTTP Configuration (via mcp-remote bridge)</strong></summary>
 
-```json snippet=examples/configs/remote/junie.json
+```json snippet=examples/configs/http/junie.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
         "mcp-remote",
-        "https://glean-dev-be.glean.com/mcp/default"
+        "https://api.example.com/mcp"
       ]
     }
   }
@@ -785,21 +778,20 @@ extensions:
 </details>
 
 <details>
-<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+<summary><strong>stdio Configuration</strong></summary>
 
-```json snippet=examples/configs/local/junie.json
+```json snippet=examples/configs/stdio/junie.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_API_KEY": "your-api-key"
       }
     }
   }
@@ -848,18 +840,18 @@ extensions:
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (via stdio with mcp-remote bridge)</strong></summary>
+<summary><strong>HTTP Configuration (via mcp-remote bridge)</strong></summary>
 
-```json snippet=examples/configs/remote/jetbrains.json
+```json snippet=examples/configs/http/jetbrains.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
         "mcp-remote",
-        "https://glean-dev-be.glean.com/mcp/default"
+        "https://api.example.com/mcp"
       ]
     }
   }
@@ -869,21 +861,20 @@ extensions:
 </details>
 
 <details>
-<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+<summary><strong>stdio Configuration</strong></summary>
 
-```json snippet=examples/configs/local/jetbrains.json
+```json snippet=examples/configs/stdio/jetbrains.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "type": "stdio",
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_API_KEY": "your-api-key"
       }
     }
   }
@@ -901,7 +892,7 @@ extensions:
 - **Documentation**: [Link](https://geminicli.com/docs/tools/mcp-server/)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Paths**:
-  - **macOS/Linux: `$HOME/.gemini/settings.json`
+  - **macOS/Linux**: `$HOME/.gemini/settings.json`
   - **Windows**: `%USERPROFILE%\.gemini\settings.json`
 
 <details>
@@ -941,13 +932,13 @@ extensions:
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (native)</strong></summary>
+<summary><strong>HTTP Configuration</strong></summary>
 
-```json snippet=examples/configs/remote/gemini.json
+```json snippet=examples/configs/http/gemini.json
 {
   "mcpServers": {
-    "glean": {
-      "httpUrl": "https://glean-dev-be.glean.com/mcp/default"
+    "glean_example": {
+      "httpUrl": "https://api.example.com/mcp"
     }
   }
 }
@@ -956,20 +947,19 @@ extensions:
 </details>
 
 <details>
-<summary><strong>Standard I/O Configuration (local process)</strong></summary>
+<summary><strong>stdio Configuration</strong></summary>
 
-```json snippet=examples/configs/local/gemini.json
+```json snippet=examples/configs/stdio/gemini.json
 {
   "mcpServers": {
-    "glean": {
+    "glean_example": {
       "command": "npx",
       "args": [
         "-y",
-        "@gleanwork/local-mcp-server"
+        "@example/mcp-server"
       ],
       "env": {
-        "GLEAN_INSTANCE": "your-instance",
-        "GLEAN_API_TOKEN": "your-api-token"
+        "EXAMPLE_API_KEY": "your-api-key"
       }
     }
   }
@@ -1000,7 +990,7 @@ Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP
 
 ### Web-based/Managed Clients
 Clients that don't support local configuration files:
-- ChatGPT (chatgpt is web-based and requires creating custom gpts through their web ui. no local configuration file support.)
+- ChatGPT (chatgpt is web-based and requires configuring mcp servers through their web ui. no local configuration file support.)
 - Claude for Teams/Enterprise (mcp servers are centrally managed by admins. no local configuration support - servers must be configured at the organization level.)
 
 ## Configuration File Formats

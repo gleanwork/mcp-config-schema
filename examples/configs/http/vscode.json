@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "glean_example": {
+      "type": "http",
+      "url": "https://api.example.com/mcp"
+    }
+  }
+}
