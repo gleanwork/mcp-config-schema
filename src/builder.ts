@@ -1,4 +1,4 @@
-import { ClientId, MCPServerConfig, MCPServersRecord, ConfigForClient } from './types.js';
+import { ClientId, MCPConnectionOptions, MCPServersRecord, ConfigForClient } from './types.js';
 import { MCPConfigRegistry } from './registry.js';
 
 // Create a singleton instance of the registry
@@ -27,19 +27,19 @@ const registry = new MCPConfigRegistry();
  */
 export function buildConfiguration<C extends ClientId>(
   clientId: C,
-  serverData: MCPServerConfig & { includeRootObject: false }
+  serverData: MCPConnectionOptions & { includeRootObject: false }
 ): MCPServersRecord;
 export function buildConfiguration<C extends ClientId>(
   clientId: C,
-  serverData: MCPServerConfig & { includeRootObject?: true }
+  serverData: MCPConnectionOptions & { includeRootObject?: true }
 ): ConfigForClient<C>;
 export function buildConfiguration<C extends ClientId>(
   clientId: C,
-  serverData: MCPServerConfig
+  serverData: MCPConnectionOptions
 ): ConfigForClient<C> | MCPServersRecord;
 export function buildConfiguration<C extends ClientId>(
   clientId: C,
-  serverData: MCPServerConfig
+  serverData: MCPConnectionOptions
 ): ConfigForClient<C> | MCPServersRecord {
   const builder = registry.createBuilder(clientId);
   return builder.buildConfiguration(serverData);
@@ -53,7 +53,10 @@ export function buildConfiguration<C extends ClientId>(
  * @param serverData - The server configuration data
  * @returns The built configuration as a formatted string (JSON or YAML)
  */
-export function buildConfigurationString(clientId: ClientId, serverData: MCPServerConfig): string {
+export function buildConfigurationString(
+  clientId: ClientId,
+  serverData: MCPConnectionOptions
+): string {
   const builder = registry.createBuilder(clientId);
   const config = builder.buildConfiguration(serverData);
   return builder.toString(config);
@@ -67,7 +70,7 @@ export function buildConfigurationString(clientId: ClientId, serverData: MCPServ
  * @param serverData - The server configuration data
  * @returns The one-click installation URL
  */
-export function buildOneClickUrl(clientId: ClientId, serverData: MCPServerConfig): string {
+export function buildOneClickUrl(clientId: ClientId, serverData: MCPConnectionOptions): string {
   const builder = registry.createBuilder(clientId);
   if (!builder.buildOneClickUrl) {
     throw new Error(`One-click URL is not supported for client: ${clientId}`);
@@ -116,7 +119,7 @@ export function clientSupportsStdio(clientId: ClientId): boolean {
  * @param serverData - The server configuration data
  * @returns The CLI command string, or null if the client doesn't support CLI installation
  */
-export function buildCommand(clientId: ClientId, serverData: MCPServerConfig): string | null {
+export function buildCommand(clientId: ClientId, serverData: MCPConnectionOptions): string | null {
   try {
     const builder = registry.createBuilder(clientId);
     return builder.buildCommand(serverData);

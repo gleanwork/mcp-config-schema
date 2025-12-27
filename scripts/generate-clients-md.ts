@@ -24,7 +24,12 @@ const clients = registry.getAllConfigs();
  * Create a collapsible details block with a code snippet inside.
  * The snippetPath creates a reference that markdown-code uses to keep content in sync.
  */
-function detailsWithCode(summary: string, lang: string, snippetPath: string, content: string): string {
+function detailsWithCode(
+  summary: string,
+  lang: string,
+  snippetPath: string,
+  content: string
+): string {
   return [
     '<details>',
     `<summary><strong>${summary}</strong></summary>`,
@@ -141,7 +146,13 @@ function getPlatformsDisplay(client: MCPClientConfig): string {
 // =============================================================================
 
 function generateQuickReference(): string {
-  const headers = ['Client', 'Configuration', 'Connection Type', 'Requires mcp-remote?', 'Platforms'];
+  const headers = [
+    'Client',
+    'Configuration',
+    'Connection Type',
+    'Requires mcp-remote?',
+    'Platforms',
+  ];
 
   const rows = clients.map((client) => {
     const configuration = client.userConfigurable ? 'User-configurable' : 'Managed';
@@ -168,7 +179,9 @@ function generateClientSection(client: MCPClientConfig): string {
 
   // Basic info as bullet list
   const info: string[] = [];
-  info.push(`**Configuration**: ${client.userConfigurable ? 'User-configurable' : 'Centrally managed'}`);
+  info.push(
+    `**Configuration**: ${client.userConfigurable ? 'User-configurable' : 'Centrally managed'}`
+  );
 
   // Connection type
   const hasHttp = client.transports?.includes('http');
@@ -177,7 +190,9 @@ function generateClientSection(client: MCPClientConfig): string {
   if (hasHttp && hasStdio) {
     info.push('**Connection Type**: Native HTTP support');
   } else if (hasStdio && !hasHttp) {
-    const suffix = client.userConfigurable ? ' (requires mcp-remote for HTTP servers)' : ' (managed)';
+    const suffix = client.userConfigurable
+      ? ' (requires mcp-remote for HTTP servers)'
+      : ' (managed)';
     info.push(`**Connection Type**: stdio only${suffix}`);
   } else if (!client.userConfigurable) {
     if (hasHttp && !hasStdio) {
@@ -230,39 +245,47 @@ function generateClientSection(client: MCPClientConfig): string {
   // Configuration examples
   if (client.userConfigurable) {
     parts.push('');
-    parts.push(detailsWithCode(
-      'Internal Configuration Schema',
-      'json',
-      `configs/${client.id}.json`,
-      readClientConfig(client.id)
-    ));
+    parts.push(
+      detailsWithCode(
+        'Internal Configuration Schema',
+        'json',
+        `configs/${client.id}.json`,
+        readClientConfig(client.id)
+      )
+    );
 
     const httpSummary = !client.transports?.includes('http')
       ? 'HTTP Configuration (via mcp-remote bridge)'
       : 'HTTP Configuration';
     parts.push('');
-    parts.push(detailsWithCode(
-      httpSummary,
-      ext,
-      `examples/configs/http/${client.id}.${ext}`,
-      readExampleConfig('http', client.id, ext)
-    ));
+    parts.push(
+      detailsWithCode(
+        httpSummary,
+        ext,
+        `examples/configs/http/${client.id}.${ext}`,
+        readExampleConfig('http', client.id, ext)
+      )
+    );
 
     parts.push('');
-    parts.push(detailsWithCode(
-      'stdio Configuration',
-      ext,
-      `examples/configs/stdio/${client.id}.${ext}`,
-      readExampleConfig('stdio', client.id, ext)
-    ));
+    parts.push(
+      detailsWithCode(
+        'stdio Configuration',
+        ext,
+        `examples/configs/stdio/${client.id}.${ext}`,
+        readExampleConfig('stdio', client.id, ext)
+      )
+    );
   } else {
     parts.push('');
-    parts.push(detailsWithCode(
-      'Internal Configuration Schema',
-      'json',
-      `configs/${client.id}.json`,
-      readClientConfig(client.id)
-    ));
+    parts.push(
+      detailsWithCode(
+        'Internal Configuration Schema',
+        'json',
+        `configs/${client.id}.json`,
+        readClientConfig(client.id)
+      )
+    );
   }
 
   return parts.join('\n');
@@ -295,7 +318,9 @@ function generateDocument(): string {
   }
 
   // Connection Types Explained
-  const nativeHttpClients = clients.filter((c) => c.transports?.includes('http') && c.userConfigurable);
+  const nativeHttpClients = clients.filter(
+    (c) => c.transports?.includes('http') && c.userConfigurable
+  );
   const stdioOnlyClients = clients.filter(
     (c) => c.transports?.includes('stdio') && !c.transports?.includes('http') && c.userConfigurable
   );
@@ -308,12 +333,20 @@ function generateDocument(): string {
   parts.push(bulletList(nativeHttpClients.map((c) => c.displayName)));
   parts.push('');
   parts.push('### stdio-only Clients');
-  parts.push('Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP servers:');
+  parts.push(
+    'Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP servers:'
+  );
   parts.push(bulletList(stdioOnlyClients.map((c) => c.displayName)));
   parts.push('');
   parts.push('### Web-based/Managed Clients');
   parts.push("Clients that don't support local configuration files:");
-  parts.push(bulletList(managedClients.map((c) => `${c.displayName} (${c.localConfigNotes?.toLowerCase() || 'centrally managed'})`)));
+  parts.push(
+    bulletList(
+      managedClients.map(
+        (c) => `${c.displayName} (${c.localConfigNotes?.toLowerCase() || 'centrally managed'})`
+      )
+    )
+  );
   parts.push('');
 
   // Security considerations
@@ -323,7 +356,7 @@ function generateDocument(): string {
     parts.push('');
     for (const client of securityClients) {
       parts.push(`### ${client.displayName} OAuth Vulnerability`);
-      parts.push(client.securityNotes);
+      parts.push(client.securityNotes!);
       parts.push('');
     }
   }
@@ -356,17 +389,23 @@ function generateDocument(): string {
   parts.push('## One-Click Protocol Support');
   parts.push('');
   parts.push('Some clients support one-click installation via custom protocols:');
-  parts.push(bulletList(oneClickClients.map((c) => `**${c.displayName}**: \`${c.protocolHandler!.protocol}\``)));
+  parts.push(
+    bulletList(
+      oneClickClients.map((c) => `**${c.displayName}**: \`${c.protocolHandler!.protocol}\``)
+    )
+  );
   parts.push('');
 
   // Additional Resources
   parts.push('## Additional Resources');
   parts.push('');
-  parts.push(bulletList([
-    '[MCP Documentation](https://modelcontextprotocol.io)',
-    '[mcp-remote Bridge](https://www.npmjs.com/package/mcp-remote)',
-    '[@gleanwork/local-mcp-server](https://www.npmjs.com/package/@gleanwork/local-mcp-server)',
-  ]));
+  parts.push(
+    bulletList([
+      '[MCP Documentation](https://modelcontextprotocol.io)',
+      '[mcp-remote Bridge](https://www.npmjs.com/package/mcp-remote)',
+      '[@gleanwork/local-mcp-server](https://www.npmjs.com/package/@gleanwork/local-mcp-server)',
+    ])
+  );
   parts.push('');
   parts.push('---');
   parts.push('');

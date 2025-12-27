@@ -19,9 +19,7 @@ const registry = new MCPConfigRegistry({
 const examplesDir = join(__dirname, '..', 'examples', 'configs');
 
 function getFileExtension(client: MCPClientConfig): string {
-  return client.configFormat === 'yaml' ? 'yaml'
-       : client.configFormat === 'toml' ? 'toml'
-       : 'json';
+  return client.configFormat === 'yaml' ? 'yaml' : client.configFormat === 'toml' ? 'toml' : 'json';
 }
 
 function writeConfig(
