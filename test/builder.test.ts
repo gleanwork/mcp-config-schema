@@ -4,7 +4,6 @@ import {
   validateGeneratedConfig,
   validateMcpServersConfig,
   validateVsCodeConfig,
-  buildCommand,
   CLIENT,
 } from '../src/index';
 import * as fs from 'fs';
@@ -360,100 +359,6 @@ describe('ConfigBuilder', () => {
         expect(command).toBe(null);
       });
 
-      it('handles claude-teams-enterprise client', () => {
-        // Claude Teams doesn't support local config, but buildCommand should handle it gracefully
-        const command = buildCommand(CLIENT.CLAUDE_TEAMS_ENTERPRISE, {
-          transport: 'http',
-          serverUrl: 'https://example.com/mcp',
-          serverName: 'test',
-          apiToken: 'token123',
-        });
-        // Should return null since Claude Teams doesn't support local config
-        expect(command).toBe(null);
-      });
-
-      it('handles chatgpt client', () => {
-        // ChatGPT doesn't support local config, but buildCommand should not throw
-        const command = buildCommand(CLIENT.CHATGPT, {
-          transport: 'http',
-          serverUrl: 'https://example.com/mcp',
-          serverName: 'test',
-        });
-        // ChatGPT requires web UI, so command should be null
-        expect(command).toBe(null);
-      });
-
-      it('handles jetbrains client', () => {
-        // JetBrains AI Assistant doesn't support local config, but buildCommand should not throw
-        const command = buildCommand(CLIENT.JETBRAINS, {
-          transport: 'http',
-          serverUrl: 'https://example.com/mcp',
-          serverName: 'test',
-        });
-        // JetBrains requires UI configuration, so command should be null
-        expect(command).toBe(null);
-      });
-
-      it('buildCommand wrapper handles errors gracefully', () => {
-        // Test with an invalid client ID
-        const command = buildCommand('invalid-client' as ClientId, {
-          transport: 'http',
-          serverUrl: 'https://example.com/mcp',
-        });
-        expect(command).toBe(null);
-      });
-
-      it('handles all supported clients for remote', () => {
-        // Only VS Code and Claude Code have native HTTP commands that don't require cliPackage
-        const nativeHttpClients = [CLIENT.CLAUDE_CODE, CLIENT.VSCODE];
-
-        nativeHttpClients.forEach((clientId) => {
-          const command = buildCommand(clientId, {
-            transport: 'http',
-            serverUrl: 'https://example.com/mcp',
-            serverName: 'test',
-          });
-          expect(command).not.toBe(null);
-          expect(command).toContain('example.com/mcp');
-        });
-
-        // Clients that need cliPackage will return null without registry options
-        const cliPackageClients = [CLIENT.CURSOR, CLIENT.WINDSURF, CLIENT.GOOSE, CLIENT.CLAUDE_DESKTOP];
-
-        cliPackageClients.forEach((clientId) => {
-          const command = buildCommand(clientId, {
-            transport: 'http',
-            serverUrl: 'https://example.com/mcp',
-            serverName: 'test',
-          });
-          // Returns null because cliPackage is not configured
-          expect(command).toBe(null);
-        });
-      });
-
-      it('handles all supported clients for local', () => {
-        // Without registry options, buildCommand returns null for stdio transport
-        // because serverPackage is not configured
-        const clients = [
-          CLIENT.CLAUDE_CODE,
-          CLIENT.CODEX,
-          CLIENT.CURSOR,
-          CLIENT.VSCODE,
-          CLIENT.WINDSURF,
-          CLIENT.GOOSE,
-          CLIENT.CLAUDE_DESKTOP,
-        ];
-
-        clients.forEach((clientId) => {
-          const command = buildCommand(clientId, {
-            transport: 'stdio',
-            instance: 'my-instance',
-            serverName: 'test',
-          });
-          // Returns null because serverPackage is not configured
-          expect(command).toBe(null);
-        });
-      });
     });
   });
 
@@ -1002,7 +907,7 @@ describe('ConfigBuilder', () => {
   describe('Unsupported clients', () => {
     it('should throw when trying to create builder for ChatGPT', () => {
       expect(() => registry.createBuilder(CLIENT.CHATGPT)).toThrow(
-        'Cannot create builder for ChatGPT: ChatGPT is web-based and requires creating custom GPTs through their web UI. No local configuration file support.'
+        'Cannot create builder for ChatGPT: ChatGPT is web-based and requires configuring MCP servers through their web UI. No local configuration file support.'
       );
     });
 

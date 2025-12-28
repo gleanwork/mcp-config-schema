@@ -20,12 +20,6 @@ describe('Browser Build', () => {
     expect(browserExports.validateGeneratedConfig).toBeDefined();
   });
 
-  it('exports convenience functions', () => {
-    expect(browserExports.buildConfiguration).toBeDefined();
-    expect(browserExports.buildConfigurationString).toBeDefined();
-    expect(browserExports.buildOneClickUrl).toBeDefined();
-  });
-
   it('exports CLIENT constants', () => {
     expect(browserExports.CLIENT).toBeDefined();
     expect(browserExports.CLIENT.CLAUDE_CODE).toBe('claude-code');

@@ -10,6 +10,13 @@ This document provides comprehensive migration instructions for updating from `@
 | Type rename | `ServerConfig` | `MCPConnectionOptions` |
 | Function rename | `validateServerConfig()` | `validateConnectionOptions()` |
 | Function rename | `safeValidateServerConfig()` | `safeValidateConnectionOptions()` |
+| Function removed | `buildConfiguration()` | Use `registry.createBuilder().buildConfiguration()` |
+| Function removed | `buildConfigurationString()` | Use `builder.buildConfiguration()` then `builder.toString()` |
+| Function removed | `buildOneClickUrl()` | Use `builder.buildOneClickUrl()` |
+| Function removed | `buildCommand()` | Use `builder.buildCommand()` |
+| Function removed | `clientNeedsMcpRemote()` | Use `registry.clientNeedsMcpRemote()` |
+| Function removed | `clientSupportsHttpNatively()` | Use `registry.clientSupportsHttpNatively()` |
+| Function removed | `clientSupportsStdio()` | Use `registry.clientSupportsStdio()` |
 | Property removed | `instance` | Use `env` object instead |
 | Property removed | `apiToken` | Use `headers` object instead |
 | Property added | - | `env: Record<string, string>` |
@@ -92,6 +99,123 @@ const result = safeValidateServerConfig(options)
 import { safeValidateConnectionOptions } from '@gleanwork/mcp-config-schema'
 
 const result = safeValidateConnectionOptions(options)
+```
+
+---
+
+## Removed Standalone Functions
+
+The standalone convenience functions have been removed in favor of the registry/builder pattern. This provides a single, consistent API and ensures proper configuration (e.g., `serverPackage` for stdio transport).
+
+### buildConfiguration() → registry.createBuilder().buildConfiguration()
+
+```typescript
+// BEFORE (v2.x)
+import { buildConfiguration } from '@gleanwork/mcp-config-schema'
+
+const config = buildConfiguration('cursor', {
+  transport: 'http',
+  serverUrl: 'https://example.com/mcp',
+})
+```
+
+```typescript
+// AFTER (v3.0)
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema'
+
+const registry = new MCPConfigRegistry()
+const builder = registry.createBuilder('cursor')
+const config = builder.buildConfiguration({
+  transport: 'http',
+  serverUrl: 'https://example.com/mcp',
+})
+```
+
+### buildCommand() → builder.buildCommand()
+
+```typescript
+// BEFORE (v2.x)
+import { buildCommand } from '@gleanwork/mcp-config-schema'
+
+const command = buildCommand('cursor', {
+  transport: 'http',
+  serverUrl: 'https://example.com/mcp',
+})
+```
+
+```typescript
+// AFTER (v3.0)
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema'
+
+const registry = new MCPConfigRegistry()
+const builder = registry.createBuilder('cursor')
+const command = builder.buildCommand({
+  transport: 'http',
+  serverUrl: 'https://example.com/mcp',
+})
+```
+
+### clientNeedsMcpRemote() → registry.clientNeedsMcpRemote()
+
+```typescript
+// BEFORE (v2.x)
+import { clientNeedsMcpRemote } from '@gleanwork/mcp-config-schema'
+
+if (clientNeedsMcpRemote('claude-desktop')) {
+  // Use mcp-remote bridge
+}
+```
+
+```typescript
+// AFTER (v3.0)
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema'
+
+const registry = new MCPConfigRegistry()
+if (registry.clientNeedsMcpRemote('claude-desktop')) {
+  // Use mcp-remote bridge
+}
+```
+
+### clientSupportsHttpNatively() → registry.clientSupportsHttpNatively()
+
+```typescript
+// BEFORE (v2.x)
+import { clientSupportsHttpNatively } from '@gleanwork/mcp-config-schema'
+
+if (clientSupportsHttpNatively('cursor')) {
+  // Direct HTTP connection
+}
+```
+
+```typescript
+// AFTER (v3.0)
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema'
+
+const registry = new MCPConfigRegistry()
+if (registry.clientSupportsHttpNatively('cursor')) {
+  // Direct HTTP connection
+}
+```
+
+### clientSupportsStdio() → registry.clientSupportsStdio()
+
+```typescript
+// BEFORE (v2.x)
+import { clientSupportsStdio } from '@gleanwork/mcp-config-schema'
+
+if (clientSupportsStdio('vscode')) {
+  // stdio transport available
+}
+```
+
+```typescript
+// AFTER (v3.0)
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema'
+
+const registry = new MCPConfigRegistry()
+if (registry.clientSupportsStdio('vscode')) {
+  // stdio transport available
+}
 ```
 
 ---
@@ -394,7 +518,7 @@ const serverData: MCPConnectionOptions = {
 const config = builder.buildConfiguration(serverData)
 ```
 
-### Example 3: buildCommand Function
+### Example 3: buildCommand via Builder
 
 ```typescript
 // BEFORE (v2.x)
@@ -412,7 +536,10 @@ const command = buildCommand('cursor', serverData)
 
 ```typescript
 // AFTER (v3.0)
-import { buildCommand, type MCPConnectionOptions } from '@gleanwork/mcp-config-schema'
+import { MCPConfigRegistry, type MCPConnectionOptions } from '@gleanwork/mcp-config-schema'
+
+const registry = new MCPConfigRegistry()
+const builder = registry.createBuilder('cursor')
 
 const serverData: MCPConnectionOptions = {
   transport: 'http',
@@ -423,7 +550,7 @@ const serverData: MCPConnectionOptions = {
   },
 }
 
-const command = buildCommand('cursor', serverData)
+const command = builder.buildCommand(serverData)
 ```
 
 ### Example 4: One-Click URL Generation
@@ -487,12 +614,13 @@ const useMcpConfig = (config: MCPConfiguration) => {
 ```typescript
 // AFTER (v3.0)
 import type { MCPConnectionOptions } from '@gleanwork/mcp-config-schema'
-import { buildCommand, MCPConfigRegistry } from '@gleanwork/mcp-config-schema'
+import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema'
 
 const useMcpConfig = (config: MCPConfiguration) => {
   const registry = useMemo(() => new MCPConfigRegistry(), [])
 
   const generateCliCommand = useMemo(() => {
+    const builder = registry.createBuilder(config.clientId)
     const serverData: MCPConnectionOptions = {
       headers: config.authMethod === 'apiToken' && config.bearerToken
         ? { Authorization: `Bearer ${config.bearerToken}` }
@@ -501,8 +629,8 @@ const useMcpConfig = (config: MCPConfiguration) => {
       serverUrl,
       transport: 'http' as const,
     }
-    return buildCommand(config.clientId, serverData)
-  }, [config, serverUrl, fullServerName])
+    return builder.buildCommand(serverData)
+  }, [config, serverUrl, fullServerName, registry])
 
   const generateConfiguration = useMemo(() => {
     const builder = registry.createBuilder(config.clientId)
@@ -579,6 +707,9 @@ Common errors to watch for:
 - `Property 'apiToken' does not exist on type 'MCPConnectionOptions'`
 - `Property 'instance' does not exist on type 'MCPConnectionOptions'`
 - `Cannot find name 'MCPServerConfig'`
+- `Module '"@gleanwork/mcp-config-schema"' has no exported member 'buildConfiguration'`
+- `Module '"@gleanwork/mcp-config-schema"' has no exported member 'buildCommand'`
+- `Module '"@gleanwork/mcp-config-schema"' has no exported member 'clientNeedsMcpRemote'`
 
 ---
 
