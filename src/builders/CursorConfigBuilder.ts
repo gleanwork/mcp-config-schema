@@ -18,7 +18,6 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
     let config: Record<string, unknown>;
 
     if (options.transport === 'http') {
-      // Substitute URL template variables
       const resolvedUrl = this.substituteUrlVariables(
         options.serverUrl || '',
         options.urlVariables
@@ -29,7 +28,6 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
         url: resolvedUrl,
       };
 
-      // Use generic headers
       const headers = this.buildHeaders(options);
       if (headers) {
         config['headers'] = headers;
@@ -41,7 +39,6 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
         args: ['-y', this.serverPackage],
       };
 
-      // Use generic env vars from options
       const env = this.getEnvVars(options);
       if (env) {
         config['env'] = env;
@@ -60,7 +57,6 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       return null;
     }
 
-    // Substitute URL template variables
     const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
     let command = `npx -y ${this.cliPackage} remote`;

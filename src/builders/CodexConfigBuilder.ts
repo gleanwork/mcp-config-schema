@@ -31,7 +31,6 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
     serverConfig[stdioPropertyMapping.commandProperty] = 'npx';
     serverConfig[stdioPropertyMapping.argsProperty] = ['-y', this.serverPackage];
 
-    // Use generic env vars from options
     if (stdioPropertyMapping.envProperty) {
       const env = this.getEnvVars(options);
       if (env) {
@@ -106,7 +105,6 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
       throw new Error('HTTP transport requires a server URL');
     }
 
-    // Substitute URL template variables
     const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
     const serverName = buildMcpServerName({
@@ -145,7 +143,6 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
     // Format: codex mcp add <server-name> --env VAR1=VALUE1 --env VAR2=VALUE2 -- <stdio server-command>
     let command = `codex mcp add ${serverName}`;
 
-    // Use generic env vars from options
     const env = this.getEnvVars(options);
     if (env) {
       for (const [key, value] of Object.entries(env)) {
