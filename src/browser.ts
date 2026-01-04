@@ -14,18 +14,4 @@ export {
 } from './schemas.js';
 
 export { MCPConfigRegistry } from './registry.js';
-export { BaseConfigBuilder } from './builders/BaseConfigBuilder.js';
-export { GenericConfigBuilder } from './builders/GenericConfigBuilder.js';
-export { VSCodeConfigBuilder } from './builders/VSCodeConfigBuilder.js';
-export { GooseConfigBuilder } from './builders/GooseConfigBuilder.js';
-export { CursorConfigBuilder } from './builders/CursorConfigBuilder.js';
-export { ClaudeCodeConfigBuilder } from './builders/ClaudeCodeConfigBuilder.js';
-export {
-  buildConfiguration,
-  buildConfigurationString,
-  buildOneClickUrl,
-  buildCommand,
-  clientNeedsMcpRemote,
-  clientSupportsHttpNatively,
-  clientSupportsStdio,
-} from './builder.js';
+export * from './builders/index.js';

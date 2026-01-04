@@ -7,13 +7,15 @@ import {
   safeValidateClientConfig,
 } from './types.js';
 
-import { BaseConfigBuilder } from './builders/BaseConfigBuilder.js';
-import { GenericConfigBuilder } from './builders/GenericConfigBuilder.js';
-import { GooseConfigBuilder } from './builders/GooseConfigBuilder.js';
-import { VSCodeConfigBuilder } from './builders/VSCodeConfigBuilder.js';
-import { CursorConfigBuilder } from './builders/CursorConfigBuilder.js';
-import { ClaudeCodeConfigBuilder } from './builders/ClaudeCodeConfigBuilder.js';
-import { CodexConfigBuilder } from './builders/CodexConfigBuilder.js';
+import {
+  BaseConfigBuilder,
+  GenericConfigBuilder,
+  GooseConfigBuilder,
+  VSCodeConfigBuilder,
+  CursorConfigBuilder,
+  ClaudeCodeConfigBuilder,
+  CodexConfigBuilder,
+} from './builders/index.js';
 import chatgptConfig from '../configs/chatgpt.json';
 import claudeCodeConfig from '../configs/claude-code.json';
 import claudeDesktopConfig from '../configs/claude-desktop.json';

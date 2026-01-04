@@ -8,7 +8,6 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
       throw new Error('HTTP transport requires a server URL');
     }
 
-    // Substitute URL template variables
     const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
     const serverName = buildMcpServerName({
@@ -20,7 +19,6 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
 
     let command = `claude mcp add ${serverName} ${resolvedUrl} --transport http --scope user`;
 
-    // Add headers as command arguments
     const headers = this.buildHeaders(options);
     if (headers) {
       for (const [key, value] of Object.entries(headers)) {
@@ -40,7 +38,6 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
 
     let command = `claude mcp add ${serverName} --scope user`;
 
-    // Use generic env vars from options
     const env = this.getEnvVars(options);
     if (env) {
       for (const [key, value] of Object.entries(env)) {
