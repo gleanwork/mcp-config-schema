@@ -48,7 +48,7 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"code --add-mcp '{"name":"glean_test-server","type":"http","url":"https://example.com/mcp/default","headers":{"Authorization":"Bearer test-token"}}'"`
+        `"code --add-mcp '{"name":"test-server","type":"http","url":"https://example.com/mcp/default","headers":{"Authorization":"Bearer test-token"}}'"`
       );
     });
 
@@ -61,7 +61,7 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"code --add-mcp '{"name":"glean_local-test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"test-instance","GLEAN_API_TOKEN":"test-token"}}'"`
+        `"code --add-mcp '{"name":"local-test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"test-instance","GLEAN_API_TOKEN":"test-token"}}'"`
       );
     });
 
@@ -75,7 +75,7 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"claude mcp add glean_test-server https://example.com/mcp/default --transport http --scope user --header "Authorization: Bearer test-token""`
+        `"claude mcp add test-server https://example.com/mcp/default --transport http --scope user --header "Authorization: Bearer test-token""`
       );
     });
 
@@ -88,7 +88,7 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"claude mcp add glean_local-test --scope user --env GLEAN_INSTANCE=test-instance --env GLEAN_API_TOKEN=test-token -- npx -y @gleanwork/local-mcp-server"`
+        `"claude mcp add local-test --scope user --env GLEAN_INSTANCE=test-instance --env GLEAN_API_TOKEN=test-token -- npx -y @gleanwork/local-mcp-server"`
       );
     });
 
@@ -157,7 +157,7 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"code --add-mcp '{"name":"glean_test'\\''s-server","type":"http","url":"https://example.com/mcp/default","headers":{"Authorization":"Bearer test-token"}}'"`
+        `"code --add-mcp '{"name":"test'\\''s-server","type":"http","url":"https://example.com/mcp/default","headers":{"Authorization":"Bearer test-token"}}'"`
       );
     });
 
@@ -205,7 +205,7 @@ describe('ConfigBuilder', () => {
 
       // Claude Code uses native command, so configureMcpServerVersion doesn't apply
       expect(command).toMatchInlineSnapshot(
-        `"claude mcp add glean_local-test --scope user --env GLEAN_INSTANCE=test-instance -- npx -y @gleanwork/local-mcp-server"`
+        `"claude mcp add local-test --scope user --env GLEAN_INSTANCE=test-instance -- npx -y @gleanwork/local-mcp-server"`
       );
     });
 
@@ -233,7 +233,7 @@ describe('ConfigBuilder', () => {
 
       // Codex CLI uses bearer-token-env-var to reference the env var containing the token
       expect(command).toMatchInlineSnapshot(
-        `"codex mcp add --url https://example.com/mcp/default --bearer-token-env-var GLEAN_API_TOKEN glean_test-server"`
+        `"codex mcp add --url https://example.com/mcp/default --bearer-token-env-var GLEAN_API_TOKEN test-server"`
       );
     });
 
@@ -246,61 +246,8 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"codex mcp add glean_local-test --env GLEAN_INSTANCE=test-instance --env GLEAN_API_TOKEN=test-token -- npx -y @gleanwork/local-mcp-server"`
+        `"codex mcp add local-test --env GLEAN_INSTANCE=test-instance --env GLEAN_API_TOKEN=test-token -- npx -y @gleanwork/local-mcp-server"`
       );
-    });
-
-    describe('White-label support', () => {
-      it('uses custom productName in server names for HTTP transport', () => {
-        const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
-        const command = vscodeBuilder.buildCommand({
-          transport: 'http',
-          serverUrl: 'https://example.com/mcp/default',
-          serverName: 'test-server',
-          headers: { Authorization: 'Bearer test-token' },
-          productName: 'acme',
-        });
-        expect(command).toMatchInlineSnapshot(
-          `"code --add-mcp '{"name":"acme_test-server","type":"http","url":"https://example.com/mcp/default","headers":{"Authorization":"Bearer test-token"}}'"`
-        );
-      });
-
-      it('uses custom productName in server names for stdio transport', () => {
-        const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
-        const command = vscodeBuilder.buildCommand({
-          transport: 'stdio',
-          serverName: 'local-test',
-          productName: 'corp',
-          env: createGleanEnv('test-instance', 'test-token'),
-        });
-        expect(command).toMatchInlineSnapshot(
-          `"code --add-mcp '{"name":"corp_local-test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"test-instance","GLEAN_API_TOKEN":"test-token"}}'"`
-        );
-      });
-
-      it('uses custom productName for extracted server names', () => {
-        const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
-        const config = cursorBuilder.buildConfiguration({
-          transport: 'http',
-          serverUrl: 'https://example.com/mcp/analytics',
-          productName: 'mycompany',
-        });
-        expect(Object.keys(config.mcpServers as Record<string, unknown>)[0]).toBe(
-          'mycompany_analytics'
-        );
-      });
-
-      it('defaults to glean when productName is not provided', () => {
-        const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
-        const command = vscodeBuilder.buildCommand({
-          transport: 'http',
-          serverUrl: 'https://example.com/mcp/default',
-          serverName: 'test-server',
-        });
-        expect(command).toMatchInlineSnapshot(
-          `"code --add-mcp '{"name":"glean_test-server","type":"http","url":"https://example.com/mcp/default"}'"`
-        );
-      });
     });
 
     describe('Edge cases and error handling', () => {
@@ -333,7 +280,7 @@ describe('ConfigBuilder', () => {
           serverName: 'test',
         });
         expect(command).toMatchInlineSnapshot(
-          `"code --add-mcp '{"name":"glean_test","type":"http","url":"not-a-valid-url"}'"`
+          `"code --add-mcp '{"name":"test","type":"http","url":"not-a-valid-url"}'"`
         );
       });
 
@@ -356,7 +303,7 @@ describe('ConfigBuilder', () => {
         });
         // No env vars when none are provided
         expect(command).toMatchInlineSnapshot(
-          `"code --add-mcp '{"name":"glean_test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"]}'"`
+          `"code --add-mcp '{"name":"test","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"]}'"`
         );
       });
 
@@ -389,7 +336,7 @@ describe('ConfigBuilder', () => {
       const urlObj = new URL(url.replace('cursor://', 'https://'));
       expect(urlObj.hostname).toBe('anysphere.cursor-deeplink');
       expect(urlObj.pathname).toBe('/mcp/install');
-      expect(urlObj.searchParams.get('name')).toBe('glean_test-server');
+      expect(urlObj.searchParams.get('name')).toBe('test-server');
 
       const encodedConfig = urlObj.searchParams.get('config');
       const decodedConfig = JSON.parse(Buffer.from(encodedConfig!, 'base64').toString());
@@ -416,7 +363,7 @@ describe('ConfigBuilder', () => {
       const decodedConfig = JSON.parse(decodeURIComponent(queryString));
 
       expect(decodedConfig).toEqual({
-        name: 'glean_test-server',
+        name: 'test-server',
         type: 'http',
         url: 'https://example.com/mcp/default',
       });
@@ -439,7 +386,7 @@ describe('ConfigBuilder', () => {
       const decodedConfig = JSON.parse(decodeURIComponent(queryString));
 
       expect(decodedConfig).toEqual({
-        name: 'glean_local-test',
+        name: 'local-test',
         type: 'stdio',
         command: 'npx',
         args: ['-y', '@gleanwork/local-mcp-server'],
@@ -617,7 +564,7 @@ describe('ConfigBuilder', () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_default": {
+            "default": {
               "headers": {
                 "Authorization": "Bearer test-token-123",
               },
@@ -642,7 +589,7 @@ describe('ConfigBuilder', () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_local": {
+            "local": {
               "args": [
                 "-y",
                 "@gleanwork/local-mcp-server",
@@ -699,9 +646,9 @@ describe('ConfigBuilder', () => {
       expect(yamlString).toContain('Authorization: Bearer test-token-123');
       expect(yamlString).toMatchInlineSnapshot(`
         "extensions:
-          glean_default:
+          default:
             enabled: true
-            name: glean_default
+            name: default
             type: streamable_http
             uri: https://glean-dev-be.glean.com/mcp/default
             envs: {}
@@ -746,10 +693,10 @@ describe('ConfigBuilder', () => {
       expect(tomlString).toContain('Authorization');
       expect(tomlString).toContain('Bearer test-token-123');
       expect(tomlString).toMatchInlineSnapshot(`
-        "[mcp_servers.glean_default]
+        "[mcp_servers.default]
         url = "https://glean-dev-be.glean.com/mcp/default"
 
-        [mcp_servers.glean_default.http_headers]
+        [mcp_servers.default.http_headers]
         Authorization = "Bearer test-token-123"
         "
       `);
@@ -767,11 +714,11 @@ describe('ConfigBuilder', () => {
 
       const tomlString = builder.toString(result);
       expect(tomlString).toMatchInlineSnapshot(`
-        "[mcp_servers.glean_local]
+        "[mcp_servers.local]
         command = "npx"
         args = [ "-y", "@gleanwork/local-mcp-server" ]
 
-        [mcp_servers.glean_local.env]
+        [mcp_servers.local.env]
         GLEAN_INSTANCE = "test-instance"
         GLEAN_API_TOKEN = "test-token"
         "
@@ -798,7 +745,7 @@ describe('ConfigBuilder', () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_local": {
+            "local": {
               "args": [
                 "-y",
                 "@gleanwork/local-mcp-server",
@@ -825,7 +772,7 @@ describe('ConfigBuilder', () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_local": {
+            "local": {
               "args": [
                 "-y",
                 "@gleanwork/local-mcp-server",
@@ -852,7 +799,7 @@ describe('ConfigBuilder', () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_local": {
+            "local": {
               "args": [
                 "-y",
                 "@gleanwork/local-mcp-server",
@@ -879,7 +826,7 @@ describe('ConfigBuilder', () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_local": {
+            "local": {
               "args": [
                 "-y",
                 "@gleanwork/local-mcp-server",
@@ -983,9 +930,9 @@ describe('ConfigBuilder', () => {
       const yamlString = builder.toString(config);
       expect(yamlString).toMatchInlineSnapshot(`
         "extensions:
-          glean_test:
+          test:
             enabled: true
-            name: glean_test
+            name: test
             type: streamable_http
             uri: https://example.com/mcp/default
             envs: {}
@@ -1015,7 +962,7 @@ describe('ConfigBuilder', () => {
       expect(parsed).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_test": {
+            "test": {
               "type": "http",
               "url": "https://example.com/mcp/default",
             },
@@ -1040,7 +987,7 @@ describe('ConfigBuilder', () => {
       expect(parsed).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_test": {
+            "test": {
               "type": "http",
               "url": "https://example.com/mcp/default",
             },
@@ -1066,7 +1013,7 @@ describe('ConfigBuilder', () => {
       expect(parsed).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_test": {
+            "test": {
               "serverUrl": "https://example.com/mcp/default",
             },
           },
@@ -1088,7 +1035,7 @@ describe('ConfigBuilder', () => {
       expect(result).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_default": {
+            "default": {
               "headers": {
                 "Authorization": "Bearer test-token-123",
               },
@@ -1099,7 +1046,7 @@ describe('ConfigBuilder', () => {
       `);
     });
 
-    it('should default server name to "glean" when not provided', () => {
+    it('should extract server name from URL when not provided', () => {
       const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const config = builder.buildConfiguration({
         transport: 'http',
@@ -1114,7 +1061,7 @@ describe('ConfigBuilder', () => {
       expect(parsed).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_default": {
+            "default": {
               "type": "http",
               "url": "https://example.com/mcp/default",
             },
@@ -1138,7 +1085,7 @@ describe('ConfigBuilder', () => {
       expect(parsed).toMatchInlineSnapshot(`
         {
           "mcpServers": {
-            "glean_local": {
+            "local": {
               "args": [
                 "-y",
                 "@gleanwork/local-mcp-server",
@@ -1180,7 +1127,7 @@ describe('ConfigBuilder', () => {
       expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serversPropertyName);
       expect(generatedConfig).toHaveProperty('servers'); // VS Code uses 'servers'
 
-      const serverConfig = generatedConfig.servers.glean_test;
+      const serverConfig = generatedConfig.servers.test;
       expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpPropertyMapping.typeProperty);
       expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpPropertyMapping.urlProperty);
     });
@@ -1199,7 +1146,7 @@ describe('ConfigBuilder', () => {
       expect(Object.keys(generatedConfig)[0]).toBe(jsonConfig.configStructure.serversPropertyName);
       expect(generatedConfig).toHaveProperty('extensions');
 
-      const serverConfig = generatedConfig.extensions.glean_test;
+      const serverConfig = generatedConfig.extensions.test;
       expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpPropertyMapping.urlProperty);
       expect(serverConfig.uri).toBe('https://example.com/mcp/default');
       expect(serverConfig.type).toBe('streamable_http');
@@ -1217,9 +1164,9 @@ describe('ConfigBuilder', () => {
       });
 
       // Windsurf now supports native HTTP with serverUrl field
-      expect(generatedConfig.mcpServers.glean_test).not.toHaveProperty('type');
-      expect(generatedConfig.mcpServers.glean_test).toHaveProperty('serverUrl');
-      expect(generatedConfig.mcpServers.glean_test.serverUrl).toBe('https://example.com/mcp/default');
+      expect(generatedConfig.mcpServers.test).not.toHaveProperty('type');
+      expect(generatedConfig.mcpServers.test).toHaveProperty('serverUrl');
+      expect(generatedConfig.mcpServers.test.serverUrl).toBe('https://example.com/mcp/default');
     });
 
     it('should use platform-specific paths from JSON config', () => {
@@ -1264,7 +1211,7 @@ describe('ConfigBuilder', () => {
       const remoteConfig = {
         transport: 'http' as const,
         serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
-        serverName: 'glean_default',
+        serverName: 'default',
         includeRootObject: false,
       };
 
@@ -1273,7 +1220,7 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
-          glean_default: {
+          default: {
             type: 'http',
             url: 'https://glean-dev-be.glean.com/mcp/default',
           },
@@ -1287,7 +1234,7 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
-          glean_default: {
+          default: {
             type: 'http',
             url: 'https://glean-dev-be.glean.com/mcp/default',
           },
@@ -1301,7 +1248,7 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
-          glean_default: {
+          default: {
             type: 'stdio',
             command: 'npx',
             args: ['-y', 'mcp-remote', 'https://glean-dev-be.glean.com/mcp/default'],
@@ -1316,7 +1263,7 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
-          glean_default: {
+          default: {
             type: 'http',
             url: 'https://glean-dev-be.glean.com/mcp/default',
           },
@@ -1331,7 +1278,7 @@ describe('ConfigBuilder', () => {
 
         // Windsurf now supports native HTTP with serverUrl field
         expect(result).toEqual({
-          glean_default: {
+          default: {
             serverUrl: 'https://glean-dev-be.glean.com/mcp/default',
           },
         });
@@ -1345,10 +1292,10 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(remoteConfig);
 
         expect(result).toEqual({
-          glean_default: {
+          default: {
             enabled: true,
             type: 'streamable_http',
-            name: 'glean_default',
+            name: 'default',
             uri: 'https://glean-dev-be.glean.com/mcp/default',
             envs: {},
             env_keys: [],
@@ -1367,7 +1314,7 @@ describe('ConfigBuilder', () => {
     describe('Local configurations', () => {
       const localConfig = {
         transport: 'stdio' as const,
-        serverName: 'glean_local',
+        serverName: 'local',
         includeRootObject: false,
         env: {
           GLEAN_INSTANCE: 'my-company',
@@ -1380,7 +1327,7 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(localConfig);
 
         expect(result).toEqual({
-          glean_local: {
+          local: {
             type: 'stdio',
             command: 'npx',
             args: ['-y', '@gleanwork/local-mcp-server'],
@@ -1399,7 +1346,7 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(localConfig);
 
         expect(result).toEqual({
-          glean_local: {
+          local: {
             type: 'stdio',
             command: 'npx',
             args: ['-y', '@gleanwork/local-mcp-server'],
@@ -1417,13 +1364,13 @@ describe('ConfigBuilder', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const result = builder.buildConfiguration({
           transport: 'stdio',
-          serverName: 'glean_custom',
+          serverName: 'custom',
           includeRootObject: false,
           env: createGleanUrlEnv('https://my-company.glean.com', 'test-token'),
         });
 
         expect(result).toEqual({
-          glean_custom: {
+          custom: {
             type: 'stdio',
             command: 'npx',
             args: ['-y', '@gleanwork/local-mcp-server'],
@@ -1442,8 +1389,8 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(localConfig);
 
         expect(result).toEqual({
-          glean_local: {
-            name: 'glean_local',
+          local: {
+            name: 'local',
             cmd: 'npx',
             args: ['-y', '@gleanwork/local-mcp-server'],
             type: 'stdio',
@@ -1475,7 +1422,7 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(config);
 
         expect(result).toHaveProperty('mcpServers');
-        expect(result.mcpServers).toHaveProperty('glean_test');
+        expect(result.mcpServers).toHaveProperty('test');
       });
 
       it('should include wrapper when includeRootObject is explicitly true', () => {
@@ -1490,7 +1437,7 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(config);
 
         expect(result).toHaveProperty('mcpServers');
-        expect(result.mcpServers).toHaveProperty('glean_test');
+        expect(result.mcpServers).toHaveProperty('test');
       });
 
       it('should maintain backward compatibility for VS Code', () => {
@@ -1504,7 +1451,7 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(config);
 
         expect(result).toHaveProperty('servers');
-        expect(result.servers).toHaveProperty('glean_test');
+        expect(result.servers).toHaveProperty('test');
       });
 
       it('should maintain backward compatibility for Goose', () => {
@@ -1518,12 +1465,12 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(config);
 
         expect(result).toHaveProperty('extensions');
-        expect(result.extensions).toHaveProperty('glean_test');
+        expect(result.extensions).toHaveProperty('test');
       });
     });
 
     describe('Edge cases', () => {
-      it('should use default server name "glean" when not provided with partial config', () => {
+      it('should extract server name from URL when not provided with partial config', () => {
         const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
         const config = {
           transport: 'http' as const,
@@ -1533,7 +1480,7 @@ describe('ConfigBuilder', () => {
 
         const result = builder.buildConfiguration(config);
 
-        expect(result).toHaveProperty('glean_default');
+        expect(result).toHaveProperty('default');
         expect(result).not.toHaveProperty('mcpServers');
       });
 
@@ -1547,14 +1494,14 @@ describe('ConfigBuilder', () => {
         const result = builder.buildConfiguration(config);
 
         expect(result).toEqual({
-          glean_local: {
+          local: {
             type: 'stdio',
             command: 'npx',
             args: ['-y', '@gleanwork/local-mcp-server'],
           },
         });
 
-        expect(result.glean_local).not.toHaveProperty('env');
+        expect(result.local).not.toHaveProperty('env');
       });
     });
   });

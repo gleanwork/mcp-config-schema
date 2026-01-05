@@ -1,6 +1,5 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { MCPConnectionOptions, GooseMCPConfig, MCPServersRecord } from '../types.js';
-import { buildMcpServerName } from '../server-name.js';
 
 function isGooseMCPConfig(config: GooseMCPConfig | MCPServersRecord): config is GooseMCPConfig {
   return typeof config === 'object' && config !== null && 'extensions' in config;
@@ -20,10 +19,9 @@ export class GooseConfigBuilder extends BaseConfigBuilder<GooseMCPConfig> {
       throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'stdio',
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     const serverConfig: Record<string, unknown> = {};
@@ -75,11 +73,10 @@ export class GooseConfigBuilder extends BaseConfigBuilder<GooseMCPConfig> {
     const { serversPropertyName, httpPropertyMapping, stdioPropertyMapping } =
       this.config.configStructure;
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'http',
       serverUrl: options.serverUrl,
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     // Substitute URL template variables

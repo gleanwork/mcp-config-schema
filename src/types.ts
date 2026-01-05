@@ -51,6 +51,19 @@ export interface CommandBuilder {
 }
 
 /**
+ * Callback type for building server names.
+ * Allows customizing how server names are generated (e.g., adding vendor prefixes).
+ *
+ * @param options - The connection options
+ * @returns The server name to use in configuration
+ */
+export type ServerNameBuilderCallback = (options: {
+  transport?: 'stdio' | 'http';
+  serverUrl?: string;
+  serverName?: string;
+}) => string;
+
+/**
  * Options for creating an MCPConfigRegistry.
  * These options configure how configurations and commands are generated.
  */
@@ -80,6 +93,21 @@ export interface RegistryOptions {
    * ```
    */
   commandBuilder?: CommandBuilder;
+  /**
+   * Custom server name builder for generating configuration keys.
+   * Use this to add vendor-specific prefixes or naming conventions.
+   *
+   * @example
+   * ```typescript
+   * const registry = new MCPConfigRegistry({
+   *   serverNameBuilder: (options) => {
+   *     const base = options.serverName || (options.transport === 'stdio' ? 'local' : 'default');
+   *     return `myvendor_${base}`;
+   *   },
+   * });
+   * ```
+   */
+  serverNameBuilder?: ServerNameBuilderCallback;
 }
 
 // ============================================================================

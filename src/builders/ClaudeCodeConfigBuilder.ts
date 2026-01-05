@@ -1,6 +1,5 @@
 import { GenericConfigBuilder } from './GenericConfigBuilder.js';
 import { MCPConnectionOptions } from '../types.js';
-import { buildMcpServerName } from '../server-name.js';
 
 export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
   protected buildHttpCommand(options: MCPConnectionOptions): string {
@@ -10,11 +9,10 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
 
     const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: options.transport,
       serverUrl: options.serverUrl,
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     let command = `claude mcp add ${serverName} ${resolvedUrl} --transport http --scope user`;
@@ -30,10 +28,9 @@ export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
   }
 
   protected buildStdioCommand(options: MCPConnectionOptions): string {
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'stdio',
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     let command = `claude mcp add ${serverName} --scope user`;
