@@ -15,11 +15,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Registry options for Glean (used for stdio transport tests)
-// Note: The new vendor-neutral API only needs serverPackage and cliPackage.
+// Note: The vendor-neutral API uses serverPackage for stdio configs.
 // Environment variables are passed directly via the `env` option in MCPConnectionOptions.
+// For non-native CLI clients, consumers can provide a commandBuilder callback.
 const GLEAN_REGISTRY_OPTIONS = {
   serverPackage: '@gleanwork/local-mcp-server',
-  cliPackage: '@gleanwork/configure-mcp-server',
 };
 
 // Helper to create Glean environment variables (for tests that need stdio transport)
@@ -92,7 +92,8 @@ describe('ConfigBuilder', () => {
       );
     });
 
-    it('generates Cursor command with remote server', () => {
+    it('returns null for Cursor without commandBuilder', () => {
+      // Cursor has no native CLI, so without a commandBuilder callback, it returns null
       const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
       const command = cursorBuilder.buildCommand({
         transport: 'http',
@@ -100,9 +101,7 @@ describe('ConfigBuilder', () => {
         serverName: 'test-server',
       });
 
-      expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client cursor"`
-      );
+      expect(command).toBeNull();
     });
 
     it('generates Cursor command with local server returns null', () => {
@@ -117,7 +116,8 @@ describe('ConfigBuilder', () => {
       expect(command).toBeNull();
     });
 
-    it('generates Junie command with remote server', () => {
+    it('returns null for Junie without commandBuilder', () => {
+      // Junie has no native CLI, so without a commandBuilder callback, it returns null
       const junieBuilder = registry.createBuilder(CLIENT.JUNIE);
       const command = junieBuilder.buildCommand({
         transport: 'http',
@@ -125,9 +125,7 @@ describe('ConfigBuilder', () => {
         serverName: 'test-server',
       });
 
-      expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client junie"`
-      );
+      expect(command).toBeNull();
     });
 
     it('generates Junie command with local server returns null', () => {
@@ -163,8 +161,17 @@ describe('ConfigBuilder', () => {
       );
     });
 
-    it('uses cliPackage for Cursor remote commands', () => {
-      const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+    it('uses commandBuilder callback for Cursor when provided', () => {
+      // Create registry with custom commandBuilder callback
+      const registryWithCallback = new MCPConfigRegistry({
+        serverPackage: '@gleanwork/local-mcp-server',
+        commandBuilder: {
+          http: (clientId, options) => {
+            return `npx -y @custom/cli install --url ${options.serverUrl} --client ${clientId}`;
+          },
+        },
+      });
+      const cursorBuilder = registryWithCallback.createBuilder(CLIENT.CURSOR);
       const command = cursorBuilder.buildCommand({
         transport: 'http',
         serverUrl: 'https://example.com/mcp/default',
@@ -172,7 +179,7 @@ describe('ConfigBuilder', () => {
       });
 
       expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client cursor"`
+        `"npx -y @custom/cli install --url https://example.com/mcp/default --client cursor"`
       );
     });
 
@@ -202,9 +209,8 @@ describe('ConfigBuilder', () => {
       );
     });
 
-    it('uses configureMcpServerVersion for Goose', () => {
-      // Note: configureMcpServerVersion is no longer used - the CLI package version
-      // is determined by the cliPackage option in registry options
+    it('returns null for Goose without commandBuilder', () => {
+      // Goose has no native CLI, so without a commandBuilder callback, it returns null
       const gooseBuilder = registry.createBuilder(CLIENT.GOOSE);
       const command = gooseBuilder.buildCommand({
         transport: 'http',
@@ -212,9 +218,7 @@ describe('ConfigBuilder', () => {
         serverName: 'test-server',
       });
 
-      expect(command).toMatchInlineSnapshot(
-        `"npx -y @gleanwork/configure-mcp-server remote --url https://example.com/mcp/default --client goose"`
-      );
+      expect(command).toBeNull();
     });
 
     it('generates Codex command with remote server', () => {
@@ -300,15 +304,24 @@ describe('ConfigBuilder', () => {
     });
 
     describe('Edge cases and error handling', () => {
-      it('handles placeholder URLs', () => {
-        const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+      it('handles placeholder URLs with commandBuilder', () => {
+        // Create registry with custom commandBuilder callback
+        const registryWithCallback = new MCPConfigRegistry({
+          serverPackage: '@gleanwork/local-mcp-server',
+          commandBuilder: {
+            http: (clientId, options) => {
+              return `npx -y @custom/cli install --url ${options.serverUrl} --client ${clientId}`;
+            },
+          },
+        });
+        const cursorBuilder = registryWithCallback.createBuilder(CLIENT.CURSOR);
         const command = cursorBuilder.buildCommand({
           transport: 'http',
           serverUrl: 'https://[instance]-be.glean.com/mcp/[endpoint]',
           serverName: 'glean',
         });
         expect(command).toMatchInlineSnapshot(
-          `"npx -y @gleanwork/configure-mcp-server remote --url https://[instance]-be.glean.com/mcp/[endpoint] --client cursor"`
+          `"npx -y @custom/cli install --url https://[instance]-be.glean.com/mcp/[endpoint] --client cursor"`
         );
       });
 

@@ -28,14 +28,58 @@ import {
 } from './schemas.js';
 
 /**
+ * Callback type for building CLI commands for clients without native CLI support.
+ * @param clientId - The client identifier (e.g., 'cursor', 'goose')
+ * @param options - The connection options passed to buildCommand()
+ * @returns The CLI command string, or null if not supported
+ */
+export type CommandBuilderCallback = (
+  clientId: string,
+  options: MCPConnectionOptions
+) => string | null;
+
+/**
+ * Custom command builders for clients without native CLI support.
+ * Native CLI clients (VS Code, Claude Code, Codex) use their built-in commands.
+ * For other clients, provide custom callbacks to generate installation commands.
+ */
+export interface CommandBuilder {
+  /** Build HTTP transport command. Return null if not supported. */
+  http?: CommandBuilderCallback;
+  /** Build stdio transport command. Return null if not supported. */
+  stdio?: CommandBuilderCallback;
+}
+
+/**
  * Options for creating an MCPConfigRegistry.
- * These options configure how stdio transport configurations are generated.
+ * These options configure how configurations and commands are generated.
  */
 export interface RegistryOptions {
   /** NPM package for stdio server (e.g., '@my-org/mcp-server') */
   serverPackage?: string;
-  /** NPM package for CLI tool (e.g., '@my-org/configure-mcp') */
-  cliPackage?: string;
+  /**
+   * Custom command builders for clients without native CLI support.
+   * Native CLI clients (VS Code, Claude Code, Codex) use their built-in commands.
+   * For other clients, provide custom callbacks to generate installation commands.
+   *
+   * @example
+   * ```typescript
+   * const registry = new MCPConfigRegistry({
+   *   serverPackage: '@my-org/mcp-server',
+   *   commandBuilder: {
+   *     http: (clientId, options) => {
+   *       return `npx my-cli install --client ${clientId} --url ${options.serverUrl}`;
+   *     },
+   *     stdio: (clientId, options) => {
+   *       const envFlags = Object.entries(options.env || {})
+   *         .map(([k, v]) => `--env ${k}=${v}`).join(' ');
+   *       return `npx my-cli install --client ${clientId} ${envFlags}`;
+   *     },
+   *   },
+   * });
+   * ```
+   */
+  commandBuilder?: CommandBuilder;
 }
 
 // ============================================================================
