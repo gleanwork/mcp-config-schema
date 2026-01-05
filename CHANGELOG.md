@@ -17,6 +17,26 @@
 
 
 
+
+## v3.0.0-beta.0 (2026-01-05)
+
+#### :boom: Breaking Change
+* [#74](https://github.com/gleanwork/mcp-config-schema/pull/74) refactor: make server naming vendor-neutral with serverNameBuilder callback ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#73](https://github.com/gleanwork/mcp-config-schema/pull/73) feat: replace cliPackage with commandBuilder callback for vendor neutrality ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#69](https://github.com/gleanwork/mcp-config-schema/pull/69) refactor: update scripts to use stdio/http terminology and add markdown helpers ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#67](https://github.com/gleanwork/mcp-config-schema/pull/67) feat: make package vendor-neutral with generic API ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :rocket: Enhancement
+* [#68](https://github.com/gleanwork/mcp-config-schema/pull/68) feat: add comprehensive type safety for config builders ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#66](https://github.com/gleanwork/mcp-config-schema/pull/66) feat: add Gemini CLI support ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :memo: Documentation
+* [#75](https://github.com/gleanwork/mcp-config-schema/pull/75) docs: update documentation for vendor-neutral API changes ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v2.0.1 (2025-12-09)
 
 #### :bug: Bug Fix
