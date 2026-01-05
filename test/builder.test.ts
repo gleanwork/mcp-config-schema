@@ -195,7 +195,7 @@ describe('ConfigBuilder', () => {
       expect(command).toBeNull();
     });
 
-    it('Claude Code native command ignores configureMcpServerVersion for local', () => {
+    it('generates Claude Code native command for stdio with minimal env', () => {
       const claudeBuilder = registry.createBuilder(CLIENT.CLAUDE_CODE);
       const command = claudeBuilder.buildCommand({
         transport: 'stdio',
@@ -203,7 +203,6 @@ describe('ConfigBuilder', () => {
         env: { GLEAN_INSTANCE: 'test-instance' },
       });
 
-      // Claude Code uses native command, so configureMcpServerVersion doesn't apply
       expect(command).toMatchInlineSnapshot(
         `"claude mcp add local-test --scope user --env GLEAN_INSTANCE=test-instance -- npx -y @gleanwork/local-mcp-server"`
       );

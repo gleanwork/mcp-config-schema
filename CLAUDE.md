@@ -14,8 +14,10 @@ This is `@gleanwork/mcp-config-schema`, a TypeScript library that provides type-
 
 ### Configuration Modes
 
-- **Local**: Direct connection to a local Glean instance using `@gleanwork/local-mcp-server`
-- **Remote**: Connection to a remote server via HTTP or through `mcp-remote` bridge
+- **Local (stdio)**: Direct connection to a local MCP server process via stdio transport
+- **Remote (HTTP)**: Connection to a remote server via HTTP or through `mcp-remote` bridge
+
+Note: This library is vendor-neutral. Glean-specific configuration (like server name prefixes) is handled by the `@gleanwork/mcp-config` wrapper package.
 
 ### Client Types
 
