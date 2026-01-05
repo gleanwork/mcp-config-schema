@@ -1,24 +1,12 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { MCPConnectionOptions, StandardMCPConfig, MCPServersRecord } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
-import { CLIENT } from '../constants.js';
 
 function isStandardMCPConfig(
   config: StandardMCPConfig | MCPServersRecord
 ): config is StandardMCPConfig {
   return typeof config === 'object' && config !== null && 'mcpServers' in config;
 }
-
-// Clients that can use configure-mcp-server
-const CONFIGURE_MCP_SUPPORTED_CLIENTS: readonly string[] = [
-  CLIENT.CLAUDE_DESKTOP,
-  CLIENT.WINDSURF,
-  CLIENT.GOOSE,
-  CLIENT.CLAUDE_CODE,
-  CLIENT.CLAUDE_TEAMS_ENTERPRISE,
-  CLIENT.CHATGPT,
-  CLIENT.JUNIE,
-];
 
 /**
  * Generic config builder for clients using the standard { mcpServers: {...} } format.
@@ -166,31 +154,22 @@ export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
   }
 
   protected buildHttpCommand(options: MCPConnectionOptions): string | null {
-    if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
-      return null;
+    // Use custom command builder callback if provided
+    if (this.commandBuilder?.http) {
+      return this.commandBuilder.http(this.config.id, options);
     }
 
-    if (!options.serverUrl) {
-      return null;
-    }
-
-    // Substitute URL template variables
-    const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
-
-    let command = `npx -y ${this.cliPackage} remote`;
-    command += ` --url ${resolvedUrl}`;
-    command += ` --client ${this.config.id}`;
-
-    return command;
+    // No native CLI support for generic clients - return null
+    return null;
   }
 
-  protected buildStdioCommand(_options: MCPConnectionOptions): string | null {
-    if (!CONFIGURE_MCP_SUPPORTED_CLIENTS.includes(this.config.id)) {
-      return null;
+  protected buildStdioCommand(options: MCPConnectionOptions): string | null {
+    // Use custom command builder callback if provided
+    if (this.commandBuilder?.stdio) {
+      return this.commandBuilder.stdio(this.config.id, options);
     }
 
-    // Stdio command generation requires the cliPackage to handle environment variables.
-    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly.
+    // No native CLI support for generic clients - return null
     return null;
   }
 

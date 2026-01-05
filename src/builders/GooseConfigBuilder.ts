@@ -163,24 +163,22 @@ export class GooseConfigBuilder extends BaseConfigBuilder<GooseMCPConfig> {
   }
 
   protected buildHttpCommand(options: MCPConnectionOptions): string | null {
-    if (!options.serverUrl) {
-      return null;
+    // Use custom command builder callback if provided
+    if (this.commandBuilder?.http) {
+      return this.commandBuilder.http(this.config.id, options);
     }
 
-    // Substitute URL template variables
-    const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
-
-    // Goose is supported by configure-mcp-server
-    let command = `npx -y ${this.cliPackage} remote`;
-    command += ` --url ${resolvedUrl}`;
-    command += ` --client goose`;
-
-    return command;
+    // No native CLI support for Goose - return null
+    return null;
   }
 
-  protected buildStdioCommand(_options: MCPConnectionOptions): string | null {
-    // Stdio command generation requires the cliPackage to handle environment variables.
-    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly.
+  protected buildStdioCommand(options: MCPConnectionOptions): string | null {
+    // Use custom command builder callback if provided
+    if (this.commandBuilder?.stdio) {
+      return this.commandBuilder.stdio(this.config.id, options);
+    }
+
+    // No native CLI support for Goose - return null
     return null;
   }
 

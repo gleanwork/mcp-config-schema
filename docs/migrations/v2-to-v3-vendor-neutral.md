@@ -19,9 +19,11 @@ This document provides comprehensive migration instructions for updating from `@
 | Function removed | `clientSupportsStdio()` | Use `registry.clientSupportsStdio()` |
 | Property removed | `instance` | Use `env` object instead |
 | Property removed | `apiToken` | Use `headers` object instead |
+| Registry option removed | `cliPackage` | Use `commandBuilder` callback instead |
 | Property added | - | `env: Record<string, string>` |
 | Property added | - | `headers: Record<string, string>` |
 | Property added | - | `urlVariables: Record<string, string>` |
+| Registry option added | - | `commandBuilder: { http?, stdio? }` callbacks |
 
 ---
 
@@ -402,13 +404,96 @@ const config: MCPConnectionOptions = {
 
 ### Simplified RegistryOptions
 
-The `RegistryOptions` type has been simplified. The `envVars` mapping has been removed since consumers now pass environment variables directly via the `env` property.
+The `RegistryOptions` type has been simplified:
+- The `envVars` mapping has been removed since consumers now pass environment variables directly via the `env` property.
+- The `cliPackage` option has been replaced with a flexible `commandBuilder` callback.
+
+### Removed: `cliPackage`
+
+The `cliPackage` option has been removed because it embedded vendor-specific CLI structure (e.g., `npx -y @vendor/cli remote --url ... --client ...`). Instead, consumers can provide custom `commandBuilder` callbacks to generate CLI commands for non-native clients.
+
+**Native CLI clients** (VS Code, Claude Code, Codex) have built-in commands like `code --add-mcp`, `claude mcp add`, and `codex mcp add`. These continue to work without any callback.
+
+**Non-native clients** (Cursor, Goose, Junie, etc.) now return `null` from `buildCommand()` unless a `commandBuilder` callback is provided.
+
+```typescript
+// BEFORE (v2.x) - with cliPackage
+const registry = new MCPConfigRegistry({
+  serverPackage: '@my-org/mcp-server',
+  cliPackage: '@my-org/configure-mcp',
+})
+
+const builder = registry.createBuilder('cursor')
+const command = builder.buildCommand({
+  transport: 'http',
+  serverUrl: 'https://example.com/mcp',
+})
+// Result: "npx -y @my-org/configure-mcp remote --url https://example.com/mcp --client cursor"
+```
+
+```typescript
+// AFTER (v3.0) - without commandBuilder, returns null for non-native clients
+const registry = new MCPConfigRegistry({
+  serverPackage: '@my-org/mcp-server',
+})
+
+const builder = registry.createBuilder('cursor')
+const command = builder.buildCommand({
+  transport: 'http',
+  serverUrl: 'https://example.com/mcp',
+})
+// Result: null (Cursor has no native CLI)
+```
+
+```typescript
+// AFTER (v3.0) - with commandBuilder callback
+const registry = new MCPConfigRegistry({
+  serverPackage: '@my-org/mcp-server',
+  commandBuilder: {
+    http: (clientId, options) => {
+      return `npx -y @my-org/cli install --url ${options.serverUrl} --client ${clientId}`;
+    },
+    stdio: (clientId, options) => {
+      const envFlags = Object.entries(options.env || {})
+        .map(([k, v]) => `--env ${k}=${v}`)
+        .join(' ');
+      return `npx -y @my-org/cli install --client ${clientId} ${envFlags}`;
+    },
+  },
+})
+
+const builder = registry.createBuilder('cursor')
+const command = builder.buildCommand({
+  transport: 'http',
+  serverUrl: 'https://example.com/mcp',
+})
+// Result: "npx -y @my-org/cli install --url https://example.com/mcp --client cursor"
+```
+
+### `commandBuilder` Callback Types
+
+```typescript
+export type CommandBuilderCallback = (
+  clientId: string,
+  options: MCPConnectionOptions
+) => string | null;
+
+export interface CommandBuilder {
+  /** Build HTTP transport command. Return null if not supported. */
+  http?: CommandBuilderCallback;
+  /** Build stdio transport command. Return null if not supported. */
+  stdio?: CommandBuilderCallback;
+}
+```
+
+### Removed: `envVars` Mapping
+
+The `envVars` mapping has been removed since consumers now pass environment variables directly via the `env` property in `MCPConnectionOptions`.
 
 ```typescript
 // BEFORE (v2.x) - if envVars was used
 const registry = new MCPConfigRegistry({
   serverPackage: '@my-org/mcp-server',
-  cliPackage: '@my-org/configure-mcp',
   envVars: {
     instance: 'MY_INSTANCE',
     token: 'MY_TOKEN',
@@ -421,7 +506,6 @@ const registry = new MCPConfigRegistry({
 // AFTER (v3.0)
 const registry = new MCPConfigRegistry({
   serverPackage: '@my-org/mcp-server',
-  cliPackage: '@my-org/configure-mcp',
 })
 
 // Environment variable names are now passed directly in buildConfiguration:

@@ -5,6 +5,7 @@ import {
   MCPServersRecord,
   Platform,
   RegistryOptions,
+  CommandBuilder,
   validateConnectionOptions,
 } from '../types.js';
 import * as yaml from 'js-yaml';
@@ -54,16 +55,11 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
   }
 
   /**
-   * Get the CLI package, or throw if not configured.
-   * Required for CLI command generation.
+   * Get the command builder callbacks, if configured.
+   * Used for CLI command generation for clients without native CLI support.
    */
-  protected get cliPackage(): string {
-    if (!this.registryOptions.cliPackage) {
-      throw new Error(
-        'No CLI package configured. Provide cliPackage in registry options for CLI commands.'
-      );
-    }
-    return this.registryOptions.cliPackage;
+  protected get commandBuilder(): CommandBuilder | undefined {
+    return this.registryOptions.commandBuilder;
   }
 
   /**

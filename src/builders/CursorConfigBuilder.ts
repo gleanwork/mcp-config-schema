@@ -51,24 +51,4 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       .replace('{{name}}', encodeURIComponent(serverName))
       .replace('{{config}}', encodedConfig);
   }
-
-  protected buildHttpCommand(options: MCPConnectionOptions): string | null {
-    if (!options.serverUrl) {
-      return null;
-    }
-
-    const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
-
-    let command = `npx -y ${this.cliPackage} remote`;
-    command += ` --url ${resolvedUrl}`;
-    command += ` --client cursor`;
-
-    return command;
-  }
-
-  protected buildStdioCommand(_options: MCPConnectionOptions): string | null {
-    // Stdio command generation requires the cliPackage to handle environment variables.
-    // For vendor-neutral usage, consumers should use buildConfiguration() and write the config file directly.
-    return null;
-  }
 }
