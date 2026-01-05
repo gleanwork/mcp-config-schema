@@ -70,7 +70,6 @@ export const MCPClientConfigSchema = z.object({
 export const BuildOptionsSchema = z.object({
   includeRootObject: z.boolean().optional(),
   mcpRemoteVersion: z.string().optional(),
-  configureMcpServerVersion: z.string().optional(),
 });
 
 export const MCPConnectionOptionsSchema = z

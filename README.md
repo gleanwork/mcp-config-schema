@@ -57,7 +57,6 @@ import { MCPConfigRegistry } from '@gleanwork/mcp-config-schema';
 
 const registry = new MCPConfigRegistry({
   serverPackage: '@your-org/mcp-server', // Your stdio server package
-  cliPackage: '@your-org/configure-mcp', // Optional: CLI tool for configuration
 });
 
 const builder = registry.createBuilder('cursor');
