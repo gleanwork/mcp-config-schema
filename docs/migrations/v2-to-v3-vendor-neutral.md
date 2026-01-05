@@ -19,11 +19,13 @@ This document provides comprehensive migration instructions for updating from `@
 | Function removed | `clientSupportsStdio()` | Use `registry.clientSupportsStdio()` |
 | Property removed | `instance` | Use `env` object instead |
 | Property removed | `apiToken` | Use `headers` object instead |
+| Property removed | `productName` | Use `serverNameBuilder` registry option instead |
 | Registry option removed | `cliPackage` | Use `commandBuilder` callback instead |
 | Property added | - | `env: Record<string, string>` |
 | Property added | - | `headers: Record<string, string>` |
 | Property added | - | `urlVariables: Record<string, string>` |
 | Registry option added | - | `commandBuilder: { http?, stdio? }` callbacks |
+| Registry option added | - | `serverNameBuilder` callback for custom naming |
 
 ---
 
@@ -723,12 +725,11 @@ const useMcpConfig = (config: MCPConfiguration) => {
         ? { Authorization: `Bearer ${config.bearerToken}` }
         : undefined,
       includeRootObject: true,
-      productName,
       serverName: fullServerName,
       serverUrl,
       transport: 'http',
     })
-  }, [config, serverUrl, fullServerName, productName, registry])
+  }, [config, serverUrl, fullServerName, registry])
 
   return { cliCommand: generateCliCommand, configuration: generateConfiguration }
 }

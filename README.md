@@ -400,13 +400,27 @@ extensions:
 
 ### Registry Options
 
-When creating an `MCPConfigRegistry`, you can provide options for stdio transport:
+When creating an `MCPConfigRegistry`, you can provide options to customize configuration generation:
 
 ```typescript
 interface RegistryOptions {
   serverPackage?: string; // NPM package for stdio server (required for stdio transport)
-  cliPackage?: string; // NPM package for CLI tool (for buildCommand)
+  commandBuilder?: CommandBuilder; // Custom CLI command builders for clients without native CLI
+  serverNameBuilder?: ServerNameBuilderCallback; // Custom server name generation (e.g., vendor prefixes)
 }
+
+// CommandBuilder allows generating CLI commands for non-native clients
+interface CommandBuilder {
+  http?: (clientId: string, options: MCPConnectionOptions) => string | null;
+  stdio?: (clientId: string, options: MCPConnectionOptions) => string | null;
+}
+
+// ServerNameBuilderCallback allows custom naming conventions
+type ServerNameBuilderCallback = (options: {
+  transport?: 'stdio' | 'http';
+  serverUrl?: string;
+  serverName?: string;
+}) => string;
 ```
 
 ### Connection Options
@@ -427,7 +441,6 @@ interface MCPConnectionOptions {
 
   // Common options
   serverName?: string; // Custom server name (default: extracted from URL or 'local')
-  productName?: string; // Product prefix for white-label support (default: 'glean')
   includeRootObject?: boolean; // Include wrapper object (default: true)
 }
 ```
