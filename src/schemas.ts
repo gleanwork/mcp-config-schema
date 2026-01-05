@@ -84,7 +84,6 @@ export const MCPConnectionOptionsSchema = z
     env: z.record(z.string(), z.string()).optional(), // Environment variables for stdio server
     // Common options
     serverName: z.string().optional(),
-    productName: z.string().optional(), // For white-label support
   })
   .merge(BuildOptionsSchema);
 

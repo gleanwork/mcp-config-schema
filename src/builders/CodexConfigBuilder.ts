@@ -1,6 +1,5 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { MCPConnectionOptions, CodexMCPConfig, MCPServersRecord } from '../types.js';
-import { buildMcpServerName } from '../server-name.js';
 
 function isCodexMCPConfig(config: CodexMCPConfig | MCPServersRecord): config is CodexMCPConfig {
   return typeof config === 'object' && config !== null && 'mcp_servers' in config;
@@ -20,10 +19,9 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
       throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'stdio',
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     const serverConfig: Record<string, unknown> = {};
@@ -65,11 +63,10 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
     // Substitute URL template variables
     const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'http',
       serverUrl: options.serverUrl,
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     if (httpPropertyMapping && this.config.transports.includes('http')) {
@@ -107,11 +104,10 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
 
     const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'http',
       serverUrl: options.serverUrl,
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     let command = `codex mcp add --url ${resolvedUrl}`;
@@ -134,10 +130,9 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
   }
 
   protected buildStdioCommand(options: MCPConnectionOptions): string {
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'stdio',
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     // Format: codex mcp add <server-name> --env VAR1=VALUE1 --env VAR2=VALUE2 -- <stdio server-command>

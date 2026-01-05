@@ -1,6 +1,5 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { MCPConnectionOptions, StandardMCPConfig, MCPServersRecord } from '../types.js';
-import { buildMcpServerName } from '../server-name.js';
 
 function isStandardMCPConfig(
   config: StandardMCPConfig | MCPServersRecord
@@ -23,10 +22,9 @@ export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
       throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'stdio',
       serverName: options.serverName,
-      productName: options.productName,
     });
     const serverConfig: Record<string, unknown> = {};
 
@@ -72,11 +70,10 @@ export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
     // Substitute URL template variables
     const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'http',
       serverUrl: options.serverUrl,
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     if (httpPropertyMapping && this.config.transports.includes('http')) {

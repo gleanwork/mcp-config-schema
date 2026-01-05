@@ -1,6 +1,5 @@
 import { GenericConfigBuilder } from './GenericConfigBuilder.js';
 import { MCPConnectionOptions } from '../types.js';
-import { buildMcpServerName } from '../server-name.js';
 
 export class CursorConfigBuilder extends GenericConfigBuilder {
   buildOneClickUrl(options: MCPConnectionOptions): string {
@@ -8,11 +7,10 @@ export class CursorConfigBuilder extends GenericConfigBuilder {
       throw new Error(`${this.config.displayName} does not support one-click installation`);
     }
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: options.transport,
       serverUrl: options.serverUrl,
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     let config: Record<string, unknown>;

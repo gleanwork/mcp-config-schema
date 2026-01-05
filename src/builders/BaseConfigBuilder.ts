@@ -6,8 +6,10 @@ import {
   Platform,
   RegistryOptions,
   CommandBuilder,
+  ServerNameBuilderCallback,
   validateConnectionOptions,
 } from '../types.js';
+import { buildMcpServerName } from '../server-name.js';
 import * as yaml from 'js-yaml';
 import * as TOML from 'smol-toml';
 
@@ -60,6 +62,28 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
    */
   protected get commandBuilder(): CommandBuilder | undefined {
     return this.registryOptions.commandBuilder;
+  }
+
+  /**
+   * Get the server name builder callback, if configured.
+   * Used to customize server name generation (e.g., adding vendor prefixes).
+   */
+  protected get serverNameBuilder(): ServerNameBuilderCallback | undefined {
+    return this.registryOptions.serverNameBuilder;
+  }
+
+  /**
+   * Build a server name using the configured serverNameBuilder or default logic.
+   */
+  protected buildServerName(options: {
+    transport?: 'stdio' | 'http';
+    serverUrl?: string;
+    serverName?: string;
+  }): string {
+    if (this.serverNameBuilder) {
+      return this.serverNameBuilder(options);
+    }
+    return buildMcpServerName(options);
   }
 
   /**

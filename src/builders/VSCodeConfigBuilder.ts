@@ -1,6 +1,5 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { MCPConnectionOptions, VSCodeMCPConfig, MCPServersRecord } from '../types.js';
-import { buildMcpServerName } from '../server-name.js';
 
 function isVSCodeMCPConfig(config: VSCodeMCPConfig | MCPServersRecord): config is VSCodeMCPConfig {
   return typeof config === 'object' && config !== null && 'servers' in config;
@@ -20,10 +19,9 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
       throw new Error(`Client ${this.config.id} doesn't support stdio server configuration`);
     }
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'stdio',
       serverName: options.serverName,
-      productName: options.productName,
     });
     const serverConfig: Record<string, unknown> = {};
 
@@ -69,11 +67,10 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
     // Substitute URL template variables
     const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'http',
       serverUrl: options.serverUrl,
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     if (httpPropertyMapping && this.config.transports.includes('http')) {
@@ -146,11 +143,10 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
       throw new Error(`${this.config.displayName} does not support one-click installation`);
     }
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: options.transport,
       serverUrl: options.serverUrl,
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     // Build the appropriate config based on the client's capabilities
@@ -198,11 +194,10 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
     // Substitute URL template variables
     const resolvedUrl = this.substituteUrlVariables(options.serverUrl, options.urlVariables);
 
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: options.transport,
       serverUrl: options.serverUrl,
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     const config: Record<string, unknown> = {
@@ -226,10 +221,9 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
 
   protected buildStdioCommand(options: MCPConnectionOptions): string {
     // VS Code also supports stdio servers via --add-mcp
-    const serverName = buildMcpServerName({
+    const serverName = this.buildServerName({
       transport: 'stdio',
       serverName: options.serverName,
-      productName: options.productName,
     });
 
     const config: Record<string, unknown> = {
