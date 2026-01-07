@@ -150,6 +150,11 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
     return command;
   }
 
+  /**
+   * @deprecated This method is deprecated and will be removed in the next major version.
+   *             Consumers should use buildConfiguration() directly and handle the output format
+   *             based on the includeRootObject option.
+   */
   getNormalizedServersConfig(config: CodexMCPConfig | MCPServersRecord): MCPServersRecord {
     // Use type guard to determine if this is a full wrapped config
     const servers: MCPServersRecord = isCodexMCPConfig(config) ? config.mcp_servers : config;

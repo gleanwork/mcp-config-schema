@@ -170,6 +170,11 @@ export class GenericConfigBuilder extends BaseConfigBuilder<StandardMCPConfig> {
     return null;
   }
 
+  /**
+   * @deprecated This method is deprecated and will be removed in the next major version.
+   *             Consumers should use buildConfiguration() directly and handle the output format
+   *             based on the includeRootObject option.
+   */
   getNormalizedServersConfig(config: StandardMCPConfig | MCPServersRecord): MCPServersRecord {
     // Use type guard to narrow the union
     if (isStandardMCPConfig(config)) {

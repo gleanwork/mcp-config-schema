@@ -1,3 +1,9 @@
+## [Unreleased]
+
+#### :warning: Deprecation
+
+- **`getNormalizedServersConfig()`**: This method on all builder classes is deprecated and will be removed in the next major version (v4.0.0). Consumers should use `buildConfiguration()` directly and handle the output format based on the `includeRootObject` option.
+
 ## v3.0.0 (2026-01-06)
 
 #### :boom: Breaking Change

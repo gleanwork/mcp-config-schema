@@ -244,6 +244,11 @@ export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
     return `code --add-mcp '${escapedConfig}'`;
   }
 
+  /**
+   * @deprecated This method is deprecated and will be removed in the next major version.
+   *             Consumers should use buildConfiguration() directly and handle the output format
+   *             based on the includeRootObject option.
+   */
   getNormalizedServersConfig(config: VSCodeMCPConfig | MCPServersRecord): MCPServersRecord {
     // Use type guard to narrow the union
     if (isVSCodeMCPConfig(config)) {

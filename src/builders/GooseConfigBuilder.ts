@@ -179,6 +179,11 @@ export class GooseConfigBuilder extends BaseConfigBuilder<GooseMCPConfig> {
     return null;
   }
 
+  /**
+   * @deprecated This method is deprecated and will be removed in the next major version.
+   *             Consumers should use buildConfiguration() directly and handle the output format
+   *             based on the includeRootObject option.
+   */
   getNormalizedServersConfig(config: GooseMCPConfig | MCPServersRecord): MCPServersRecord {
     // Use type guard to determine if this is a full wrapped config
     const servers: MCPServersRecord = isGooseMCPConfig(config) ? config.extensions : config;

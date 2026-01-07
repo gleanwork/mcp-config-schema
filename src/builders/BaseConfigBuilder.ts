@@ -267,6 +267,9 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
    *                 Full configs come from buildConfiguration() with includeRootObject: true (default).
    *                 Flat configs come from buildConfiguration() with includeRootObject: false.
    * @returns A normalized record of server configurations.
+   * @deprecated This method is deprecated and will be removed in the next major version.
+   *             Consumers should use buildConfiguration() directly and handle the output format
+   *             based on the includeRootObject option.
    */
   abstract getNormalizedServersConfig(config: TConfig | MCPServersRecord): MCPServersRecord;
 
