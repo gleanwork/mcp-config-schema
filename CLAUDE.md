@@ -21,8 +21,8 @@ Note: This library is vendor-neutral. Glean-specific configuration (like server 
 
 ### Client Types
 
-- **Native HTTP**: Can connect directly to HTTP servers (Claude Code, VS Code, Cursor, Goose, Windsurf, Codex)
-- **stdio-only**: Require `mcp-remote` bridge for HTTP connections (Claude Desktop, Junie, JetBrains AI Assistant)
+- **Native HTTP**: Can connect directly to HTTP servers (Claude Code, VS Code, Cursor, Goose, Windsurf, Codex, JetBrains AI Assistant)
+- **stdio-only**: Require `mcp-remote` bridge for HTTP connections (Claude Desktop, Junie)
 
 ## Architecture
 
