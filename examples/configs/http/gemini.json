@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "httpUrl": "https://api.example.com/mcp"
     }
   }

@@ -1,6 +1,6 @@
 extensions:
-  glean_example:
-    name: glean_example
+  example:
+    name: example
     cmd: npx
     args:
       - '-y'

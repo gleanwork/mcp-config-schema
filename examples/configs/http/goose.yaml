@@ -1,7 +1,7 @@
 extensions:
-  glean_example:
+  example:
     enabled: true
-    name: glean_example
+    name: example
     type: streamable_http
     uri: https://api.example.com/mcp
     envs: {}

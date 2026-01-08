@@ -58,7 +58,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 
 - **Configuration**: User-configurable
 - **Connection Type**: Native HTTP support
-- **Documentation**: [Link](https://docs.claude.com/en/docs/claude-code/mcp)
+- **Documentation**: [Link](https://code.claude.com/docs/en/mcp)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Paths**:
   - **macOS/Linux**: `$HOME/.claude.json`
@@ -74,7 +74,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
   "displayName": "Claude Code",
   "description": "Claude Code with native HTTP support",
   "userConfigurable": true,
-  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/mcp",
+  "documentationUrl": "https://code.claude.com/docs/en/mcp",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
@@ -108,7 +108,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ```json snippet=examples/configs/http/claude-code.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "type": "http",
       "url": "https://api.example.com/mcp"
     }
@@ -124,7 +124,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ```json snippet=examples/configs/stdio/claude-code.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "command": "npx",
       "args": [
         "-y",
@@ -195,7 +195,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ```json snippet=examples/configs/http/claude-desktop.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "type": "stdio",
       "command": "npx",
       "args": [
@@ -216,7 +216,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 ```json snippet=examples/configs/stdio/claude-desktop.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "command": "npx",
       "args": [
         "-y",
@@ -318,7 +318,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 <summary><strong>HTTP Configuration</strong></summary>
 
 ```toml snippet=examples/configs/http/codex.toml
-[mcp_servers.glean_example]
+[mcp_servers.example]
 url = "https://api.example.com/mcp"
 ```
 
@@ -328,11 +328,11 @@ url = "https://api.example.com/mcp"
 <summary><strong>stdio Configuration</strong></summary>
 
 ```toml snippet=examples/configs/stdio/codex.toml
-[mcp_servers.glean_example]
+[mcp_servers.example]
 command = "npx"
 args = [ "-y", "@example/mcp-server" ]
 
-[mcp_servers.glean_example.env]
+[mcp_servers.example.env]
 EXAMPLE_API_KEY = "your-api-key"
 ```
 
@@ -344,7 +344,7 @@ EXAMPLE_API_KEY = "your-api-key"
 
 - **Configuration**: User-configurable
 - **Connection Type**: Native HTTP support
-- **Documentation**: [Link](https://docs.cursor.com/context/model-context-protocol)
+- **Documentation**: [Link](https://cursor.com/docs/context/mcp)
 - **Supported Platforms**: macOS, Linux, Windows
 - **One-Click Protocol**: `cursor://`
 - **Configuration Paths**:
@@ -361,7 +361,7 @@ EXAMPLE_API_KEY = "your-api-key"
   "displayName": "Cursor",
   "description": "Cursor with native HTTP support",
   "userConfigurable": true,
-  "documentationUrl": "https://docs.cursor.com/context/model-context-protocol",
+  "documentationUrl": "https://cursor.com/docs/context/mcp",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
@@ -400,7 +400,7 @@ EXAMPLE_API_KEY = "your-api-key"
 ```json snippet=examples/configs/http/cursor.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "type": "http",
       "url": "https://api.example.com/mcp"
     }
@@ -416,7 +416,7 @@ EXAMPLE_API_KEY = "your-api-key"
 ```json snippet=examples/configs/stdio/cursor.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "command": "npx",
       "args": [
         "-y",
@@ -488,9 +488,9 @@ EXAMPLE_API_KEY = "your-api-key"
 
 ```yaml snippet=examples/configs/http/goose.yaml
 extensions:
-  glean_example:
+  example:
     enabled: true
-    name: glean_example
+    name: example
     type: streamable_http
     uri: https://api.example.com/mcp
     envs: {}
@@ -509,8 +509,8 @@ extensions:
 
 ```yaml snippet=examples/configs/stdio/goose.yaml
 extensions:
-  glean_example:
-    name: glean_example
+  example:
+    name: example
     cmd: npx
     args:
       - '-y'
@@ -590,7 +590,7 @@ extensions:
 ```json snippet=examples/configs/http/vscode.json
 {
   "servers": {
-    "glean_example": {
+    "example": {
       "type": "http",
       "url": "https://api.example.com/mcp"
     }
@@ -606,7 +606,7 @@ extensions:
 ```json snippet=examples/configs/stdio/vscode.json
 {
   "servers": {
-    "glean_example": {
+    "example": {
       "command": "npx",
       "args": [
         "-y",
@@ -629,7 +629,7 @@ extensions:
 
 - **Configuration**: User-configurable
 - **Connection Type**: Native HTTP support
-- **Documentation**: [Link](https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp)
+- **Documentation**: [Link](https://docs.windsurf.com/windsurf/cascade/mcp)
 - **Supported Platforms**: macOS, Linux, Windows
 - **Configuration Paths**:
   - **macOS/Linux**: `$HOME/.codeium/windsurf/mcp_config.json`
@@ -646,7 +646,7 @@ extensions:
   "description": "Windsurf supports both stdio and native HTTP connections",
   "userConfigurable": true,
   "localConfigNotes": "Supports both stdio and native HTTP connections",
-  "documentationUrl": "https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp",
+  "documentationUrl": "https://docs.windsurf.com/windsurf/cascade/mcp",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
@@ -678,7 +678,7 @@ extensions:
 ```json snippet=examples/configs/http/windsurf.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "serverUrl": "https://api.example.com/mcp"
     }
   }
@@ -693,7 +693,7 @@ extensions:
 ```json snippet=examples/configs/stdio/windsurf.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "command": "npx",
       "args": [
         "-y",
@@ -762,7 +762,7 @@ extensions:
 ```json snippet=examples/configs/http/junie.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "type": "stdio",
       "command": "npx",
       "args": [
@@ -783,7 +783,7 @@ extensions:
 ```json snippet=examples/configs/stdio/junie.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "command": "npx",
       "args": [
         "-y",
@@ -845,7 +845,7 @@ extensions:
 ```json snippet=examples/configs/http/jetbrains.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "type": "stdio",
       "command": "npx",
       "args": [
@@ -866,7 +866,7 @@ extensions:
 ```json snippet=examples/configs/stdio/jetbrains.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "command": "npx",
       "args": [
         "-y",
@@ -937,7 +937,7 @@ extensions:
 ```json snippet=examples/configs/http/gemini.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "httpUrl": "https://api.example.com/mcp"
     }
   }
@@ -952,7 +952,7 @@ extensions:
 ```json snippet=examples/configs/stdio/gemini.json
 {
   "mcpServers": {
-    "glean_example": {
+    "example": {
       "command": "npx",
       "args": [
         "-y",
