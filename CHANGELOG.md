@@ -1,3 +1,21 @@
+
+## v3.1.0 (2026-01-08)
+
+#### :rocket: Enhancement
+* [#79](https://github.com/gleanwork/mcp-config-schema/pull/79) feat(jetbrains): add native HTTP transport support (2025.2+) ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#76](https://github.com/gleanwork/mcp-config-schema/pull/76) deprecate: mark getNormalizedServersConfig for removal in v4.0.0 ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :bug: Bug Fix
+* [#78](https://github.com/gleanwork/mcp-config-schema/pull/78) fix(junie): correct config path from ~/.junie/mcp.json to ~/.junie/mcp/mcp.json ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+* [#77](https://github.com/gleanwork/mcp-config-schema/pull/77) docs: fix outdated documentation URLs ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :house: Internal
+* [#80](https://github.com/gleanwork/mcp-config-schema/pull/80) feat: add config validation Claude Code commands ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## [Unreleased]
 
 #### :warning: Deprecation
