@@ -1,6 +1,6 @@
 {
   "servers": {
-    "glean_example": {
+    "example": {
       "command": "npx",
       "args": [
         "-y",

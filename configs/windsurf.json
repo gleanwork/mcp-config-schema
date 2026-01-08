@@ -5,7 +5,7 @@
   "description": "Windsurf supports both stdio and native HTTP connections",
   "userConfigurable": true,
   "localConfigNotes": "Supports both stdio and native HTTP connections",
-  "documentationUrl": "https://docs.windsurf.com/windsurf/cascade/mcp#model-context-protocol-mcp",
+  "documentationUrl": "https://docs.windsurf.com/windsurf/cascade/mcp",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",

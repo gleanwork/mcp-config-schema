@@ -1,6 +1,6 @@
-[mcp_servers.glean_example]
+[mcp_servers.example]
 command = "npx"
 args = [ "-y", "@example/mcp-server" ]
 
-[mcp_servers.glean_example.env]
+[mcp_servers.example.env]
 EXAMPLE_API_KEY = "your-api-key"

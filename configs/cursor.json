@@ -4,7 +4,7 @@
   "displayName": "Cursor",
   "description": "Cursor with native HTTP support",
   "userConfigurable": true,
-  "documentationUrl": "https://docs.cursor.com/context/model-context-protocol",
+  "documentationUrl": "https://cursor.com/docs/context/mcp",
   "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
