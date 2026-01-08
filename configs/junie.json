@@ -10,9 +10,9 @@
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {
-    "darwin": "$HOME/.junie/mcp.json",
-    "linux": "$HOME/.junie/mcp.json",
-    "win32": "%USERPROFILE%\\.junie\\mcp.json"
+    "darwin": "$HOME/.junie/mcp/mcp.json",
+    "linux": "$HOME/.junie/mcp/mcp.json",
+    "win32": "%USERPROFILE%\\.junie\\mcp\\mcp.json"
   },
   "configStructure": {
     "serversPropertyName": "mcpServers",

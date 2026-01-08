@@ -858,7 +858,7 @@ describe('ConfigBuilder', () => {
       const path = builder.getConfigPath();
 
       expect(path).not.toContain('$HOME');
-      expect(path).toContain('/.junie/mcp.json');
+      expect(path).toContain('/.junie/mcp/mcp.json');
     });
 
   });
