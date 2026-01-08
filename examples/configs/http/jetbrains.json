@@ -1,13 +1,8 @@
 {
   "mcpServers": {
     "example": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://api.example.com/mcp"
-      ]
+      "type": "http",
+      "url": "https://api.example.com/mcp"
     }
   }
 }

@@ -505,7 +505,7 @@ describe('ConfigBuilder', () => {
       `);
     });
 
-    it('should generate correct bridge config for JetBrains', () => {
+    it('should generate correct HTTP config for JetBrains', () => {
       const builder = registry.createBuilder(CLIENT.JETBRAINS);
       const result = builder.buildConfiguration(remoteConfig);
 
@@ -516,13 +516,8 @@ describe('ConfigBuilder', () => {
         {
           "mcpServers": {
             "glean": {
-              "args": [
-                "-y",
-                "mcp-remote",
-                "https://glean-dev-be.glean.com/mcp/default",
-              ],
-              "command": "npx",
-              "type": "stdio",
+              "type": "http",
+              "url": "https://glean-dev-be.glean.com/mcp/default",
             },
           },
         }

@@ -16,7 +16,7 @@ This document provides a comprehensive overview of all supported MCP clients, th
 | **Visual Studio Code** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 | **Windsurf** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 | **Junie (JetBrains)** | User-configurable | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
-| **JetBrains AI Assistant** | User-configurable | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
+| **JetBrains AI Assistant** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 | **Gemini CLI** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 
 ## Detailed Client Information
@@ -805,7 +805,7 @@ extensions:
 ### JetBrains AI Assistant
 
 - **Configuration**: User-configurable
-- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
+- **Connection Type**: Native HTTP support
 - **Documentation**: [Link](https://www.jetbrains.com/help/ai-assistant/mcp.html)
 - **Supported Platforms**: macOS, Linux, Windows
 
@@ -817,16 +817,21 @@ extensions:
   "id": "jetbrains",
   "name": "jetbrains",
   "displayName": "JetBrains AI Assistant",
-  "description": "JetBrains AI Assistant for all JetBrains IDEs - stdio only, configure via IDE UI",
+  "description": "JetBrains AI Assistant for all JetBrains IDEs - supports stdio, Streamable HTTP, and SSE transports (2025.2+), configure via IDE UI",
   "userConfigurable": true,
   "localConfigNotes": "Configuration must be pasted into Settings → Tools → AI Assistant → Model Context Protocol → Add → As JSON. Direct file writing is not supported due to version-specific XML storage.",
   "documentationUrl": "https://www.jetbrains.com/help/ai-assistant/mcp.html",
-  "transports": ["stdio"],
+  "transports": ["stdio", "http"],
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {},
   "configStructure": {
     "serversPropertyName": "mcpServers",
+    "httpPropertyMapping": {
+      "typeProperty": "type",
+      "urlProperty": "url",
+      "headersProperty": "headers"
+    },
     "stdioPropertyMapping": {
       "typeProperty": "type",
       "commandProperty": "command",
@@ -840,19 +845,14 @@ extensions:
 </details>
 
 <details>
-<summary><strong>HTTP Configuration (via mcp-remote bridge)</strong></summary>
+<summary><strong>HTTP Configuration</strong></summary>
 
 ```json snippet=examples/configs/http/jetbrains.json
 {
   "mcpServers": {
     "example": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://api.example.com/mcp"
-      ]
+      "type": "http",
+      "url": "https://api.example.com/mcp"
     }
   }
 }
@@ -980,13 +980,13 @@ Clients that can connect directly to HTTP MCP servers without additional tooling
 - Goose
 - Visual Studio Code
 - Windsurf
+- JetBrains AI Assistant
 - Gemini CLI
 
 ### stdio-only Clients
 Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP servers:
 - Claude for Desktop
 - Junie (JetBrains)
-- JetBrains AI Assistant
 
 ### Web-based/Managed Clients
 Clients that don't support local configuration files:
