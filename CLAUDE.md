@@ -118,7 +118,7 @@ Configuration files are written to client-specific locations:
 - **Goose**: `~/.config/goose/config.yaml` (macOS/Linux/Windows)
 - **Windsurf**: `~/.codeium/windsurf/mcp_config.json` (all platforms)
 - **Codex**: `~/.codex/config.toml` (all platforms)
-- **Junie**: `~/.junie/mcp.json` (all platforms)
+- **Junie**: `~/.junie/mcp/mcp.json` (all platforms)
 - **JetBrains AI Assistant**: Configure via IDE UI (Settings → Tools → AI Assistant → Model Context Protocol)
 
 ## Common Tasks

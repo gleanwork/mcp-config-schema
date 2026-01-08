@@ -719,8 +719,8 @@ extensions:
 - **Supported Platforms**: macOS, Linux, Windows
 - **Notes**: Requires mcp-remote bridge for remote servers
 - **Configuration Paths**:
-  - **macOS/Linux**: `$HOME/.junie/mcp.json`
-  - **Windows**: `%USERPROFILE%\.junie\mcp.json`
+  - **macOS/Linux**: `$HOME/.junie/mcp/mcp.json`
+  - **Windows**: `%USERPROFILE%\.junie\mcp\mcp.json`
 
 <details>
 <summary><strong>Internal Configuration Schema</strong></summary>
@@ -738,9 +738,9 @@ extensions:
   "supportedPlatforms": ["darwin", "linux", "win32"],
   "configFormat": "json",
   "configPath": {
-    "darwin": "$HOME/.junie/mcp.json",
-    "linux": "$HOME/.junie/mcp.json",
-    "win32": "%USERPROFILE%\\.junie\\mcp.json"
+    "darwin": "$HOME/.junie/mcp/mcp.json",
+    "linux": "$HOME/.junie/mcp/mcp.json",
+    "win32": "%USERPROFILE%\\.junie\\mcp\\mcp.json"
   },
   "configStructure": {
     "serversPropertyName": "mcpServers",
