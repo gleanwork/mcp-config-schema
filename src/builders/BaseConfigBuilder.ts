@@ -8,6 +8,8 @@ import {
   CommandBuilder,
   ServerNameBuilderCallback,
   validateConnectionOptions,
+  CliInstallationStatus,
+  CLI_INSTALL_REASON,
 } from '../types.js';
 import { buildMcpServerName } from '../server-name.js';
 import * as yaml from 'js-yaml';
@@ -70,6 +72,69 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
    */
   protected get serverNameBuilder(): ServerNameBuilderCallback | undefined {
     return this.registryOptions.serverNameBuilder;
+  }
+
+  /**
+   * Whether this builder has native CLI support.
+   * Override in subclasses that implement native CLI commands (e.g., VSCode, ClaudeCode, Codex).
+   */
+  protected get hasNativeCliSupport(): boolean {
+    return false;
+  }
+
+  /**
+   * Check whether this client supports CLI-based installation.
+   *
+   * Use this method to determine if the CLI tab should be shown in the UI,
+   * and to understand why CLI installation may not be available.
+   *
+   * @returns Status object indicating whether CLI installation is supported and why.
+   *
+   * @example
+   * ```typescript
+   * const status = builder.supportsCliInstallation();
+   * if (status.supported) {
+   *   const command = builder.buildCommand(options);
+   *   showCliTab(command);
+   * } else {
+   *   if (status.reason === CLI_INSTALL_REASON.NO_CONFIG_PATH) {
+   *     showIdeConfigInstructions(status.message);
+   *   }
+   * }
+   * ```
+   */
+  supportsCliInstallation(): CliInstallationStatus {
+    // No config path = client is configured via IDE UI (e.g., JetBrains)
+    if (!this.config.configPath[this.platform]) {
+      return {
+        supported: false,
+        reason: CLI_INSTALL_REASON.NO_CONFIG_PATH,
+        message: `${this.config.displayName} is configured through IDE settings, not via CLI.`,
+      };
+    }
+
+    // Has native CLI = supported
+    if (this.hasNativeCliSupport) {
+      return {
+        supported: true,
+        reason: CLI_INSTALL_REASON.NATIVE_CLI,
+      };
+    }
+
+    // Has commandBuilder callback = supported via custom command
+    if (this.commandBuilder?.http || this.commandBuilder?.stdio) {
+      return {
+        supported: true,
+        reason: CLI_INSTALL_REASON.COMMAND_BUILDER,
+      };
+    }
+
+    // No native CLI and no commandBuilder = not supported
+    return {
+      supported: false,
+      reason: CLI_INSTALL_REASON.NO_CLI_AVAILABLE,
+      message: `No CLI command available for ${this.config.displayName}.`,
+    };
   }
 
   /**
