@@ -9,6 +9,10 @@ function isCodexMCPConfig(config: CodexMCPConfig | MCPServersRecord): config is 
  * Config builder for Codex which uses { mcp_servers: {...} } format (snake_case).
  */
 export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
+  protected get hasNativeCliSupport(): boolean {
+    return true;
+  }
+
   protected buildStdioConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true

@@ -9,6 +9,10 @@ function isVSCodeMCPConfig(config: VSCodeMCPConfig | MCPServersRecord): config i
  * Config builder for VS Code which uses { servers: {...} } format.
  */
 export class VSCodeConfigBuilder extends BaseConfigBuilder<VSCodeMCPConfig> {
+  protected get hasNativeCliSupport(): boolean {
+    return true;
+  }
+
   protected buildStdioConfig(
     options: MCPConnectionOptions,
     includeRootObject: boolean = true

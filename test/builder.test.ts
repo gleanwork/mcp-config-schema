@@ -5,6 +5,7 @@ import {
   validateMcpServersConfig,
   validateVsCodeConfig,
   CLIENT,
+  CLI_INSTALL_REASON,
 } from '../src/index';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -318,6 +319,54 @@ describe('ConfigBuilder', () => {
         expect(command).toBe(null);
       });
 
+    });
+
+    describe('non-CLI-installable clients', () => {
+      it('returns null for JetBrains (no configPath)', () => {
+        // JetBrains has empty configPath - configuration is done through IDE UI
+        const jetbrainsBuilder = registry.createBuilder(CLIENT.JETBRAINS);
+        const command = jetbrainsBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test-server',
+        });
+        expect(command).toBeNull();
+      });
+
+      it('returns null for JetBrains stdio transport (no configPath)', () => {
+        const jetbrainsBuilder = registry.createBuilder(CLIENT.JETBRAINS);
+        const command = jetbrainsBuilder.buildCommand({
+          transport: 'stdio',
+          serverName: 'local-test',
+          env: { GLEAN_INSTANCE: 'test-instance' },
+        });
+        expect(command).toBeNull();
+      });
+
+      it('returns command for Cursor (has configPath)', () => {
+        // Cursor has configPath, but no native CLI - should return null without commandBuilder
+        // This test verifies that clients WITH configPath still work as expected
+        const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+        const command = cursorBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test-server',
+        });
+        // Cursor returns null because it has no native CLI, not because of missing configPath
+        expect(command).toBeNull();
+      });
+
+      it('returns command for VS Code (has configPath and native CLI)', () => {
+        // VS Code has both configPath and native CLI support
+        const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+        const command = vscodeBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test-server',
+        });
+        expect(command).not.toBeNull();
+        expect(command).toContain('code --add-mcp');
+      });
     });
   });
 
@@ -1496,6 +1545,147 @@ describe('ConfigBuilder', () => {
         });
 
         expect(result.local).not.toHaveProperty('env');
+      });
+    });
+  });
+
+  describe('supportsCliInstallation', () => {
+    describe('native CLI clients', () => {
+      it('returns supported with native_cli reason for Claude Code', () => {
+        const builder = registry.createBuilder(CLIENT.CLAUDE_CODE);
+        const status = builder.supportsCliInstallation();
+
+        expect(status.supported).toBe(true);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.NATIVE_CLI);
+        expect(status.reason).toBe('native_cli');
+      });
+
+      it('returns supported with native_cli reason for VS Code', () => {
+        const builder = registry.createBuilder(CLIENT.VSCODE);
+        const status = builder.supportsCliInstallation();
+
+        expect(status.supported).toBe(true);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.NATIVE_CLI);
+      });
+
+      it('returns supported with native_cli reason for Codex', () => {
+        const builder = registry.createBuilder(CLIENT.CODEX);
+        const status = builder.supportsCliInstallation();
+
+        expect(status.supported).toBe(true);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.NATIVE_CLI);
+      });
+    });
+
+    describe('clients without native CLI', () => {
+      it('returns unsupported with no_cli_available for Cursor (no commandBuilder)', () => {
+        const builder = registry.createBuilder(CLIENT.CURSOR);
+        const status = builder.supportsCliInstallation();
+
+        expect(status.supported).toBe(false);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.NO_CLI_AVAILABLE);
+        expect(status.reason).toBe('no_cli_available');
+        if (!status.supported) {
+          expect(status.message).toContain('Cursor');
+        }
+      });
+
+      it('returns unsupported with no_cli_available for Claude Desktop (no commandBuilder)', () => {
+        const builder = registry.createBuilder(CLIENT.CLAUDE_DESKTOP);
+        const status = builder.supportsCliInstallation();
+
+        expect(status.supported).toBe(false);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.NO_CLI_AVAILABLE);
+      });
+
+      it('returns unsupported with no_cli_available for Goose (no commandBuilder)', () => {
+        const builder = registry.createBuilder(CLIENT.GOOSE);
+        const status = builder.supportsCliInstallation();
+
+        expect(status.supported).toBe(false);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.NO_CLI_AVAILABLE);
+      });
+    });
+
+    describe('clients without configPath (IDE-configured)', () => {
+      it('returns unsupported with no_config_path for JetBrains', () => {
+        const builder = registry.createBuilder(CLIENT.JETBRAINS);
+        const status = builder.supportsCliInstallation();
+
+        expect(status.supported).toBe(false);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.NO_CONFIG_PATH);
+        expect(status.reason).toBe('no_config_path');
+        if (!status.supported) {
+          expect(status.message).toContain('JetBrains');
+          expect(status.message).toContain('IDE settings');
+        }
+      });
+    });
+
+    describe('with commandBuilder callback', () => {
+      it('returns supported with command_builder reason for Cursor', () => {
+        const registryWithCommandBuilder = new MCPConfigRegistry({
+          serverPackage: '@gleanwork/local-mcp-server',
+          commandBuilder: {
+            http: (clientId, options) => `npx my-cli install --client ${clientId} --url ${options.serverUrl}`,
+            stdio: (clientId) => `npx my-cli install --client ${clientId}`,
+          },
+        });
+
+        const builder = registryWithCommandBuilder.createBuilder(CLIENT.CURSOR);
+        const status = builder.supportsCliInstallation();
+
+        expect(status.supported).toBe(true);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.COMMAND_BUILDER);
+        expect(status.reason).toBe('command_builder');
+      });
+
+      it('returns supported with command_builder reason for Claude Desktop', () => {
+        const registryWithCommandBuilder = new MCPConfigRegistry({
+          serverPackage: '@gleanwork/local-mcp-server',
+          commandBuilder: {
+            http: () => 'some-command',
+          },
+        });
+
+        const builder = registryWithCommandBuilder.createBuilder(CLIENT.CLAUDE_DESKTOP);
+        const status = builder.supportsCliInstallation();
+
+        expect(status.supported).toBe(true);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.COMMAND_BUILDER);
+      });
+
+      it('still returns unsupported for JetBrains even with commandBuilder (no configPath)', () => {
+        const registryWithCommandBuilder = new MCPConfigRegistry({
+          serverPackage: '@gleanwork/local-mcp-server',
+          commandBuilder: {
+            http: () => 'some-command',
+            stdio: () => 'some-command',
+          },
+        });
+
+        const builder = registryWithCommandBuilder.createBuilder(CLIENT.JETBRAINS);
+        const status = builder.supportsCliInstallation();
+
+        // JetBrains has no configPath, so CLI install is not supported regardless
+        expect(status.supported).toBe(false);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.NO_CONFIG_PATH);
+      });
+
+      it('native CLI takes precedence over commandBuilder', () => {
+        const registryWithCommandBuilder = new MCPConfigRegistry({
+          serverPackage: '@gleanwork/local-mcp-server',
+          commandBuilder: {
+            http: () => 'custom-command',
+          },
+        });
+
+        const builder = registryWithCommandBuilder.createBuilder(CLIENT.CLAUDE_CODE);
+        const status = builder.supportsCliInstallation();
+
+        // Claude Code has native CLI, so that takes precedence
+        expect(status.supported).toBe(true);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.NATIVE_CLI);
       });
     });
   });

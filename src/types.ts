@@ -110,11 +110,6 @@ export interface RegistryOptions {
   serverNameBuilder?: ServerNameBuilderCallback;
 }
 
-// ============================================================================
-// Config Output Types
-// These types represent the shape of configuration objects returned by builders.
-// ============================================================================
-
 /**
  * Record type for the servers collection within a config.
  * The value is `unknown` since different clients have different server config schemas.
@@ -221,6 +216,70 @@ export interface ValidationResult {
   data?: unknown;
   error?: z.ZodError;
 }
+
+/**
+ * Constants for CLI installation status reasons.
+ * Use these to avoid string literals when checking status.reason.
+ *
+ * @example
+ * ```typescript
+ * const status = builder.supportsCliInstallation();
+ * if (status.reason === CLI_INSTALL_REASON.NATIVE_CLI) {
+ *   // Client has native CLI support
+ * }
+ * ```
+ */
+export const CLI_INSTALL_REASON = {
+  /** Client has a native CLI command (e.g., `claude mcp add`, `code --add-mcp`) */
+  NATIVE_CLI: 'native_cli',
+  /** CLI command provided via commandBuilder callback */
+  COMMAND_BUILDER: 'command_builder',
+  /** Client has no configPath - configured via IDE UI (e.g., JetBrains) */
+  NO_CONFIG_PATH: 'no_config_path',
+  /** Client has no native CLI and no commandBuilder was provided */
+  NO_CLI_AVAILABLE: 'no_cli_available',
+} as const;
+
+/**
+ * Union type of all CLI installation reason values.
+ */
+export type CliInstallReason = (typeof CLI_INSTALL_REASON)[keyof typeof CLI_INSTALL_REASON];
+
+/**
+ * Status indicating CLI installation is supported.
+ */
+export interface CliInstallSupported {
+  supported: true;
+  reason: typeof CLI_INSTALL_REASON.NATIVE_CLI | typeof CLI_INSTALL_REASON.COMMAND_BUILDER;
+}
+
+/**
+ * Status indicating CLI installation is not supported.
+ */
+export interface CliInstallUnsupported {
+  supported: false;
+  reason: typeof CLI_INSTALL_REASON.NO_CONFIG_PATH | typeof CLI_INSTALL_REASON.NO_CLI_AVAILABLE;
+  /** Human-readable message explaining why CLI installation is not supported */
+  message: string;
+}
+
+/**
+ * Result of checking whether a client supports CLI-based installation.
+ *
+ * @example
+ * ```typescript
+ * const status = builder.supportsCliInstallation();
+ * if (status.supported) {
+ *   const command = builder.buildCommand(options);
+ *   showCliTab(command);
+ * } else {
+ *   if (status.reason === CLI_INSTALL_REASON.NO_CONFIG_PATH) {
+ *     showIdeConfigInstructions(status.message);
+ *   }
+ * }
+ * ```
+ */
+export type CliInstallationStatus = CliInstallSupported | CliInstallUnsupported;
 
 export {
   ClientIdSchema,

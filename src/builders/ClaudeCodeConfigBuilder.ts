@@ -2,6 +2,10 @@ import { GenericConfigBuilder } from './GenericConfigBuilder.js';
 import { MCPConnectionOptions } from '../types.js';
 
 export class ClaudeCodeConfigBuilder extends GenericConfigBuilder {
+  protected get hasNativeCliSupport(): boolean {
+    return true;
+  }
+
   protected buildHttpCommand(options: MCPConnectionOptions): string {
     if (!options.serverUrl) {
       throw new Error('HTTP transport requires a server URL');
