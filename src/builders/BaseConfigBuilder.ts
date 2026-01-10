@@ -285,8 +285,9 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
 
   buildCommand(options: MCPConnectionOptions): string | null {
     try {
-      // If no configPath for this platform, the client is not CLI-installable
-      if (!this.config.configPath[this.platform]) {
+      // Check if CLI installation is supported for this client
+      const status = this.supportsCliInstallation();
+      if (!status.supported) {
         return null;
       }
 
