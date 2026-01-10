@@ -285,7 +285,10 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
 
   buildCommand(options: MCPConnectionOptions): string | null {
     try {
-      // Check if CLI installation is supported for this client
+      // Check if CLI installation is supported for this client.
+      // Returns null if:
+      // - Client has no configPath for this platform (e.g., JetBrains - configured via IDE UI)
+      // - Client has no native CLI and no commandBuilder callback was provided
       const status = this.supportsCliInstallation();
       if (!status.supported) {
         return null;
