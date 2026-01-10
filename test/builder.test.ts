@@ -319,6 +319,54 @@ describe('ConfigBuilder', () => {
       });
 
     });
+
+    describe('non-CLI-installable clients', () => {
+      it('returns null for JetBrains (no configPath)', () => {
+        // JetBrains has empty configPath - configuration is done through IDE UI
+        const jetbrainsBuilder = registry.createBuilder(CLIENT.JETBRAINS);
+        const command = jetbrainsBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test-server',
+        });
+        expect(command).toBeNull();
+      });
+
+      it('returns null for JetBrains stdio transport (no configPath)', () => {
+        const jetbrainsBuilder = registry.createBuilder(CLIENT.JETBRAINS);
+        const command = jetbrainsBuilder.buildCommand({
+          transport: 'stdio',
+          serverName: 'local-test',
+          env: { GLEAN_INSTANCE: 'test-instance' },
+        });
+        expect(command).toBeNull();
+      });
+
+      it('returns command for Cursor (has configPath)', () => {
+        // Cursor has configPath, but no native CLI - should return null without commandBuilder
+        // This test verifies that clients WITH configPath still work as expected
+        const cursorBuilder = registry.createBuilder(CLIENT.CURSOR);
+        const command = cursorBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test-server',
+        });
+        // Cursor returns null because it has no native CLI, not because of missing configPath
+        expect(command).toBeNull();
+      });
+
+      it('returns command for VS Code (has configPath and native CLI)', () => {
+        // VS Code has both configPath and native CLI support
+        const vscodeBuilder = registry.createBuilder(CLIENT.VSCODE);
+        const command = vscodeBuilder.buildCommand({
+          transport: 'http',
+          serverUrl: 'https://example.com/mcp/default',
+          serverName: 'test-server',
+        });
+        expect(command).not.toBeNull();
+        expect(command).toContain('code --add-mcp');
+      });
+    });
   });
 
   describe('buildOneClickUrl', () => {

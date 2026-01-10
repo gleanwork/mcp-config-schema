@@ -220,6 +220,11 @@ export abstract class BaseConfigBuilder<TConfig extends MCPConfig = MCPConfig> {
 
   buildCommand(options: MCPConnectionOptions): string | null {
     try {
+      // If no configPath for this platform, the client is not CLI-installable
+      if (!this.config.configPath[this.platform]) {
+        return null;
+      }
+
       const validatedOptions = validateConnectionOptions(options);
 
       if (validatedOptions.transport === 'http') {
