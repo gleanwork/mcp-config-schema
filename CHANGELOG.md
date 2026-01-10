@@ -1,4 +1,14 @@
 
+
+## v3.1.1 (2026-01-10)
+
+#### :bug: Bug Fix
+* [#81](https://github.com/gleanwork/mcp-config-schema/pull/81) fix: return null from buildCommand for clients without configPath ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v3.1.0 (2026-01-08)
 
 #### :rocket: Enhancement
