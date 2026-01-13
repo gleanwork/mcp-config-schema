@@ -119,7 +119,9 @@ describe('Client: claude-code', () => {
           env: createGleanEnv('my-company', 'my-api-token'),
         });
 
-        expect(command).toMatchInlineSnapshot(`"claude mcp add glean_local --scope user --env GLEAN_INSTANCE=my-company --env GLEAN_API_TOKEN=my-api-token -- npx -y @gleanwork/local-mcp-server"`);
+        expect(command).toMatchInlineSnapshot(
+          `"claude mcp add glean_local --scope user --env GLEAN_INSTANCE=my-company --env GLEAN_API_TOKEN=my-api-token -- npx -y @gleanwork/local-mcp-server"`
+        );
       });
 
       it('with OAuth (instance only, no token)', () => {
@@ -128,7 +130,9 @@ describe('Client: claude-code', () => {
           env: createGleanEnv('my-company'),
         });
 
-        expect(command).toMatchInlineSnapshot(`"claude mcp add glean_local --scope user --env GLEAN_INSTANCE=my-company -- npx -y @gleanwork/local-mcp-server"`);
+        expect(command).toMatchInlineSnapshot(
+          `"claude mcp add glean_local --scope user --env GLEAN_INSTANCE=my-company -- npx -y @gleanwork/local-mcp-server"`
+        );
       });
     });
 
@@ -140,7 +144,9 @@ describe('Client: claude-code', () => {
           headers: createGleanHeaders('my-api-token'),
         });
 
-        expect(command).toMatchInlineSnapshot(`"claude mcp add glean_default https://my-company-be.glean.com/mcp/default --transport http --scope user --header "Authorization: Bearer my-api-token""`);
+        expect(command).toMatchInlineSnapshot(
+          `"claude mcp add glean_default https://my-company-be.glean.com/mcp/default --transport http --scope user --header "Authorization: Bearer my-api-token""`
+        );
       });
 
       it('with OAuth (URL only, no token)', () => {
@@ -149,7 +155,9 @@ describe('Client: claude-code', () => {
           serverUrl: buildGleanServerUrl('my-company'),
         });
 
-        expect(command).toMatchInlineSnapshot(`"claude mcp add glean_default https://my-company-be.glean.com/mcp/default --transport http --scope user"`);
+        expect(command).toMatchInlineSnapshot(
+          `"claude mcp add glean_default https://my-company-be.glean.com/mcp/default --transport http --scope user"`
+        );
       });
     });
   });

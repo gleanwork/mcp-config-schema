@@ -318,7 +318,6 @@ describe('ConfigBuilder', () => {
         // Returns null because serverUrl is required for http transport
         expect(command).toBe(null);
       });
-
     });
 
     describe('non-CLI-installable clients', () => {
@@ -885,7 +884,6 @@ describe('ConfigBuilder', () => {
         }
       `);
     });
-
   });
 
   describe('path expansion', () => {
@@ -904,7 +902,6 @@ describe('ConfigBuilder', () => {
       expect(path).not.toContain('$HOME');
       expect(path).toContain('/.junie/mcp/mcp.json');
     });
-
   });
 
   describe('Unsupported clients', () => {
@@ -1171,8 +1168,12 @@ describe('ConfigBuilder', () => {
       expect(generatedConfig).toHaveProperty('servers'); // VS Code uses 'servers'
 
       const serverConfig = generatedConfig.servers.test;
-      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpPropertyMapping.typeProperty);
-      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpPropertyMapping.urlProperty);
+      expect(serverConfig).toHaveProperty(
+        jsonConfig.configStructure.httpPropertyMapping.typeProperty
+      );
+      expect(serverConfig).toHaveProperty(
+        jsonConfig.configStructure.httpPropertyMapping.urlProperty
+      );
     });
 
     it('should use Goose YAML structure from JSON config', () => {
@@ -1190,7 +1191,9 @@ describe('ConfigBuilder', () => {
       expect(generatedConfig).toHaveProperty('extensions');
 
       const serverConfig = generatedConfig.extensions.test;
-      expect(serverConfig).toHaveProperty(jsonConfig.configStructure.httpPropertyMapping.urlProperty);
+      expect(serverConfig).toHaveProperty(
+        jsonConfig.configStructure.httpPropertyMapping.urlProperty
+      );
       expect(serverConfig.uri).toBe('https://example.com/mcp/default');
       expect(serverConfig.type).toBe('streamable_http');
     });
@@ -1627,7 +1630,8 @@ describe('ConfigBuilder', () => {
         const registryWithCommandBuilder = new MCPConfigRegistry({
           serverPackage: '@gleanwork/local-mcp-server',
           commandBuilder: {
-            http: (clientId, options) => `npx my-cli install --client ${clientId} --url ${options.serverUrl}`,
+            http: (clientId, options) =>
+              `npx my-cli install --client ${clientId} --url ${options.serverUrl}`,
             stdio: (clientId) => `npx my-cli install --client ${clientId}`,
           },
         });
