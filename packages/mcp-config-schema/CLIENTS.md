@@ -12,12 +12,12 @@ This document provides a comprehensive overview of all supported MCP clients, th
 | **Claude for Teams/Enterprise** | Managed | HTTP only | No | Organization-managed |
 | **Codex** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 | **Cursor** | User-configurable | HTTP native | No | macOS, Linux, Windows |
+| **Gemini CLI** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 | **Goose** | User-configurable | HTTP native | No | macOS, Linux, Windows |
+| **JetBrains AI Assistant** | User-configurable | HTTP native | No | macOS, Linux, Windows |
+| **Junie (JetBrains)** | User-configurable | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
 | **Visual Studio Code** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 | **Windsurf** | User-configurable | HTTP native | No | macOS, Linux, Windows |
-| **Junie (JetBrains)** | User-configurable | stdio only | Yes (for HTTP) | macOS, Linux, Windows |
-| **JetBrains AI Assistant** | User-configurable | HTTP native | No | macOS, Linux, Windows |
-| **Gemini CLI** | User-configurable | HTTP native | No | macOS, Linux, Windows |
 
 ## Detailed Client Information
 
@@ -435,6 +435,91 @@ EXAMPLE_API_KEY = "your-api-key"
 
 ---
 
+### Gemini CLI
+
+- **Configuration**: User-configurable
+- **Connection Type**: Native HTTP support
+- **Documentation**: [Link](https://geminicli.com/docs/tools/mcp-server/)
+- **Supported Platforms**: macOS, Linux, Windows
+- **Configuration Paths**:
+  - **macOS/Linux**: `$HOME/.gemini/settings.json`
+  - **Windows**: `%USERPROFILE%\.gemini\settings.json`
+
+<details>
+<summary><strong>Internal Configuration Schema</strong></summary>
+
+```json snippet=configs/gemini.json
+{
+  "id": "gemini",
+  "name": "gemini",
+  "displayName": "Gemini CLI",
+  "description": "Gemini CLI with native HTTP and stdio support",
+  "userConfigurable": true,
+  "documentationUrl": "https://geminicli.com/docs/tools/mcp-server/",
+  "transports": ["stdio", "http"],
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/.gemini/settings.json",
+    "linux": "$HOME/.gemini/settings.json",
+    "win32": "%USERPROFILE%\\.gemini\\settings.json"
+  },
+  "configStructure": {
+    "serversPropertyName": "mcpServers",
+    "httpPropertyMapping": {
+      "urlProperty": "httpUrl",
+      "headersProperty": "headers"
+    },
+    "stdioPropertyMapping": {
+      "commandProperty": "command",
+      "argsProperty": "args",
+      "envProperty": "env"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>HTTP Configuration</strong></summary>
+
+```json snippet=examples/configs/http/gemini.json
+{
+  "mcpServers": {
+    "example": {
+      "httpUrl": "https://api.example.com/mcp"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>stdio Configuration</strong></summary>
+
+```json snippet=examples/configs/stdio/gemini.json
+{
+  "mcpServers": {
+    "example": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@example/mcp-server"
+      ],
+      "env": {
+        "EXAMPLE_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+---
+
 ### Goose
 
 - **Configuration**: User-configurable
@@ -523,6 +608,180 @@ extensions:
     env_keys: []
     envs:
       EXAMPLE_API_KEY: your-api-key
+```
+
+</details>
+
+---
+
+### JetBrains AI Assistant
+
+- **Configuration**: User-configurable
+- **Connection Type**: Native HTTP support
+- **Documentation**: [Link](https://www.jetbrains.com/help/ai-assistant/mcp.html)
+- **Supported Platforms**: macOS, Linux, Windows
+
+<details>
+<summary><strong>Internal Configuration Schema</strong></summary>
+
+```json snippet=configs/jetbrains.json
+{
+  "id": "jetbrains",
+  "name": "jetbrains",
+  "displayName": "JetBrains AI Assistant",
+  "description": "JetBrains AI Assistant for all JetBrains IDEs - supports stdio, Streamable HTTP, and SSE transports (2025.2+), configure via IDE UI",
+  "userConfigurable": true,
+  "localConfigNotes": "Configuration must be pasted into Settings → Tools → AI Assistant → Model Context Protocol → Add → As JSON. Direct file writing is not supported due to version-specific XML storage.",
+  "documentationUrl": "https://www.jetbrains.com/help/ai-assistant/mcp.html",
+  "transports": ["stdio", "http"],
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {},
+  "configStructure": {
+    "serversPropertyName": "mcpServers",
+    "httpPropertyMapping": {
+      "typeProperty": "type",
+      "urlProperty": "url",
+      "headersProperty": "headers"
+    },
+    "stdioPropertyMapping": {
+      "typeProperty": "type",
+      "commandProperty": "command",
+      "argsProperty": "args",
+      "envProperty": "env"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>HTTP Configuration</strong></summary>
+
+```json snippet=examples/configs/http/jetbrains.json
+{
+  "mcpServers": {
+    "example": {
+      "type": "http",
+      "url": "https://api.example.com/mcp"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>stdio Configuration</strong></summary>
+
+```json snippet=examples/configs/stdio/jetbrains.json
+{
+  "mcpServers": {
+    "example": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@example/mcp-server"
+      ],
+      "type": "stdio",
+      "env": {
+        "EXAMPLE_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+---
+
+### Junie (JetBrains)
+
+- **Configuration**: User-configurable
+- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
+- **Documentation**: [Link](https://www.jetbrains.com/help/junie/model-context-protocol-mcp.html)
+- **Supported Platforms**: macOS, Linux, Windows
+- **Notes**: Requires mcp-remote bridge for remote servers
+- **Configuration Paths**:
+  - **macOS/Linux**: `$HOME/.junie/mcp/mcp.json`
+  - **Windows**: `%USERPROFILE%\.junie\mcp\mcp.json`
+
+<details>
+<summary><strong>Internal Configuration Schema</strong></summary>
+
+```json snippet=configs/junie.json
+{
+  "id": "junie",
+  "name": "junie",
+  "displayName": "Junie (JetBrains)",
+  "description": "JetBrains Junie AI agent - stdio only, requires mcp-remote for HTTP",
+  "userConfigurable": true,
+  "localConfigNotes": "Requires mcp-remote for remote servers",
+  "documentationUrl": "https://www.jetbrains.com/help/junie/model-context-protocol-mcp.html",
+  "transports": ["stdio"],
+  "supportedPlatforms": ["darwin", "linux", "win32"],
+  "configFormat": "json",
+  "configPath": {
+    "darwin": "$HOME/.junie/mcp/mcp.json",
+    "linux": "$HOME/.junie/mcp/mcp.json",
+    "win32": "%USERPROFILE%\\.junie\\mcp\\mcp.json"
+  },
+  "configStructure": {
+    "serversPropertyName": "mcpServers",
+    "stdioPropertyMapping": {
+      "typeProperty": "type",
+      "commandProperty": "command",
+      "argsProperty": "args",
+      "envProperty": "env"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>HTTP Configuration (via mcp-remote bridge)</strong></summary>
+
+```json snippet=examples/configs/http/junie.json
+{
+  "mcpServers": {
+    "example": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.example.com/mcp"
+      ]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>stdio Configuration</strong></summary>
+
+```json snippet=examples/configs/stdio/junie.json
+{
+  "mcpServers": {
+    "example": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@example/mcp-server"
+      ],
+      "type": "stdio",
+      "env": {
+        "EXAMPLE_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
 ```
 
 </details>
@@ -711,265 +970,6 @@ extensions:
 
 ---
 
-### Junie (JetBrains)
-
-- **Configuration**: User-configurable
-- **Connection Type**: stdio only (requires mcp-remote for HTTP servers)
-- **Documentation**: [Link](https://www.jetbrains.com/help/junie/model-context-protocol-mcp.html)
-- **Supported Platforms**: macOS, Linux, Windows
-- **Notes**: Requires mcp-remote bridge for remote servers
-- **Configuration Paths**:
-  - **macOS/Linux**: `$HOME/.junie/mcp/mcp.json`
-  - **Windows**: `%USERPROFILE%\.junie\mcp\mcp.json`
-
-<details>
-<summary><strong>Internal Configuration Schema</strong></summary>
-
-```json snippet=configs/junie.json
-{
-  "id": "junie",
-  "name": "junie",
-  "displayName": "Junie (JetBrains)",
-  "description": "JetBrains Junie AI agent - stdio only, requires mcp-remote for HTTP",
-  "userConfigurable": true,
-  "localConfigNotes": "Requires mcp-remote for remote servers",
-  "documentationUrl": "https://www.jetbrains.com/help/junie/model-context-protocol-mcp.html",
-  "transports": ["stdio"],
-  "supportedPlatforms": ["darwin", "linux", "win32"],
-  "configFormat": "json",
-  "configPath": {
-    "darwin": "$HOME/.junie/mcp/mcp.json",
-    "linux": "$HOME/.junie/mcp/mcp.json",
-    "win32": "%USERPROFILE%\\.junie\\mcp\\mcp.json"
-  },
-  "configStructure": {
-    "serversPropertyName": "mcpServers",
-    "stdioPropertyMapping": {
-      "typeProperty": "type",
-      "commandProperty": "command",
-      "argsProperty": "args",
-      "envProperty": "env"
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>HTTP Configuration (via mcp-remote bridge)</strong></summary>
-
-```json snippet=examples/configs/http/junie.json
-{
-  "mcpServers": {
-    "example": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://api.example.com/mcp"
-      ]
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>stdio Configuration</strong></summary>
-
-```json snippet=examples/configs/stdio/junie.json
-{
-  "mcpServers": {
-    "example": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@example/mcp-server"
-      ],
-      "type": "stdio",
-      "env": {
-        "EXAMPLE_API_KEY": "your-api-key"
-      }
-    }
-  }
-}
-```
-
-</details>
-
----
-
-### JetBrains AI Assistant
-
-- **Configuration**: User-configurable
-- **Connection Type**: Native HTTP support
-- **Documentation**: [Link](https://www.jetbrains.com/help/ai-assistant/mcp.html)
-- **Supported Platforms**: macOS, Linux, Windows
-
-<details>
-<summary><strong>Internal Configuration Schema</strong></summary>
-
-```json snippet=configs/jetbrains.json
-{
-  "id": "jetbrains",
-  "name": "jetbrains",
-  "displayName": "JetBrains AI Assistant",
-  "description": "JetBrains AI Assistant for all JetBrains IDEs - supports stdio, Streamable HTTP, and SSE transports (2025.2+), configure via IDE UI",
-  "userConfigurable": true,
-  "localConfigNotes": "Configuration must be pasted into Settings → Tools → AI Assistant → Model Context Protocol → Add → As JSON. Direct file writing is not supported due to version-specific XML storage.",
-  "documentationUrl": "https://www.jetbrains.com/help/ai-assistant/mcp.html",
-  "transports": ["stdio", "http"],
-  "supportedPlatforms": ["darwin", "linux", "win32"],
-  "configFormat": "json",
-  "configPath": {},
-  "configStructure": {
-    "serversPropertyName": "mcpServers",
-    "httpPropertyMapping": {
-      "typeProperty": "type",
-      "urlProperty": "url",
-      "headersProperty": "headers"
-    },
-    "stdioPropertyMapping": {
-      "typeProperty": "type",
-      "commandProperty": "command",
-      "argsProperty": "args",
-      "envProperty": "env"
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>HTTP Configuration</strong></summary>
-
-```json snippet=examples/configs/http/jetbrains.json
-{
-  "mcpServers": {
-    "example": {
-      "type": "http",
-      "url": "https://api.example.com/mcp"
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>stdio Configuration</strong></summary>
-
-```json snippet=examples/configs/stdio/jetbrains.json
-{
-  "mcpServers": {
-    "example": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@example/mcp-server"
-      ],
-      "type": "stdio",
-      "env": {
-        "EXAMPLE_API_KEY": "your-api-key"
-      }
-    }
-  }
-}
-```
-
-</details>
-
----
-
-### Gemini CLI
-
-- **Configuration**: User-configurable
-- **Connection Type**: Native HTTP support
-- **Documentation**: [Link](https://geminicli.com/docs/tools/mcp-server/)
-- **Supported Platforms**: macOS, Linux, Windows
-- **Configuration Paths**:
-  - **macOS/Linux**: `$HOME/.gemini/settings.json`
-  - **Windows**: `%USERPROFILE%\.gemini\settings.json`
-
-<details>
-<summary><strong>Internal Configuration Schema</strong></summary>
-
-```json snippet=configs/gemini.json
-{
-  "id": "gemini",
-  "name": "gemini",
-  "displayName": "Gemini CLI",
-  "description": "Gemini CLI with native HTTP and stdio support",
-  "userConfigurable": true,
-  "documentationUrl": "https://geminicli.com/docs/tools/mcp-server/",
-  "transports": ["stdio", "http"],
-  "supportedPlatforms": ["darwin", "linux", "win32"],
-  "configFormat": "json",
-  "configPath": {
-    "darwin": "$HOME/.gemini/settings.json",
-    "linux": "$HOME/.gemini/settings.json",
-    "win32": "%USERPROFILE%\\.gemini\\settings.json"
-  },
-  "configStructure": {
-    "serversPropertyName": "mcpServers",
-    "httpPropertyMapping": {
-      "urlProperty": "httpUrl",
-      "headersProperty": "headers"
-    },
-    "stdioPropertyMapping": {
-      "commandProperty": "command",
-      "argsProperty": "args",
-      "envProperty": "env"
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>HTTP Configuration</strong></summary>
-
-```json snippet=examples/configs/http/gemini.json
-{
-  "mcpServers": {
-    "example": {
-      "httpUrl": "https://api.example.com/mcp"
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>stdio Configuration</strong></summary>
-
-```json snippet=examples/configs/stdio/gemini.json
-{
-  "mcpServers": {
-    "example": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@example/mcp-server"
-      ],
-      "env": {
-        "EXAMPLE_API_KEY": "your-api-key"
-      }
-    }
-  }
-}
-```
-
-</details>
-
----
-
 ## Connection Types Explained
 
 ### Native HTTP Clients
@@ -977,11 +977,11 @@ Clients that can connect directly to HTTP MCP servers without additional tooling
 - Claude Code
 - Codex
 - Cursor
+- Gemini CLI
 - Goose
+- JetBrains AI Assistant
 - Visual Studio Code
 - Windsurf
-- JetBrains AI Assistant
-- Gemini CLI
 
 ### stdio-only Clients
 Clients that communicate via stdio and require `mcp-remote` as a bridge for HTTP servers:

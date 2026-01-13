@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const registry = new MCPConfigRegistry();
-const clients = registry.getAllConfigs();
+const clients = registry.getAllConfigs().sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 // =============================================================================
 // Markdown Helpers
