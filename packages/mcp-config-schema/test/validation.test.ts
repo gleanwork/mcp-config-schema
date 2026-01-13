@@ -39,7 +39,7 @@ describe('Zod Validation', () => {
         displayName: 'Invalid',
         description: 'Test',
         userConfigurable: true,
-        
+
         transports: ['http'],
 
         supportedPlatforms: ['darwin'],
@@ -65,7 +65,7 @@ describe('Zod Validation', () => {
         displayName: 'Claude Code',
         description: 'Test',
         userConfigurable: 1234, // Invalid
-        
+
         transports: ['http'],
 
         supportedPlatforms: ['darwin'],
@@ -92,7 +92,7 @@ describe('Zod Validation', () => {
         displayName: 'Claude Code',
         description: 'Test',
         userConfigurable: true,
-        
+
         documentationUrl: 'https://docs.example.com',
         transports: ['http'],
 
@@ -116,7 +116,7 @@ describe('Zod Validation', () => {
         displayName: 'Claude Code',
         description: 'Test',
         userConfigurable: true,
-        
+
         documentationUrl: 'not-a-url', // Invalid URL
         transports: ['http'],
 

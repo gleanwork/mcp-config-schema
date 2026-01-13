@@ -32,33 +32,12 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "lint": "npm-run-all --sequential lint:*",
-    "lint:eslint": "eslint src --ext ts --fix",
-    "lint:package-json": "sort-package-json",
     "test": "vitest run",
-    "test:all": "npm run lint && npm run typecheck && npm run test",
-    "format": "prettier --write '**/*.ts'",
+    "test:all": "npm run typecheck && npm run test",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@gleanwork/mcp-config-schema": "*"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
-    "@eslint/js": "^9.39.2",
-    "@types/node": "^22.15.21",
-    "@typescript-eslint/eslint-plugin": "^8.51.0",
-    "@typescript-eslint/parser": "^8.51.0",
-    "eslint": "^9.28.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
-    "globals": "^17.0.0",
-    "npm-run-all": "^4.1.5",
-    "prettier": "^3.7.4",
-    "sort-package-json": "^3.6.0",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
-    "vitest": "^4.0.0"
   },
   "engines": {
     "node": ">=20"

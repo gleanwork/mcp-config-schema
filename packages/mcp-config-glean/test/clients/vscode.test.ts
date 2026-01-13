@@ -119,7 +119,9 @@ describe('Client: vscode', () => {
           env: createGleanEnv('my-company', 'my-api-token'),
         });
 
-        expect(command).toMatchInlineSnapshot(`"code --add-mcp '{"name":"glean_local","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"my-company","GLEAN_API_TOKEN":"my-api-token"}}'"`);
+        expect(command).toMatchInlineSnapshot(
+          `"code --add-mcp '{"name":"glean_local","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"my-company","GLEAN_API_TOKEN":"my-api-token"}}'"`
+        );
       });
 
       it('with OAuth (instance only, no token)', () => {
@@ -128,7 +130,9 @@ describe('Client: vscode', () => {
           env: createGleanEnv('my-company'),
         });
 
-        expect(command).toMatchInlineSnapshot(`"code --add-mcp '{"name":"glean_local","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"my-company"}}'"`);
+        expect(command).toMatchInlineSnapshot(
+          `"code --add-mcp '{"name":"glean_local","type":"stdio","command":"npx","args":["-y","@gleanwork/local-mcp-server"],"env":{"GLEAN_INSTANCE":"my-company"}}'"`
+        );
       });
     });
 
@@ -140,7 +144,9 @@ describe('Client: vscode', () => {
           headers: createGleanHeaders('my-api-token'),
         });
 
-        expect(command).toMatchInlineSnapshot(`"code --add-mcp '{"name":"glean_default","type":"http","url":"https://my-company-be.glean.com/mcp/default","headers":{"Authorization":"Bearer my-api-token"}}'"`);
+        expect(command).toMatchInlineSnapshot(
+          `"code --add-mcp '{"name":"glean_default","type":"http","url":"https://my-company-be.glean.com/mcp/default","headers":{"Authorization":"Bearer my-api-token"}}'"`
+        );
       });
 
       it('with OAuth (URL only, no token)', () => {
@@ -149,7 +155,9 @@ describe('Client: vscode', () => {
           serverUrl: buildGleanServerUrl('my-company'),
         });
 
-        expect(command).toMatchInlineSnapshot(`"code --add-mcp '{"name":"glean_default","type":"http","url":"https://my-company-be.glean.com/mcp/default"}'"`);
+        expect(command).toMatchInlineSnapshot(
+          `"code --add-mcp '{"name":"glean_default","type":"http","url":"https://my-company-be.glean.com/mcp/default"}'"`
+        );
       });
     });
   });
