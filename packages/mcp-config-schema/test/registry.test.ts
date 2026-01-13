@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { MCPConfigRegistry } from '../src/registry';
 import { CLIENT, CLIENT_DISPLAY_NAME } from '../src/constants';
+import type { ClientId } from '../src/types';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -144,9 +145,10 @@ describe('MCPConfigRegistry', () => {
     });
 
     it('should throw for unknown clients', () => {
-      expect(() => registry.clientNeedsMcpRemote('unknown' as any)).toThrow('Unknown client');
-      expect(() => registry.clientSupportsHttpNatively('unknown' as any)).toThrow('Unknown client');
-      expect(() => registry.clientSupportsStdio('unknown' as any)).toThrow('Unknown client');
+      const invalidClient = 'unknown' as unknown as ClientId;
+      expect(() => registry.clientNeedsMcpRemote(invalidClient)).toThrow('Unknown client');
+      expect(() => registry.clientSupportsHttpNatively(invalidClient)).toThrow('Unknown client');
+      expect(() => registry.clientSupportsStdio(invalidClient)).toThrow('Unknown client');
     });
   });
 });

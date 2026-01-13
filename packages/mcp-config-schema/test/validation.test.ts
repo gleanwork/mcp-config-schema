@@ -162,7 +162,7 @@ describe('Zod Validation', () => {
 
     it('should reject invalid transport', () => {
       const config = {
-        transport: 'hybrid' as any, // Invalid
+        transport: 'hybrid' as unknown as 'stdio' | 'http', // Invalid transport for testing
         serverUrl: 'https://glean.com/mcp/default',
       };
 
