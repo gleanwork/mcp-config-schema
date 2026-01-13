@@ -1,112 +1,30 @@
 {
-  "name": "@gleanwork/mcp-config-schema",
-  "version": "3.1.1",
-  "description": "Type-safe schemas and builders for MCP client configurations",
-  "keywords": [
-    "mcp",
-    "model-context-protocol",
-    "glean",
-    "configuration",
-    "schema"
-  ],
+  "name": "mcp-config",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for MCP configuration packages",
   "repository": {
     "type": "git",
-    "url": "git@github.com:gleanwork/mcp-config-schema.git"
+    "url": "git@github.com:gleanwork/mcp-config.git"
   },
   "license": "MIT",
   "author": "Glean",
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./browser": {
-      "types": "./dist/browser.d.ts",
-      "import": "./dist/browser.js",
-      "require": "./dist/browser.cjs"
-    }
-  },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "configs",
-    "LICENSE"
+  "workspaces": [
+    "packages/*"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "test:all": "npm run lint && npm run typecheck && npm run test",
-    "lint": "npm-run-all --sequential lint:*",
-    "lint:clients": "npx markdown-code check CLIENTS.md",
-    "lint:eslint": "eslint src --ext ts --fix",
-    "lint:package-json": "sort-package-json",
-    "typecheck": "tsc --noEmit",
-    "format": "prettier --write '**/*.ts'",
-    "generate:examples": "tsx scripts/generate-examples.ts",
-    "generate:clients-md": "tsx scripts/generate-clients-md.ts",
-    "generate:docs": "npm run generate:examples && npm run generate:clients-md && npx markdown-code sync CLIENTS.md",
-    "prepublishOnly": "npm run build"
-  },
-  "dependencies": {
-    "glob": "^13.0.0",
-    "js-yaml": "^4.1.0",
-    "mkdirp": "^3.0.1",
-    "smol-toml": "^1.5.2"
+    "build": "npm run build -w @gleanwork/mcp-config-schema && npm run build -w @gleanwork/mcp-config-glean",
+    "test": "npm run test --workspaces",
+    "test:all": "npm run test:all --workspaces",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "format": "npm run format --workspaces"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.35.0",
-    "@release-it-plugins/lerna-changelog": "^8.0.1",
-    "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.3.0",
-    "@typescript-eslint/eslint-plugin": "^8.43.0",
-    "@typescript-eslint/parser": "^8.43.0",
-    "@vitest/coverage-v8": "^4.0.6",
-    "eslint": "^9.35.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
-    "globals": "^16.4.0",
-    "markdown-code": "^0.6.1",
-    "npm-run-all": "^4.1.5",
-    "prettier": "^3.2.4",
-    "release-it": "^19.0.4",
-    "sort-package-json": "^3.4.0",
-    "tsup": "^8.0.1",
-    "tsx": "^4.20.4",
-    "typescript": "^5.3.3",
-    "vitest": "^4.0.6",
-    "zod": "^4.1.11"
-  },
-  "peerDependencies": {
-    "zod": "^3.25.0 || ^4.0.0"
+    "@release-it-plugins/workspaces": "^4.2.0",
+    "release-it": "^17.10.0"
   },
   "engines": {
-    "node": ">=18.0.0"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org"
-  },
-  "release-it": {
-    "plugins": {
-      "@release-it-plugins/lerna-changelog": {
-        "infile": "CHANGELOG.md",
-        "launchEditor": true
-      }
-    },
-    "git": {
-      "tagName": "v${version}"
-    },
-    "github": {
-      "release": true,
-      "tokenRef": "GITHUB_AUTH"
-    }
+    "node": ">=20"
   }
 }
