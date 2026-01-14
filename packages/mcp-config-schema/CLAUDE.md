@@ -4,6 +4,15 @@
 
 This is `@gleanwork/mcp-config-schema`, a TypeScript library that provides type-safe configuration schemas and builders for MCP (Model Context Protocol) client configurations. It serves as the **Single Source of Truth** for MCP client configurations across various code editors and IDEs.
 
+## CRITICAL: Vendor Neutrality
+
+**This package MUST remain vendor-neutral.** Never add:
+- Glean-specific strings, URLs, or environment variable names
+- Hardcoded references to `@gleanwork/local-mcp-server` or other Glean packages
+- Any Glean branding or product-specific logic
+
+All vendor-specific configuration belongs in `@gleanwork/mcp-config-glean`, which injects Glean defaults via `RegistryOptions`.
+
 ## Key Concepts
 
 ### MCP (Model Context Protocol)
@@ -17,7 +26,7 @@ This is `@gleanwork/mcp-config-schema`, a TypeScript library that provides type-
 - **Local (stdio)**: Direct connection to a local MCP server process via stdio transport
 - **Remote (HTTP)**: Connection to a remote server via HTTP or through `mcp-remote` bridge
 
-Note: This library is vendor-neutral. Glean-specific configuration (like server name prefixes) is handled by the `@gleanwork/mcp-config` wrapper package.
+Note: This library is vendor-neutral. Glean-specific configuration (like server name prefixes) is handled by the `@gleanwork/mcp-config-glean` wrapper package.
 
 ### Client Types
 
