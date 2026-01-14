@@ -7,6 +7,20 @@ All notable changes to this project will be documented in this file.
 
 
 
+
+## v4.0.3 (2026-01-14)
+
+#### :bug: Bug Fix
+* `mcp-config-glean`, `mcp-config-schema`
+  * [#87](https://github.com/gleanwork/mcp-config/pull/87) feat: add GeminiConfigBuilder for native CLI support ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :house: Internal
+* [#88](https://github.com/gleanwork/mcp-config/pull/88) fix: update package-lock.json during release-it version bump ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v4.0.2 (2026-01-14)
 
 #### :bug: Bug Fix
