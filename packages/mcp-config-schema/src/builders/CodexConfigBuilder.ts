@@ -116,13 +116,14 @@ export class CodexConfigBuilder extends BaseConfigBuilder<CodexMCPConfig> {
 
     let command = `codex mcp add --url ${resolvedUrl}`;
 
-    // For Codex CLI, if headers are provided, we need to find the token env var
-    // This is a simplified approach - for full control, use configuration files
+    // For Codex CLI, if headers are provided, we need to specify the token env var.
+    // Priority: 1) env var with 'token' in name from options.env, 2) registry's tokenEnvVarName
     const headers = this.buildHeaders(options);
     if (headers && headers['Authorization']) {
-      // Find the first env var that might contain the token
       const env = this.getEnvVars(options);
-      const tokenEnvVar = env && Object.keys(env).find((k) => k.toLowerCase().includes('token'));
+      const tokenEnvVar =
+        (env && Object.keys(env).find((k) => k.toLowerCase().includes('token'))) ||
+        this.registryOptions.tokenEnvVarName;
       if (tokenEnvVar) {
         command += ` --bearer-token-env-var ${tokenEnvVar}`;
       }

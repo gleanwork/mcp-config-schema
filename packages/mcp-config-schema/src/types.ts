@@ -108,6 +108,20 @@ export interface RegistryOptions {
    * ```
    */
   serverNameBuilder?: ServerNameBuilderCallback;
+  /**
+   * Default environment variable name for bearer token authentication.
+   * Used by native CLI clients (e.g., Codex) when headers contain Authorization
+   * but no matching env var is found in options.env.
+   *
+   * @example
+   * ```typescript
+   * const registry = new MCPConfigRegistry({
+   *   tokenEnvVarName: 'MY_API_TOKEN',
+   * });
+   * // Codex CLI will use: codex mcp add --bearer-token-env-var MY_API_TOKEN ...
+   * ```
+   */
+  tokenEnvVarName?: string;
 }
 
 /**

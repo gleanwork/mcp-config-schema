@@ -142,7 +142,7 @@ describe('Client: codex', () => {
         });
 
         expect(command).toMatchInlineSnapshot(
-          `"codex mcp add --url https://my-company-be.glean.com/mcp/default glean_default"`
+          `"codex mcp add --url https://my-company-be.glean.com/mcp/default --bearer-token-env-var GLEAN_API_TOKEN glean_default"`
         );
       });
 
