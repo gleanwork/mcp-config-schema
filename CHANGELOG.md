@@ -6,6 +6,17 @@ All notable changes to this project will be documented in this file.
 
 
 
+
+## v4.0.2 (2026-01-14)
+
+#### :bug: Bug Fix
+* `mcp-config-glean`
+  * [#86](https://github.com/gleanwork/mcp-config/pull/86) fix: use explicit version for mcp-config-schema dependency ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v4.0.1 (2026-01-14)
 
 #### :bug: Bug Fix

@@ -1,6 +1,6 @@
 {
   "name": "@gleanwork/mcp-config-glean",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Glean-specific MCP configuration defaults and helpers",
   "keywords": [
     "mcp",
@@ -37,7 +37,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@gleanwork/mcp-config-schema": "^4.0.1"
+    "@gleanwork/mcp-config-schema": "^4.0.2"
   },
   "engines": {
     "node": ">=20"
