@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 > **Note:** This monorepo was created by consolidating `@gleanwork/mcp-config-schema` and `@gleanwork/mcp-config` (now `@gleanwork/mcp-config-glean`). Historical entries below v4.0.0 refer to `@gleanwork/mcp-config-schema` only.
 
+
+## v4.0.0 (2026-01-14)
+
+#### :house: Internal
+* `mcp-config-glean`, `mcp-config-schema`
+  * [#83](https://github.com/gleanwork/mcp-config/pull/83) refactor: consolidate tooling configuration at monorepo root ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+  * [#82](https://github.com/gleanwork/mcp-config/pull/82) feat: convert to npm workspaces monorepo ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v3.1.1 (2026-01-10)
 
 #### :bug: Bug Fix
