@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 > **Note:** This monorepo was created by consolidating `@gleanwork/mcp-config-schema` and `@gleanwork/mcp-config` (now `@gleanwork/mcp-config-glean`). Historical entries below v4.0.0 refer to `@gleanwork/mcp-config-schema` only.
 
 
+
+## v4.0.1 (2026-01-14)
+
+#### :bug: Bug Fix
+* `mcp-config-glean`, `mcp-config-schema`
+  * [#84](https://github.com/gleanwork/mcp-config/pull/84) fix: add --bearer-token-env-var flag to Codex CLI for API token auth ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### :house: Internal
+* `mcp-config-schema`
+  * [#85](https://github.com/gleanwork/mcp-config/pull/85) docs: improve CLAUDE.md with architecture and vendor-neutrality constraint ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+#### Committers: 1
+- Steve Calvert ([@steve-calvert-glean](https://github.com/steve-calvert-glean))
+
+
 ## v4.0.0 (2026-01-14)
 
 #### :house: Internal

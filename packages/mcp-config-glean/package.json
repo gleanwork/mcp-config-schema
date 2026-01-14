@@ -1,6 +1,6 @@
 {
   "name": "@gleanwork/mcp-config-glean",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Glean-specific MCP configuration defaults and helpers",
   "keywords": [
     "mcp",
