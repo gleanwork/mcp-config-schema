@@ -37,7 +37,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@gleanwork/mcp-config-schema": "*"
+    "@gleanwork/mcp-config-schema": "^4.0.1"
   },
   "engines": {
     "node": ">=20"
