@@ -15,6 +15,7 @@ import {
   CursorConfigBuilder,
   ClaudeCodeConfigBuilder,
   CodexConfigBuilder,
+  GeminiConfigBuilder,
 } from './builders/index.js';
 import chatgptConfig from '../configs/chatgpt.json';
 import claudeCodeConfig from '../configs/claude-code.json';
@@ -80,6 +81,10 @@ export class MCPConfigRegistry {
     this.builderFactories.set(
       'codex' as ClientId,
       CodexConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
+    );
+    this.builderFactories.set(
+      'gemini' as ClientId,
+      GeminiConfigBuilder as new (config: MCPClientConfig) => BaseConfigBuilder
     );
     // Other clients will use GenericConfigBuilder by default
   }

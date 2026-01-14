@@ -250,6 +250,46 @@ describe('ConfigBuilder', () => {
       );
     });
 
+    it('generates Gemini command with remote server', () => {
+      const geminiBuilder = registry.createBuilder(CLIENT.GEMINI);
+      const command = geminiBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"gemini mcp add --transport http test-server https://example.com/mcp/default"`
+      );
+    });
+
+    it('generates Gemini command with remote server and headers', () => {
+      const geminiBuilder = registry.createBuilder(CLIENT.GEMINI);
+      const command = geminiBuilder.buildCommand({
+        transport: 'http',
+        serverUrl: 'https://example.com/mcp/default',
+        serverName: 'test-server',
+        headers: { Authorization: 'Bearer test-token' },
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"gemini mcp add --transport http -H "Authorization: Bearer test-token" test-server https://example.com/mcp/default"`
+      );
+    });
+
+    it('generates Gemini command with local server', () => {
+      const geminiBuilder = registry.createBuilder(CLIENT.GEMINI);
+      const command = geminiBuilder.buildCommand({
+        transport: 'stdio',
+        serverName: 'local-test',
+        env: createGleanEnv('test-instance', 'test-token'),
+      });
+
+      expect(command).toMatchInlineSnapshot(
+        `"gemini mcp add -e GLEAN_INSTANCE=test-instance -e GLEAN_API_TOKEN=test-token local-test npx -y @gleanwork/local-mcp-server"`
+      );
+    });
+
     describe('Edge cases and error handling', () => {
       it('handles placeholder URLs with commandBuilder', () => {
         // Create registry with custom commandBuilder callback
@@ -1573,6 +1613,14 @@ describe('ConfigBuilder', () => {
 
       it('returns supported with native_cli reason for Codex', () => {
         const builder = registry.createBuilder(CLIENT.CODEX);
+        const status = builder.supportsCliInstallation();
+
+        expect(status.supported).toBe(true);
+        expect(status.reason).toBe(CLI_INSTALL_REASON.NATIVE_CLI);
+      });
+
+      it('returns supported with native_cli reason for Gemini', () => {
+        const builder = registry.createBuilder(CLIENT.GEMINI);
         const status = builder.supportsCliInstallation();
 
         expect(status.supported).toBe(true);

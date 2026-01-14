@@ -7,9 +7,9 @@ import {
 } from '../../src/index.js';
 
 /**
- * Gemini: commandBuilder client
+ * Gemini: Native CLI client
  * Uses httpUrl instead of url for HTTP transport
- * NOTE: Gemini has native `gemini mcp add` but schema uses GenericConfigBuilder
+ * Uses native `gemini mcp add` command for installation
  */
 describe('Client: gemini', () => {
   const registry = createGleanRegistry();
@@ -117,7 +117,7 @@ describe('Client: gemini', () => {
         });
 
         expect(command).toMatchInlineSnapshot(
-          `"npx -y @gleanwork/configure-mcp-server local --client gemini --env GLEAN_INSTANCE=my-company --env GLEAN_API_TOKEN=my-api-token"`
+          `"gemini mcp add -e GLEAN_INSTANCE=my-company -e GLEAN_API_TOKEN=my-api-token glean_local npx -y @gleanwork/local-mcp-server"`
         );
       });
 
@@ -128,7 +128,7 @@ describe('Client: gemini', () => {
         });
 
         expect(command).toMatchInlineSnapshot(
-          `"npx -y @gleanwork/configure-mcp-server local --client gemini --env GLEAN_INSTANCE=my-company"`
+          `"gemini mcp add -e GLEAN_INSTANCE=my-company glean_local npx -y @gleanwork/local-mcp-server"`
         );
       });
     });
@@ -142,7 +142,7 @@ describe('Client: gemini', () => {
         });
 
         expect(command).toMatchInlineSnapshot(
-          `"npx -y @gleanwork/configure-mcp-server remote --url https://my-company-be.glean.com/mcp/default --client gemini --token my-api-token"`
+          `"gemini mcp add --transport http -H "Authorization: Bearer my-api-token" glean_default https://my-company-be.glean.com/mcp/default"`
         );
       });
 
@@ -153,7 +153,7 @@ describe('Client: gemini', () => {
         });
 
         expect(command).toMatchInlineSnapshot(
-          `"npx -y @gleanwork/configure-mcp-server remote --url https://my-company-be.glean.com/mcp/default --client gemini"`
+          `"gemini mcp add --transport http glean_default https://my-company-be.glean.com/mcp/default"`
         );
       });
     });
@@ -164,7 +164,7 @@ describe('Client: gemini', () => {
       const status = builder.supportsCliInstallation();
       expect(status).toMatchInlineSnapshot(`
         {
-          "reason": "command_builder",
+          "reason": "native_cli",
           "supported": true,
         }
       `);
