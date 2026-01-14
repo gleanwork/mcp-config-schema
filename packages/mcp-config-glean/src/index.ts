@@ -9,10 +9,23 @@ import {
 export * from '@gleanwork/mcp-config-schema';
 
 /**
+ * Glean environment variable names.
+ */
+export const GLEAN_ENV = {
+  /** Environment variable for Glean instance name (e.g., 'my-company') */
+  INSTANCE: 'GLEAN_INSTANCE',
+  /** Environment variable for full Glean URL (e.g., 'https://my-company.glean.com') */
+  URL: 'GLEAN_URL',
+  /** Environment variable for Glean API token */
+  API_TOKEN: 'GLEAN_API_TOKEN',
+} as const;
+
+/**
  * Glean-specific registry options for stdio transport.
  */
 export const GLEAN_REGISTRY_OPTIONS: RegistryOptions = {
   serverPackage: '@gleanwork/local-mcp-server',
+  tokenEnvVarName: GLEAN_ENV.API_TOKEN,
   commandBuilder: {
     http: (clientId, options) => {
       if (!options.serverUrl) return null;
@@ -40,18 +53,6 @@ export const GLEAN_REGISTRY_OPTIONS: RegistryOptions = {
     return buildGleanServerName(options);
   },
 };
-
-/**
- * Glean environment variable names.
- */
-export const GLEAN_ENV = {
-  /** Environment variable for Glean instance name (e.g., 'my-company') */
-  INSTANCE: 'GLEAN_INSTANCE',
-  /** Environment variable for full Glean URL (e.g., 'https://my-company.glean.com') */
-  URL: 'GLEAN_URL',
-  /** Environment variable for Glean API token */
-  API_TOKEN: 'GLEAN_API_TOKEN',
-} as const;
 
 /**
  * Helper to create Glean environment variables for stdio transport.
